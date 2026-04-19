@@ -9,6 +9,7 @@ import Register from "./pages/Register.tsx";
 import Login from "./pages/Login.tsx";
 import VerifyEmail from "./pages/VerifyEmail.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import AddChild from "./pages/AddChild.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-child" element={<AddChild />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
