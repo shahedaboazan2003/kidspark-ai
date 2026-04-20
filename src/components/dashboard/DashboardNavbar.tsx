@@ -53,7 +53,7 @@ const DashboardNavbar = ({ parentName }: DashboardNavbarProps) => {
           {/* Right — Welcome + avatar */}
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline text-sm text-muted-foreground">
-              Hi <span className="font-semibold text-foreground">{parentName}</span> 👋
+              Hi <span className="font-semibold text-foreground">{displayName}</span> 👋
             </span>
 
             <DropdownMenu>
@@ -67,7 +67,7 @@ const DashboardNavbar = ({ parentName }: DashboardNavbarProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-card border-border/50">
                 <DropdownMenuLabel>
-                  <div className="font-semibold">{parentName}</div>
+                  <div className="font-semibold">{displayName}</div>
                   <div className="text-xs text-muted-foreground font-normal">Parent account</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
