@@ -8,6 +8,7 @@ import PlayfulBackground from "@/components/PlayfulBackground";
 import ForgotPasswordModal from "@/components/ForgotPasswordModal";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 type UserType = "parent" | "child";
 
