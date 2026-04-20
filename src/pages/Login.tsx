@@ -20,6 +20,7 @@ const DEMO_USERS: Record<string, { password: string; type: UserType }> = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState<UserType>("parent");
@@ -46,10 +47,9 @@ const Login = () => {
       return;
     }
 
-    // Persist session
+    // Persist session via auth context
     const fakeToken = `demo-token-${Date.now()}`;
-    localStorage.setItem("accessToken", fakeToken);
-    localStorage.setItem("userType", account.type);
+    login(fakeToken, account.type, username.trim());
 
     toast.success(`Welcome back! 👋`, {
       description: account.type === "parent" ? "Heading to your dashboard..." : "Let's keep learning!",

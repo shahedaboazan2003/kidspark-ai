@@ -11,23 +11,27 @@ import {
 import { useState } from "react";
 import LogoutConfirmModal from "./LogoutConfirmModal";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardNavbarProps {
   parentName?: string;
 }
 
-const DashboardNavbar = ({ parentName = "Parent" }: DashboardNavbarProps) => {
+const DashboardNavbar = ({ parentName }: DashboardNavbarProps) => {
   const navigate = useNavigate();
+  const { username, logout } = useAuth();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
+  const displayName =
+    parentName ?? (username ? username.charAt(0).toUpperCase() + username.slice(1) : "Parent");
+
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("userType");
+    logout();
     toast.success("See you soon! 👋");
     navigate("/login");
   };
 
-  const initial = parentName.charAt(0).toUpperCase();
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <>
