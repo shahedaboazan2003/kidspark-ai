@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, MessageCircleQuestion, Clock, UserPlus, BookOpen, UsersRound, AlertCircle, PlusCircle } from "lucide-react";
-import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
+import AppNavbar from "@/components/AppNavbar";
 import StatCard from "@/components/dashboard/StatCard";
 import ChildCard from "@/components/dashboard/ChildCard";
 import ChildCardSkeleton from "@/components/dashboard/ChildCardSkeleton";
@@ -66,7 +66,7 @@ const Dashboard = () => {
       <PlayfulBackground />
 
       <div className="relative z-10">
-        <DashboardNavbar parentName="Sarah" />
+        <AppNavbar />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           {/* Greeting */}

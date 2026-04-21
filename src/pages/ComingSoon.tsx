@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Construction } from "lucide-react";
 import PlayfulBackground from "@/components/PlayfulBackground";
-import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
+import AppNavbar from "@/components/AppNavbar";
 import { Button } from "@/components/ui/button";
 
 interface ComingSoonProps {
@@ -15,7 +15,7 @@ const ComingSoon = ({ title, emoji, description }: ComingSoonProps) => (
     <div className="absolute inset-0 playful-bg opacity-60" aria-hidden />
     <PlayfulBackground />
     <div className="relative z-10">
-      <DashboardNavbar parentName="Parent" />
+      <AppNavbar />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         <Link
           to="/dashboard"
