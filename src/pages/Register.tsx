@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { registerSchema } from "@/lib/validation";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { cn } from "@/lib/utils";
+import { registerParent } from "@/lib/api";
+import { toast } from "sonner";
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -81,10 +83,30 @@ const Register = () => {
       return;
     }
     setLoading(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    navigate("/verify-email", { state: { email: form.email } });
+    try {
+      await registerParent({
+        username: form.username.trim(),
+        password: form.password,
+        email: form.email.trim(),
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+      });
+      setLoading(false);
+      navigate("/verify-email", {
+        state: { email: form.email, username: form.username.trim() },
+      });
+    } catch (err) {
+      setLoading(false);
+      const code = (err as Error).message;
+      const msg =
+        code === "USERNAME_TAKEN"
+          ? "That username is already taken 😅"
+          : code === "EMAIL_TAKEN"
+            ? "An account with this email already exists 💌"
+            : "Something went wrong, please try again 💫";
+      toast.error(msg);
+      setShakeKey((k) => k + 1);
+    }
   };
 
   const showError = (key: keyof FormState) => touched[key] && errors[key];

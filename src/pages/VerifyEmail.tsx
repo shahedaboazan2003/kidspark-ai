@@ -7,22 +7,15 @@ import OtpInput from "@/components/OtpInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { verifyEmail as apiVerifyEmail } from "@/lib/api";
 
 const RESEND_SECONDS = 30;
-// Demo: any 6-digit code works EXCEPT "000000" (invalid) and "111111" (expired)
-const verifyOtp = async (code: string) => {
-  await new Promise((r) => setTimeout(r, 900));
-  if (code === "000000") throw new Error("invalid");
-  if (code === "111111") throw new Error("expired");
-  return { accessToken: `parent-token-${Date.now()}` };
-};
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
   const email = (location.state as { email?: string } | null)?.email ?? "your inbox";
-  const username = (location.state as { username?: string } | null)?.username ?? "Parent";
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,14 +23,12 @@ const VerifyEmail = () => {
   const [shake, setShake] = useState(0);
   const [resendIn, setResendIn] = useState(RESEND_SECONDS);
 
-  // Resend cooldown
   useEffect(() => {
     if (resendIn <= 0) return;
     const t = setInterval(() => setResendIn((s) => s - 1), 1000);
     return () => clearInterval(t);
   }, [resendIn]);
 
-  // Auto-submit when 6 digits entered
   useEffect(() => {
     if (otp.length === 6 && !loading) {
       void handleVerify(otp);
@@ -49,8 +40,9 @@ const VerifyEmail = () => {
     setError("");
     setLoading(true);
     try {
-      const { accessToken } = await verifyOtp(code);
-      login(accessToken, "parent", username);
+      const res = await apiVerifyEmail(code);
+      // Auto-login the freshly created parent
+      login(res.accessToken, res.userType, res.username);
       toast.success("Email verified! 🎉", {
         description: "Welcome to Little Minds — let's get you set up.",
       });
@@ -58,13 +50,14 @@ const VerifyEmail = () => {
     } catch (e) {
       const reason = (e as Error).message;
       const msg =
-        reason === "expired"
+        reason === "EXPIRED_CODE"
           ? "This code has expired. Please request a new one ⏰"
-          : "That code doesn't look right. Try again 😕";
+          : reason === "NO_PENDING_REGISTRATION"
+            ? "No pending sign-up found. Please register again 📝"
+            : "That code doesn't look right. Try again 😕";
       setError(msg);
       setShake((k) => k + 1);
       setOtp("");
-    } finally {
       setLoading(false);
     }
   };

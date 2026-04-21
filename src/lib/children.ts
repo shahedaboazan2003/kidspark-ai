@@ -5,6 +5,11 @@ export interface Child {
   birthdate: string; // ISO date
   avatarColor: string; // tailwind gradient classes
   avatarEmoji: string;
+  /** Optional — present for children created via Add Child / api */
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  createdAt?: string;
 }
 
 export const AVATAR_PRESETS = [
@@ -23,19 +28,39 @@ const STORAGE_KEY = "littleminds.children";
 const seed: Child[] = [
   {
     id: "c1",
-    name: "Emma",
+    name: "Emma Parker",
+    firstName: "Emma",
+    lastName: "Parker",
     username: "emma_explorer",
+    password: "emma123",
     birthdate: "2017-04-12",
     avatarColor: AVATAR_PRESETS[0].color,
     avatarEmoji: AVATAR_PRESETS[0].emoji,
+    createdAt: "2024-01-20T10:00:00Z",
   },
   {
     id: "c2",
-    name: "Liam",
+    name: "Liam Parker",
+    firstName: "Liam",
+    lastName: "Parker",
     username: "liam_learns",
+    password: "liam123",
     birthdate: "2019-09-03",
     avatarColor: AVATAR_PRESETS[3].color,
     avatarEmoji: AVATAR_PRESETS[3].emoji,
+    createdAt: "2024-02-05T10:00:00Z",
+  },
+  {
+    id: "c_demo",
+    name: "Demo Kid",
+    firstName: "Demo",
+    lastName: "Kid",
+    username: "child",
+    password: "child123",
+    birthdate: "2018-06-15",
+    avatarColor: AVATAR_PRESETS[5].color,
+    avatarEmoji: AVATAR_PRESETS[5].emoji,
+    createdAt: "2024-01-15T10:00:00Z",
   },
 ];
 
@@ -46,7 +71,14 @@ export const loadChildren = (): Child[] => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
       return seed;
     }
-    return JSON.parse(raw) as Child[];
+    const parsed = JSON.parse(raw) as Child[];
+    // Ensure the demo "child" account exists for the documented login creds
+    if (!parsed.find((c) => c.username === "child")) {
+      const merged = [...parsed, seed[2]];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      return merged;
+    }
+    return parsed;
   } catch {
     return seed;
   }

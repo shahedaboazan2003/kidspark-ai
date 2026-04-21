@@ -11,7 +11,6 @@ import {
   BookOpen,
   Users,
   MessageCircle,
-  History,
   Cloud,
   Star,
   Globe2,
@@ -43,11 +42,11 @@ const PARENT_LINKS: NavItem[] = [
   { to: "/add-child", label: "Add Child", emoji: "➕", icon: UserPlus },
   { to: "/history", label: "History", emoji: "📚", icon: BookOpen },
   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
+  { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
 ];
 
 const CHILD_LINKS: NavItem[] = [
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
-  { to: "/chat", label: "Conversations", emoji: "📝", icon: History },
 ];
 
 const AppNavbar = () => {
@@ -76,7 +75,6 @@ const AppNavbar = () => {
   return (
     <>
       <header className="sticky top-0 z-40 animate-nav-slide-down">
-        {/* Floating 3D decorations behind the bar */}
         <div className="absolute inset-x-0 top-0 h-16 overflow-hidden pointer-events-none -z-10">
           <Cloud
             className="absolute -top-2 left-[12%] w-10 h-10 text-primary/20 animate-float"
@@ -103,7 +101,6 @@ const AppNavbar = () => {
         <div className="px-3 sm:px-6 pt-3">
           <div className="max-w-7xl mx-auto bg-card/70 backdrop-blur-xl border border-border/50 rounded-2xl shadow-card">
             <div className="h-14 px-3 sm:px-5 flex items-center justify-between gap-3">
-              {/* Left — Logo */}
               <Link to={home} className="flex items-center gap-2 group shrink-0">
                 <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-button transition-transform group-hover:scale-110 group-hover:rotate-6">
                   <Sparkles className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
@@ -113,14 +110,13 @@ const AppNavbar = () => {
                 </span>
               </Link>
 
-              {/* Center — Nav links */}
               <nav className="hidden md:flex items-center gap-1">
                 {links.map((item) => (
                   <NavLink
                     key={item.to + item.label}
                     to={item.to}
                     end
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 hover:scale-105 transition-all duration-200"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 hover:scale-105 transition-all duration-200"
                     activeClassName="!text-primary !bg-primary/10 shadow-soft scale-105"
                   >
                     <span className="text-base leading-none">{item.emoji}</span>
@@ -129,7 +125,6 @@ const AppNavbar = () => {
                 ))}
               </nav>
 
-              {/* Right — User */}
               <div className="flex items-center gap-2 shrink-0">
                 <span className="hidden lg:inline text-sm text-muted-foreground">
                   Hi <span className="font-semibold text-foreground">{displayName}</span> 👋
@@ -163,7 +158,6 @@ const AppNavbar = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Mobile burger */}
                 <button
                   type="button"
                   className="md:hidden ml-1 w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-muted/60 transition-colors"
@@ -178,7 +172,6 @@ const AppNavbar = () => {
         </div>
       </header>
 
-      {/* Mobile drawer */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="right"

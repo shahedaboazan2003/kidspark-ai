@@ -17,7 +17,6 @@ const ProtectedRoute = ({ children, allow }: ProtectedRouteProps) => {
   const location = useLocation();
   const warnedRef = useRef(false);
 
-  // Friendly toast when redirecting due to missing auth — fires once per mount.
   useEffect(() => {
     if (!isLoading && !isAuthenticated && !warnedRef.current) {
       warnedRef.current = true;
@@ -34,7 +33,6 @@ const ProtectedRoute = ({ children, allow }: ProtectedRouteProps) => {
   }
 
   if (allow && !allow.includes(userType)) {
-    // Wrong role — silently bounce to their proper home
     return <Navigate to={homeFor(userType)} replace />;
   }
 
