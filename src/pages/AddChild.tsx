@@ -25,7 +25,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import PlayfulBackground from "@/components/PlayfulBackground";
-import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
+import AppNavbar from "@/components/AppNavbar";
 import { Child, AVATAR_PRESETS, loadChildren, saveChildren } from "@/lib/children";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -187,7 +187,7 @@ const AddChild = () => {
       <PlayfulBackground />
 
       <div className="relative z-10">
-        <DashboardNavbar parentName="Sarah" />
+        <AppNavbar />
 
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           {/* Back link */}
