@@ -26,7 +26,8 @@ import {
 } from "@/components/ui/dialog";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import AppNavbar from "@/components/AppNavbar";
-import { Child, AVATAR_PRESETS, loadChildren, saveChildren } from "@/lib/children";
+import { Child, loadChildren } from "@/lib/children";
+import { createChild } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -151,28 +152,24 @@ const AddChild = () => {
     setSubmitError("");
     setLoading(true);
     try {
-      // Simulate POST /children
-      await new Promise((r) => setTimeout(r, 1100));
-
-      // Pick a random avatar preset
-      const preset = AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)];
-
-      const newChild: Child = {
-        id: `c_${Date.now()}`,
+      await createChild({
         name: name.trim(),
         username: username.trim(),
+        password,
         birthdate: format(birthDate!, "yyyy-MM-dd"),
-        avatarColor: preset.color,
-        avatarEmoji: preset.emoji,
-      };
-
-      const next = [...loadChildren(), newChild];
-      saveChildren(next);
+        firstName: name.trim().split(" ")[0],
+        lastName: name.trim().split(" ").slice(1).join(" "),
+      });
       setLoading(false);
       setSuccessOpen(true);
-    } catch {
+    } catch (err) {
       setLoading(false);
-      setSubmitError("Something went wrong, please try again 💫");
+      const code = (err as Error).message;
+      setSubmitError(
+        code === "USERNAME_TAKEN"
+          ? "This username is already taken 😅"
+          : "Something went wrong, please try again 💫",
+      );
     }
   };
 

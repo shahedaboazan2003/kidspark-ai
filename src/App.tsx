@@ -14,7 +14,8 @@ import VerifyEmail from "./pages/VerifyEmail.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import AddChild from "./pages/AddChild.tsx";
 import Chat from "./pages/Chat.tsx";
-import ComingSoon from "./pages/ComingSoon.tsx";
+import Accounts from "./pages/Accounts.tsx";
+import History from "./pages/History.tsx";
 
 const queryClient = new QueryClient();
 
@@ -67,11 +68,7 @@ const App = () => (
               path="/history"
               element={
                 <ProtectedRoute allow={["parent"]}>
-                  <ComingSoon
-                    title="Activity History 📚"
-                    emoji="📚"
-                    description="A timeline of your children's questions and conversations is on its way."
-                  />
+                  <History />
                 </ProtectedRoute>
               }
             />
@@ -79,20 +76,16 @@ const App = () => (
               path="/accounts"
               element={
                 <ProtectedRoute allow={["parent"]}>
-                  <ComingSoon
-                    title="Accounts 👥"
-                    emoji="👥"
-                    description="Manage parent and child accounts here, soon."
-                  />
+                  <Accounts />
                 </ProtectedRoute>
               }
             />
 
-            {/* Child-only */}
+            {/* Chat — accessible to BOTH parent and child */}
             <Route
               path="/chat"
               element={
-                <ProtectedRoute allow={["child"]}>
+                <ProtectedRoute allow={["parent", "child"]}>
                   <Chat />
                 </ProtectedRoute>
               }
@@ -100,7 +93,7 @@ const App = () => (
             <Route
               path="/conversation/:id"
               element={
-                <ProtectedRoute allow={["child"]}>
+                <ProtectedRoute allow={["parent", "child"]}>
                   <Chat />
                 </ProtectedRoute>
               }

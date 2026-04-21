@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import { Menu, Sparkles, Bot } from "lucide-react";
 import { toast } from "sonner";
 import PlayfulBackground from "@/components/PlayfulBackground";
@@ -34,6 +35,7 @@ const SUGGESTED = [
 ];
 
 const Chat = () => {
+  const { id: routeConvoId } = useParams<{ id?: string }>();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<UiMessage[]>([]);
@@ -51,14 +53,20 @@ const Chat = () => {
       try {
         const list = await listConversations();
         setConversations(list);
-        if (list.length > 0) setActiveId(list[0].id);
+        // Prefer conversation from URL param, else first in list
+        if (routeConvoId && list.find((c) => c.id === routeConvoId)) {
+          setActiveId(routeConvoId);
+        } else if (list.length > 0) {
+          setActiveId(list[0].id);
+        }
       } catch {
         toast.error("Couldn't load chats", { description: "Please refresh and try again 💫" });
       } finally {
         setLoadingConvos(false);
       }
     })();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeConvoId]);
 
   // Load messages when active conversation changes
   useEffect(() => {
