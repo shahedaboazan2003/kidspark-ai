@@ -30,10 +30,26 @@ export interface AccountRow {
   type: UserType;
   email: string | null;
   createdAt: string;
+  lastLogin: string | null;
 }
 
 const PARENTS_KEY = "littleminds.parents";
 const PENDING_KEY = "littleminds.pendingRegistration";
+const LAST_LOGIN_KEY = "littleminds.lastLogin"; // map: username -> ISO string
+
+const loadLastLogins = (): Record<string, string> => {
+  try {
+    return JSON.parse(localStorage.getItem(LAST_LOGIN_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+};
+
+const setLastLogin = (username: string) => {
+  const map = loadLastLogins();
+  map[username.toLowerCase()] = new Date().toISOString();
+  localStorage.setItem(LAST_LOGIN_KEY, JSON.stringify(map));
+};
 
 const delay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
 
@@ -84,8 +100,16 @@ export interface LoginResponse {
   id: string;
 }
 
-/** POST /auth/login */
-export async function login(username: string, password: string): Promise<LoginResponse> {
+/**
+ * POST /auth/login
+ * The role selected in the UI is sent for UX validation, but the backend
+ * is the source of truth — if the account's actual role differs we reject.
+ */
+export async function login(
+  username: string,
+  password: string,
+  selectedRole?: UserType,
+): Promise<LoginResponse> {
   await delay(700);
   const u = username.trim().toLowerCase();
 
@@ -94,6 +118,8 @@ export async function login(username: string, password: string): Promise<LoginRe
   if (parent) {
     if (parent.password !== password) throw new Error("INVALID_CREDENTIALS");
     if (!parent.emailVerified) throw new Error("EMAIL_NOT_VERIFIED");
+    if (selectedRole && selectedRole !== "parent") throw new Error("ROLE_MISMATCH");
+    setLastLogin(parent.username);
     return {
       accessToken: `parent_${parent.id}_${Date.now()}`,
       userType: "parent",
@@ -108,9 +134,10 @@ export async function login(username: string, password: string): Promise<LoginRe
   const children = loadChildren();
   const child = children.find((c) => c.username.toLowerCase() === u);
   if (child) {
-    // Default child demo password fallback for the seeded "child" account
     const expected = child.password ?? (child.username === "child" ? "child123" : null);
     if (!expected || expected !== password) throw new Error("INVALID_CREDENTIALS");
+    if (selectedRole && selectedRole !== "child") throw new Error("ROLE_MISMATCH");
+    setLastLogin(child.username);
     return {
       accessToken: `child_${child.id}_${Date.now()}`,
       userType: "child",
@@ -174,6 +201,7 @@ export async function verifyEmail(code: string): Promise<LoginResponse> {
   };
   saveParents([...parents, newParent]);
   localStorage.removeItem(PENDING_KEY);
+  setLastLogin(newParent.username);
 
   return {
     accessToken: `parent_${newParent.id}_${Date.now()}`,
@@ -187,9 +215,10 @@ export async function verifyEmail(code: string): Promise<LoginResponse> {
 
 // ====================== ACCOUNTS ======================
 
-/** GET /accounts — returns parent(s) + all children */
+/** GET /accounts — returns parent(s) + all children, with last login times */
 export async function listAccounts(): Promise<AccountRow[]> {
   await delay(500);
+  const lastLogins = loadLastLogins();
   const parents = loadParents().map<AccountRow>((p) => ({
     id: p.id,
     username: p.username,
@@ -198,6 +227,7 @@ export async function listAccounts(): Promise<AccountRow[]> {
     type: "parent",
     email: p.email,
     createdAt: p.createdAt,
+    lastLogin: lastLogins[p.username.toLowerCase()] ?? null,
   }));
   const children = loadChildren().map<AccountRow>((c) => ({
     id: c.id,
@@ -207,6 +237,7 @@ export async function listAccounts(): Promise<AccountRow[]> {
     type: "child",
     email: null,
     createdAt: c.createdAt ?? new Date().toISOString(),
+    lastLogin: lastLogins[c.username.toLowerCase()] ?? null,
   }));
   return [...parents, ...children];
 }
