@@ -7,6 +7,7 @@ import ChatSidebar from "@/components/chat/ChatSidebar";
 import MessageBubble from "@/components/chat/MessageBubble";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatInput from "@/components/chat/ChatInput";
+import ChatTopControls from "@/components/chat/ChatTopControls";
 import {
   Conversation,
   DbMessage,
@@ -256,7 +257,13 @@ const Chat = () => {
             </div>
             <span className="font-bold">Sparky</span>
           </div>
+          <ChatTopControls className="ml-auto" />
         </header>
+
+        {/* Desktop floating controls (theme + logout) */}
+        <div className="hidden lg:flex absolute top-4 right-4 z-30 animate-fade-slide-up">
+          <ChatTopControls />
+        </div>
 
         {/* Messages scroll area */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 sm:px-6 py-6">
