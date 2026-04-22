@@ -6,12 +6,13 @@ interface AuthState {
   accessToken: string | null;
   userType: UserType | null;
   username: string | null;
+  firstName: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
 
 interface AuthContextValue extends AuthState {
-  login: (token: string, userType: UserType, username?: string) => void;
+  login: (token: string, userType: UserType, username: string, firstName?: string) => void;
   logout: () => void;
 }
 
@@ -20,27 +21,30 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const TOKEN_KEY = "accessToken";
 const USERTYPE_KEY = "userType";
 const USERNAME_KEY = "username";
+const FIRSTNAME_KEY = "firstName";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AuthState>({
     accessToken: null,
     userType: null,
     username: null,
+    firstName: null,
     isAuthenticated: false,
     isLoading: true,
   });
 
-  // Restore session on mount
   useEffect(() => {
     try {
       const token = localStorage.getItem(TOKEN_KEY);
       const userType = localStorage.getItem(USERTYPE_KEY) as UserType | null;
       const username = localStorage.getItem(USERNAME_KEY);
+      const firstName = localStorage.getItem(FIRSTNAME_KEY);
       if (token && (userType === "parent" || userType === "child")) {
         setState({
           accessToken: token,
           userType,
-          username: username,
+          username,
+          firstName,
           isAuthenticated: true,
           isLoading: false,
         });
@@ -52,18 +56,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Sync across tabs
   useEffect(() => {
     const handler = (e: StorageEvent) => {
-      if (e.key === TOKEN_KEY || e.key === USERTYPE_KEY) {
+      if (
+        e.key === TOKEN_KEY ||
+        e.key === USERTYPE_KEY ||
+        e.key === USERNAME_KEY ||
+        e.key === FIRSTNAME_KEY
+      ) {
         const token = localStorage.getItem(TOKEN_KEY);
         const userType = localStorage.getItem(USERTYPE_KEY) as UserType | null;
         const username = localStorage.getItem(USERNAME_KEY);
+        const firstName = localStorage.getItem(FIRSTNAME_KEY);
         if (token && (userType === "parent" || userType === "child")) {
           setState({
             accessToken: token,
             userType,
             username,
+            firstName,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -72,6 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             accessToken: null,
             userType: null,
             username: null,
+            firstName: null,
             isAuthenticated: false,
             isLoading: false,
           });
@@ -82,27 +93,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("storage", handler);
   }, []);
 
-  const login = useCallback((token: string, userType: UserType, username?: string) => {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USERTYPE_KEY, userType);
-    if (username) localStorage.setItem(USERNAME_KEY, username);
-    setState({
-      accessToken: token,
-      userType,
-      username: username ?? null,
-      isAuthenticated: true,
-      isLoading: false,
-    });
-  }, []);
+  const login = useCallback(
+    (token: string, userType: UserType, username: string, firstName?: string) => {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(USERTYPE_KEY, userType);
+      localStorage.setItem(USERNAME_KEY, username);
+      if (firstName) localStorage.setItem(FIRSTNAME_KEY, firstName);
+      else localStorage.removeItem(FIRSTNAME_KEY);
+      setState({
+        accessToken: token,
+        userType,
+        username,
+        firstName: firstName ?? null,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USERTYPE_KEY);
     localStorage.removeItem(USERNAME_KEY);
+    localStorage.removeItem(FIRSTNAME_KEY);
     setState({
       accessToken: null,
       userType: null,
       username: null,
+      firstName: null,
       isAuthenticated: false,
       isLoading: false,
     });

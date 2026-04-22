@@ -12,10 +12,15 @@ import PlayfulBackground from "@/components/PlayfulBackground";
 import { Button } from "@/components/ui/button";
 import { Child, loadChildren, saveChildren } from "@/lib/children";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 type LoadState = "loading" | "ready" | "error";
 
 const Dashboard = () => {
+  const { firstName, username } = useAuth();
+  const greetingName =
+    firstName ||
+    (username ? username.charAt(0).toUpperCase() + username.slice(1) : "there");
   const [state, setState] = useState<LoadState>("loading");
   const [children, setChildren] = useState<Child[]>([]);
   const [editing, setEditing] = useState<Child | null>(null);
@@ -72,7 +77,7 @@ const Dashboard = () => {
           {/* Greeting */}
           <div className="mb-8 animate-fade-slide-up">
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-              Welcome back, Sarah 👋
+              Welcome back, {greetingName} 👋
             </h1>
             <p className="text-muted-foreground mt-1">
               Here's what's happening with your little learners today.

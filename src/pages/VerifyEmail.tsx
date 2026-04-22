@@ -42,7 +42,7 @@ const VerifyEmail = () => {
     try {
       const res = await apiVerifyEmail(code);
       // Auto-login the freshly created parent
-      login(res.accessToken, res.userType, res.username);
+      login(res.accessToken, res.userType, res.username, res.firstName);
       toast.success("Email verified! 🎉", {
         description: "Welcome to Little Minds — let's get you set up.",
       });

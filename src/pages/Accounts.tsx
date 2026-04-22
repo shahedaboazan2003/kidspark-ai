@@ -148,6 +148,7 @@ const Accounts = () => {
                     <TableHead className="font-bold">Username</TableHead>
                     <TableHead className="font-bold">Type</TableHead>
                     <TableHead className="font-bold hidden md:table-cell">Email</TableHead>
+                    <TableHead className="font-bold hidden lg:table-cell">Last login</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -174,7 +175,7 @@ const Accounts = () => {
                               {a.firstName} {a.lastName}
                             </div>
                             <div className="text-xs text-muted-foreground md:hidden truncate">
-                              {a.email ?? "—"}
+                              {a.email ?? formatRelative(a.lastLogin)}
                             </div>
                           </div>
                         </div>
@@ -194,6 +195,9 @@ const Accounts = () => {
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                         {a.email ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
+                        {formatRelative(a.lastLogin)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -228,5 +232,17 @@ const FilterPill = ({ active, onClick, icon: Icon, label }: FilterPillProps) => 
     {label}
   </button>
 );
+
+const formatRelative = (iso: string | null): string => {
+  if (!iso) return "Never";
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const diffSec = Math.max(0, Math.floor((now - then) / 1000));
+  if (diffSec < 60) return "Just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 86400 * 7) return `${Math.floor(diffSec / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+};
 
 export default Accounts;

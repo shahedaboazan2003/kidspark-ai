@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicOnlyRoute from "@/components/PublicOnlyRoute";
 import Index from "./pages/Index.tsx";
@@ -21,90 +22,92 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<Index />} />
-            <Route
-              path="/register"
-              element={
-                <PublicOnlyRoute>
-                  <Register />
-                </PublicOnlyRoute>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <PublicOnlyRoute>
-                  <Login />
-                </PublicOnlyRoute>
-              }
-            />
-            <Route path="/verify-email" element={<VerifyEmail />} />
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<Index />} />
+              <Route
+                path="/register"
+                element={
+                  <PublicOnlyRoute>
+                    <Register />
+                  </PublicOnlyRoute>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <PublicOnlyRoute>
+                    <Login />
+                  </PublicOnlyRoute>
+                }
+              />
+              <Route path="/verify-email" element={<VerifyEmail />} />
 
-            {/* Parent-only */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allow={["parent"]}>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/add-child"
-              element={
-                <ProtectedRoute allow={["parent"]}>
-                  <AddChild />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <ProtectedRoute allow={["parent"]}>
-                  <History />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/accounts"
-              element={
-                <ProtectedRoute allow={["parent"]}>
-                  <Accounts />
-                </ProtectedRoute>
-              }
-            />
+              {/* Parent-only */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/add-child"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <AddChild />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <History />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <Accounts />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Chat — accessible to BOTH parent and child */}
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute allow={["parent", "child"]}>
-                  <Chat />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/conversation/:id"
-              element={
-                <ProtectedRoute allow={["parent", "child"]}>
-                  <Chat />
-                </ProtectedRoute>
-              }
-            />
+              {/* Chat — accessible to BOTH parent and child */}
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute allow={["parent", "child"]}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/conversation/:id"
+                element={
+                  <ProtectedRoute allow={["parent", "child"]}>
+                    <Chat />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
