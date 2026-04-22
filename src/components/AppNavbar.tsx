@@ -26,6 +26,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { NavLink } from "@/components/NavLink";
 import LogoutConfirmModal from "@/components/dashboard/LogoutConfirmModal";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -126,6 +127,7 @@ const AppNavbar = () => {
               </nav>
 
               <div className="flex items-center gap-2 shrink-0">
+                <ThemeToggle className="hidden sm:flex" />
                 <span className="hidden lg:inline text-sm text-muted-foreground">
                   Hi <span className="font-semibold text-foreground">{displayName}</span> 👋
                 </span>
@@ -223,7 +225,11 @@ const AppNavbar = () => {
             ))}
           </nav>
 
-          <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50">
+          <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
+              <span className="text-sm font-semibold text-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
             <button
               onClick={() => {
                 setMobileOpen(false);
