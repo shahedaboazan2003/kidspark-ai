@@ -67,6 +67,14 @@ const App = () => (
                 }
               />
               <Route
+                path="/edit-child/:id"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <AddChild />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/history"
                 element={
                   <ProtectedRoute allow={["parent"]}>
