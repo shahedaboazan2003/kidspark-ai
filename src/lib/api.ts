@@ -275,3 +275,36 @@ export async function createChild(payload: AddChildPayload): Promise<Child> {
   saveChildren([...children, newChild]);
   return newChild;
 }
+
+export interface UpdateChildPayload {
+  id: string;
+  name: string;
+  username: string;
+  password?: string;
+  birthdate: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export async function updateChild(payload: UpdateChildPayload): Promise<Child> {
+  await delay(700);
+  const children = loadChildren();
+  const existing = children.find((c) => c.id === payload.id);
+  if (!existing) throw new Error("CHILD_NOT_FOUND");
+
+  const u = payload.username.trim().toLowerCase();
+  if (children.find((c) => c.id !== payload.id && c.username.toLowerCase() === u))
+    throw new Error("USERNAME_TAKEN");
+
+  const updated: Child = {
+    ...existing,
+    name: payload.name.trim(),
+    username: payload.username.trim(),
+    password: payload.password && payload.password.length > 0 ? payload.password : existing.password,
+    birthdate: payload.birthdate,
+    firstName: payload.firstName ?? payload.name.trim().split(" ")[0],
+    lastName: payload.lastName ?? payload.name.trim().split(" ").slice(1).join(" "),
+  };
+  saveChildren(children.map((c) => (c.id === payload.id ? updated : c)));
+  return updated;
+}
