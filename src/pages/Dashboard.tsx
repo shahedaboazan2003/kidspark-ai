@@ -172,7 +172,7 @@ const Dashboard = () => {
                   <ChildCard
                     key={child.id}
                     child={child}
-                    onEdit={() => setEditing(child)}
+                    onEdit={() => navigate(`/edit-child/${child.id}`)}
                     onDelete={() => setDeleting(child)}
                     delay={i * 80}
                   />
@@ -214,12 +214,6 @@ const Dashboard = () => {
         </main>
       </div>
 
-      <EditChildModal
-        open={!!editing}
-        onOpenChange={(o) => !o && setEditing(null)}
-        child={editing}
-        onSave={handleSave}
-      />
       <DeleteChildModal
         open={!!deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
