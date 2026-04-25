@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Users, MessageCircleQuestion, Clock, UserPlus, BookOpen, UsersRound, AlertCircle, PlusCircle } from "lucide-react";
 import AppNavbar from "@/components/AppNavbar";
 import StatCard from "@/components/dashboard/StatCard";
