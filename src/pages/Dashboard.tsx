@@ -45,13 +45,6 @@ const Dashboard = () => {
     };
   }, []);
 
-  const handleSave = (updated: Child) => {
-    const next = children.map((c) => (c.id === updated.id ? updated : c));
-    setChildren(next);
-    saveChildren(next);
-    toast.success(`${updated.name}'s profile updated ✨`);
-  };
-
   const handleDelete = (child: Child) => {
     const next = children.filter((c) => c.id !== child.id);
     setChildren(next);
