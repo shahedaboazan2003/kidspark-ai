@@ -6,7 +6,7 @@ import StatCard from "@/components/dashboard/StatCard";
 import ChildCard from "@/components/dashboard/ChildCard";
 import ChildCardSkeleton from "@/components/dashboard/ChildCardSkeleton";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
-import EditChildModal from "@/components/dashboard/EditChildModal";
+
 import DeleteChildModal from "@/components/dashboard/DeleteChildModal";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Button } from "@/components/ui/button";
