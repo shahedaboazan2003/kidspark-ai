@@ -18,12 +18,12 @@ type LoadState = "loading" | "ready" | "error";
 
 const Dashboard = () => {
   const { firstName, username } = useAuth();
+  const navigate = useNavigate();
   const greetingName =
     firstName ||
     (username ? username.charAt(0).toUpperCase() + username.slice(1) : "there");
   const [state, setState] = useState<LoadState>("loading");
   const [children, setChildren] = useState<Child[]>([]);
-  const [editing, setEditing] = useState<Child | null>(null);
   const [deleting, setDeleting] = useState<Child | null>(null);
 
   // Simulate GET /children
