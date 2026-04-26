@@ -118,7 +118,8 @@ export async function login(
   if (parent) {
     if (parent.password !== password) throw new Error("INVALID_CREDENTIALS");
     if (!parent.emailVerified) throw new Error("EMAIL_NOT_VERIFIED");
-    if (selectedRole && selectedRole !== "parent") throw new Error("ROLE_MISMATCH");
+    if (selectedRole && selectedRole !== "parent")
+      throw new Error("ROLE_MISMATCH");
     setLastLogin(parent.username);
     return {
       accessToken: `parent_${parent.id}_${Date.now()}`,
@@ -134,9 +135,12 @@ export async function login(
   const children = loadChildren();
   const child = children.find((c) => c.username.toLowerCase() === u);
   if (child) {
-    const expected = child.password ?? (child.username === "child" ? "child123" : null);
-    if (!expected || expected !== password) throw new Error("INVALID_CREDENTIALS");
-    if (selectedRole && selectedRole !== "child") throw new Error("ROLE_MISMATCH");
+    const expected =
+      child.password ?? (child.username === "child" ? "child123" : null);
+    if (!expected || expected !== password)
+      throw new Error("INVALID_CREDENTIALS");
+    if (selectedRole && selectedRole !== "child")
+      throw new Error("ROLE_MISMATCH");
     setLastLogin(child.username);
     return {
       accessToken: `child_${child.id}_${Date.now()}`,
@@ -160,12 +164,17 @@ export interface RegisterPayload {
 }
 
 /** POST /auth/register — stores a pending registration awaiting OTP */
-export async function registerParent(payload: RegisterPayload): Promise<{ ok: true }> {
+export async function registerParent(
+  payload: RegisterPayload,
+): Promise<{ ok: true }> {
   await delay(900);
   const parents = loadParents();
   const u = payload.username.trim().toLowerCase();
-  if (parents.find((p) => p.username.toLowerCase() === u)) throw new Error("USERNAME_TAKEN");
-  if (parents.find((p) => p.email.toLowerCase() === payload.email.toLowerCase()))
+  if (parents.find((p) => p.username.toLowerCase() === u))
+    throw new Error("USERNAME_TAKEN");
+  if (
+    parents.find((p) => p.email.toLowerCase() === payload.email.toLowerCase())
+  )
     throw new Error("EMAIL_TAKEN");
 
   // Stash pending until OTP verifies
@@ -257,9 +266,11 @@ export async function createChild(payload: AddChildPayload): Promise<Child> {
   await delay(900);
   const children = loadChildren();
   const u = payload.username.trim().toLowerCase();
-  if (children.find((c) => c.username.toLowerCase() === u)) throw new Error("USERNAME_TAKEN");
+  if (children.find((c) => c.username.toLowerCase() === u))
+    throw new Error("USERNAME_TAKEN");
 
-  const preset = AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)];
+  const preset =
+    AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)];
   const newChild: Child = {
     id: `c_${Date.now()}`,
     name: payload.name.trim(),
@@ -269,7 +280,8 @@ export async function createChild(payload: AddChildPayload): Promise<Child> {
     avatarColor: preset.color,
     avatarEmoji: preset.emoji,
     firstName: payload.firstName ?? payload.name.trim().split(" ")[0],
-    lastName: payload.lastName ?? payload.name.trim().split(" ").slice(1).join(" "),
+    lastName:
+      payload.lastName ?? payload.name.trim().split(" ").slice(1).join(" "),
     createdAt: new Date().toISOString(),
   };
   saveChildren([...children, newChild]);

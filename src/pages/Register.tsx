@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { registerSchema } from "@/lib/validation";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { cn } from "@/lib/utils";
-import { registerParent } from "@/lib/api";
+// import { registerParent } from "@/lib/api";
 import { toast } from "sonner";
+import { register } from "@/lib/auth.remote";
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -84,7 +85,7 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await registerParent({
+      await register({
         username: form.username.trim(),
         password: form.password,
         email: form.email.trim(),

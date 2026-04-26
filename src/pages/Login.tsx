@@ -10,8 +10,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth, UserType } from "@/contexts/AuthContext";
-import { login as apiLogin } from "@/lib/api";
-
+// import { login as apiLogin } from "@/lib/api";
+import { login as apiLogin } from "@/lib/auth.remote";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -51,18 +51,24 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await apiLogin(username.trim(), password, role!);
+      const res = await apiLogin(username.trim(), password);
+      // حفظ التوكن
+      localStorage.setItem("token", res.access_token);
+      // حفظ بيانات المستخدم (اختياري)
       login(res.accessToken, res.userType, res.username, res.firstName);
 
       toast.success(`Welcome back, ${res.firstName || res.username}! 👋`, {
         description:
-          res.userType === "parent" ? "Heading to your dashboard..." : "Let's keep learning!",
+          res.userType === "parent"
+            ? "Heading to your dashboard..."
+            : "Let's keep learning!",
       });
 
       setTimeout(() => {
         navigate(res.userType === "parent" ? "/dashboard" : "/chat");
       }, 350);
     } catch (e) {
+      console.error(e);
       const code = (e as Error).message;
       const msg =
         code === "EMAIL_NOT_VERIFIED"
@@ -92,7 +98,10 @@ const Login = () => {
       <div className="w-full max-w-md relative z-10 animate-fade-slide-up">
         <div className="flex flex-col items-center mb-6">
           <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-button mb-3">
-            <Sparkles className="w-8 h-8 text-primary-foreground" strokeWidth={2.5} />
+            <Sparkles
+              className="w-8 h-8 text-primary-foreground"
+              strokeWidth={2.5}
+            />
           </div>
           <h2 className="text-sm font-semibold text-primary tracking-wide uppercase">
             Little Minds
@@ -107,7 +116,9 @@ const Login = () => {
           )}
         >
           <div className="text-center mb-7">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back 👋</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Welcome Back 👋
+            </h1>
             <p className="text-muted-foreground text-sm">
               Login to continue your learning journey
             </p>
@@ -172,7 +183,11 @@ const Login = () => {
                   tabIndex={-1}
                   aria-label={showPwd ? "Hide password" : "Show password"}
                 >
-                  {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPwd ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {fieldErrors.password && (
@@ -224,7 +239,9 @@ const Login = () => {
 
             {error && (
               <div className="bg-destructive/10 border border-destructive/30 rounded-xl px-4 py-3 animate-fade-slide-up">
-                <p className="text-sm text-destructive font-medium text-center">{error}</p>
+                <p className="text-sm text-destructive font-medium text-center">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -272,7 +289,8 @@ const Login = () => {
         </p>
 
         <div className="mt-4 text-center text-xs text-muted-foreground/80 bg-card/60 rounded-xl px-4 py-2 border border-border/40">
-          <span className="font-semibold">Demo:</span> parent / parent123 · child / child123
+          <span className="font-semibold">Demo:</span> parent / parent123 ·
+          child / child123
         </div>
       </div>
 
@@ -319,10 +337,17 @@ const RoleCard = ({
     )}
   >
     <div className="text-2xl leading-none mb-0.5">{emoji}</div>
-    <div className={cn("font-bold text-sm", selected ? "text-primary" : "text-foreground")}>
+    <div
+      className={cn(
+        "font-bold text-sm",
+        selected ? "text-primary" : "text-foreground",
+      )}
+    >
       {title}
     </div>
-    <div className="text-[11px] text-muted-foreground leading-tight">{subtitle}</div>
+    <div className="text-[11px] text-muted-foreground leading-tight">
+      {subtitle}
+    </div>
     {selected && (
       <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-scale-fade-in" />
     )}

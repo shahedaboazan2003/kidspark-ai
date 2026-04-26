@@ -23,6 +23,7 @@ const USERTYPE_KEY = "userType";
 const USERNAME_KEY = "username";
 const FIRSTNAME_KEY = "firstName";
 
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AuthState>({
     accessToken: null,
