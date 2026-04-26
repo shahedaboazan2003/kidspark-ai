@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Users, MessageCircleQuestion, Clock, UserPlus, BookOpen, UsersRound, AlertCircle, PlusCircle } from "lucide-react";
 import AppNavbar from "@/components/AppNavbar";
 import StatCard from "@/components/dashboard/StatCard";
 import ChildCard from "@/components/dashboard/ChildCard";
 import ChildCardSkeleton from "@/components/dashboard/ChildCardSkeleton";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
-import EditChildModal from "@/components/dashboard/EditChildModal";
+
 import DeleteChildModal from "@/components/dashboard/DeleteChildModal";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Button } from "@/components/ui/button";
@@ -18,12 +18,12 @@ type LoadState = "loading" | "ready" | "error";
 
 const Dashboard = () => {
   const { firstName, username } = useAuth();
+  const navigate = useNavigate();
   const greetingName =
     firstName ||
     (username ? username.charAt(0).toUpperCase() + username.slice(1) : "there");
   const [state, setState] = useState<LoadState>("loading");
   const [children, setChildren] = useState<Child[]>([]);
-  const [editing, setEditing] = useState<Child | null>(null);
   const [deleting, setDeleting] = useState<Child | null>(null);
 
   // Simulate GET /children
@@ -44,13 +44,6 @@ const Dashboard = () => {
       clearTimeout(t);
     };
   }, []);
-
-  const handleSave = (updated: Child) => {
-    const next = children.map((c) => (c.id === updated.id ? updated : c));
-    setChildren(next);
-    saveChildren(next);
-    toast.success(`${updated.name}'s profile updated ✨`);
-  };
 
   const handleDelete = (child: Child) => {
     const next = children.filter((c) => c.id !== child.id);
@@ -179,7 +172,7 @@ const Dashboard = () => {
                   <ChildCard
                     key={child.id}
                     child={child}
-                    onEdit={() => setEditing(child)}
+                    onEdit={() => navigate(`/edit-child/${child.id}`)}
                     onDelete={() => setDeleting(child)}
                     delay={i * 80}
                   />
@@ -221,12 +214,6 @@ const Dashboard = () => {
         </main>
       </div>
 
-      <EditChildModal
-        open={!!editing}
-        onOpenChange={(o) => !o && setEditing(null)}
-        child={editing}
-        onSave={handleSave}
-      />
       <DeleteChildModal
         open={!!deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
