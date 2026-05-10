@@ -10,7 +10,7 @@ import PublicOnlyRoute from "@/components/PublicOnlyRoute";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Register from "./pages/Register.tsx";
-import Login from "./pages/Login.tsx";
+import Login from "@/pages/Login";
 import VerifyEmail from "./pages/VerifyEmail.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import AddChild from "./pages/AddChild.tsx";

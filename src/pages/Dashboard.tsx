@@ -1,55 +1,84 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Users, MessageCircleQuestion, Clock, UserPlus, BookOpen, UsersRound, AlertCircle, PlusCircle } from "lucide-react";
+import {
+  Users,
+  MessageCircleQuestion,
+  Clock,
+  UserPlus,
+  BookOpen,
+  UsersRound,
+  AlertCircle,
+  PlusCircle,
+} from "lucide-react";
+
 import AppNavbar from "@/components/AppNavbar";
 import StatCard from "@/components/dashboard/StatCard";
 import ChildCard from "@/components/dashboard/ChildCard";
 import ChildCardSkeleton from "@/components/dashboard/ChildCardSkeleton";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
-
 import DeleteChildModal from "@/components/dashboard/DeleteChildModal";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Button } from "@/components/ui/button";
-import { Child, loadChildren, saveChildren } from "@/lib/children";
+import { Child } from "@/lib/children";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-
+import {
+  getChildren,
+  deleteChildById,
+  createChild,
+  updateChild,
+} from "@/lib/children";
 type LoadState = "loading" | "ready" | "error";
 
 const Dashboard = () => {
-  const { firstName, username } = useAuth();
+  const { firstName, username, accessToken } = useAuth();
   const navigate = useNavigate();
+
   const greetingName =
     firstName ||
     (username ? username.charAt(0).toUpperCase() + username.slice(1) : "there");
+
   const [state, setState] = useState<LoadState>("loading");
   const [children, setChildren] = useState<Child[]>([]);
+
   const [deleting, setDeleting] = useState<Child | null>(null);
 
-  // Simulate GET /children
+  // LOAD CHILDREN (mock / fallback)
   useEffect(() => {
-    let cancelled = false;
-    setState("loading");
-    const t = setTimeout(() => {
-      if (cancelled) return;
+    const load = async () => {
       try {
-        setChildren(loadChildren());
+        setState("loading");
+
+        const res = await getChildren();
+        setChildren(res.data || []);
+        console.log(">>>>>>>>",res.data)
+        console.log("LEVEL 2:", res.data.data);
         setState("ready");
-      } catch {
+      } catch (err) {
+        console.log(err);
         setState("error");
       }
-    }, 800);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
     };
-  }, []);
 
-  const handleDelete = (child: Child) => {
-    const next = children.filter((c) => c.id !== child.id);
-    setChildren(next);
-    saveChildren(next);
-    toast.success(`${child.name} has been removed`);
+    if (accessToken) {
+      load();
+    }
+
+    window.addEventListener("focus", load);
+
+    return () => window.removeEventListener("focus", load);
+  }, [accessToken]);
+
+  const handleDelete = async (child: Child) => {
+    try {
+      await deleteChildById(child.id);
+
+      setChildren((prev) => prev.filter((c) => c.id !== child.id));
+
+      toast.success(`${child.firstName} ${child.lastName} has been removed`);
+    } catch {
+      toast.error("Failed to delete child");
+    }
   };
 
   const stats = {
@@ -60,16 +89,15 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0 playful-bg opacity-60" aria-hidden />
+      <div className="absolute inset-0 playful-bg opacity-60" />
       <PlayfulBackground />
 
       <div className="relative z-10">
         <AppNavbar />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          {/* Greeting */}
-          <div className="mb-8 animate-fade-slide-up">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+          <div className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold">
               Welcome back, {greetingName} 👋
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -77,7 +105,6 @@ const Dashboard = () => {
             </p>
           </div>
 
-          {/* Stats */}
           <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <StatCard
               label="Total Children"
@@ -88,7 +115,7 @@ const Dashboard = () => {
               delay={0}
             />
             <StatCard
-              label="Questions Asked Today"
+              label="Questions Today"
               value={stats.questionsToday}
               icon={MessageCircleQuestion}
               emoji="❓"
@@ -96,7 +123,7 @@ const Dashboard = () => {
               delay={100}
             />
             <StatCard
-              label="Active Usage Time"
+              label="Active Time"
               value={stats.activeMinutes}
               suffix="min"
               icon={Clock}
@@ -106,62 +133,43 @@ const Dashboard = () => {
             />
           </section>
 
-          {/* Children section */}
-          <section className="mb-10">
-            <div className="flex items-end justify-between mb-5">
+          <section>
+            <div className="flex justify-between items-center mb-5">
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Your Children 🧸</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Manage profiles and keep their journey safe.
+                <h2 className="text-2xl font-bold">Your Children 🧸</h2>
+                <p className="text-sm text-muted-foreground">
+                  Manage profiles and keep them safe.
                 </p>
               </div>
-              {state === "ready" && children.length > 0 && (
-                <Link to="/add-child" className="hidden sm:block">
-                  <Button variant="hero" size="default">
-                    <PlusCircle className="w-4 h-4" />
-                    Add Child
-                  </Button>
-                </Link>
-              )}
+
+              <Link to="/add-child">
+                <Button variant="hero">
+                  <PlusCircle className="w-4 h-4" />
+                  Add Child
+                </Button>
+              </Link>
             </div>
 
             {state === "loading" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[0, 1, 2].map((i) => (
+                {[1, 2, 3].map((i) => (
                   <ChildCardSkeleton key={i} delay={i * 80} />
                 ))}
               </div>
             )}
 
             {state === "error" && (
-              <div className="bg-card rounded-2xl p-10 text-center border border-destructive/30 shadow-soft animate-scale-fade-in">
-                <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-3">
-                  <AlertCircle className="w-8 h-8 text-destructive" />
-                </div>
-                <h3 className="font-bold text-lg">Oops! Something went wrong 💫</h3>
-                <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  We couldn't load your children right now.
-                </p>
-                <Button variant="outline" onClick={() => window.location.reload()}>
-                  Try again
-                </Button>
+              <div className="text-center p-10 border border-red-200 rounded-2xl">
+                <AlertCircle className="mx-auto text-red-500" />
+                <p className="mt-2">Failed to load children</p>
               </div>
             )}
 
             {state === "ready" && children.length === 0 && (
-              <div className="bg-card rounded-3xl p-10 sm:p-14 text-center border border-border/50 shadow-soft animate-scale-fade-in">
-                <div className="text-6xl mb-3">🧸</div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">
-                  Your journey starts here
-                </h3>
-                <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                  Add your first child to begin learning together!
-                </p>
+              <div className="text-center p-10">
+                <p>No children yet</p>
                 <Link to="/add-child">
-                  <Button variant="hero" size="lg">
-                    <PlusCircle className="w-5 h-5" />
-                    Add Your First Child
-                  </Button>
+                  <Button className="mt-4">Add First Child</Button>
                 </Link>
               </div>
             )}
@@ -172,7 +180,9 @@ const Dashboard = () => {
                   <ChildCard
                     key={child.id}
                     child={child}
-                    onEdit={() => navigate(`/edit-child/${child.id}`)}
+                    onEdit={() =>
+                      navigate(`/edit-child/${child.id}`, { state: child })
+                    }
                     onDelete={() => setDeleting(child)}
                     delay={i * 80}
                   />
@@ -181,33 +191,30 @@ const Dashboard = () => {
             )}
           </section>
 
-          {/* Quick actions */}
-          <section>
-            <h2 className="text-2xl font-bold text-foreground mb-5">Quick Actions ⚡</h2>
+          <section className="mt-10">
+            <h2 className="text-2xl font-bold mb-5">Quick Actions ⚡</h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <QuickActionCard
                 to="/add-child"
                 label="Add Child"
-                description="Create a new profile"
+                description="Create profile"
                 icon={UserPlus}
                 gradient="from-primary to-primary-glow"
-                delay={0}
               />
               <QuickActionCard
                 to="/history"
-                label="View History"
-                description="Browse past conversations"
+                label="History"
+                description="View chats"
                 icon={BookOpen}
                 gradient="from-secondary to-primary-glow"
-                delay={100}
               />
               <QuickActionCard
                 to="/accounts"
-                label="View Accounts"
-                description="Manage all profiles"
+                label="Accounts"
+                description="Manage users"
                 icon={UsersRound}
                 gradient="from-accent to-secondary"
-                delay={200}
               />
             </div>
           </section>

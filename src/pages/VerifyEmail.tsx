@@ -7,7 +7,7 @@ import OtpInput from "@/components/OtpInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { verifyEmail as apiVerifyEmail } from "@/lib/api";
+import { verifyEmail } from "@/lib/auth";
 
 const RESEND_SECONDS = 30;
 
@@ -15,7 +15,8 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const email = (location.state as { email?: string } | null)?.email ?? "your inbox";
+  const email =
+    (location.state as { email?: string } | null)?.email ?? "your inbox";
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,9 +41,16 @@ const VerifyEmail = () => {
     setError("");
     setLoading(true);
     try {
-      const res = await apiVerifyEmail(code);
-      // Auto-login the freshly created parent
-      login(res.accessToken, res.userType, res.username, res.firstName);
+      const res = await verifyEmail({
+        email: email.trim().toLowerCase(),
+        otp: code.trim(),
+      });
+
+      login(
+        res.data.accessToken,
+        res.data.user.type,
+        res.data.user.username,
+      );
       toast.success("Email verified! 🎉", {
         description: "Welcome to Little Minds — let's get you set up.",
       });
@@ -83,15 +91,27 @@ const VerifyEmail = () => {
           )}
         >
           <div className="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-button mx-auto mb-6">
-            <Mail className="w-10 h-10 text-primary-foreground" strokeWidth={2.2} />
+            <Mail
+              className="w-10 h-10 text-primary-foreground"
+              strokeWidth={2.2}
+            />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">Check your email 💌</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Check your email 💌
+          </h1>
           <p className="text-muted-foreground text-sm mb-7">
             We sent a 6-digit code to{" "}
-            <span className="font-semibold text-foreground break-all">{email}</span>
+            <span className="font-semibold text-foreground break-all">
+              {email}
+            </span>
           </p>
 
-          <OtpInput value={otp} onChange={setOtp} hasError={!!error} disabled={loading} />
+          <OtpInput
+            value={otp}
+            onChange={setOtp}
+            hasError={!!error}
+            disabled={loading}
+          />
 
           {error && (
             <p className="text-sm text-destructive font-medium mt-4 animate-fade-slide-up">
@@ -119,7 +139,9 @@ const VerifyEmail = () => {
           <div className="mt-5 text-sm text-muted-foreground">
             Didn't get a code?{" "}
             {resendIn > 0 ? (
-              <span className="text-muted-foreground/70">Resend in {resendIn}s</span>
+              <span className="text-muted-foreground/70">
+                Resend in {resendIn}s
+              </span>
             ) : (
               <button
                 type="button"
@@ -142,7 +164,8 @@ const VerifyEmail = () => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          🛡️ Tip for demo: any 6 digits work. Try <code className="font-mono">000000</code> for invalid,{" "}
+          🛡️ Tip for demo: any 6 digits work. Try{" "}
+          <code className="font-mono">000000</code> for invalid,{" "}
           <code className="font-mono">111111</code> for expired.
         </p>
       </div>

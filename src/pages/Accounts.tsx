@@ -5,6 +5,7 @@ import AppNavbar from "@/components/AppNavbar";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { listAccounts } from "@/lib/accounts";
 import {
   Table,
   TableBody,
@@ -13,11 +14,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { listAccounts, AccountRow } from "@/lib/api";
 import { cn } from "@/lib/utils";
-
 type FilterType = "all" | "parent" | "child";
-
+type AccountRow = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email?: string;
+  type: "parent" | "child";
+  lastLogin?: string | null;
+};
 const Accounts = () => {
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -72,6 +79,7 @@ const Accounts = () => {
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <Link
+          
             to="/dashboard"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-4"
           >

@@ -1,11 +1,10 @@
+import http, { ApiResponse } from "./http";
 export interface Child {
   id: string;
-  name: string;
   username: string;
-  birthdate: string; // ISO date
-  avatarColor: string; // tailwind gradient classes
+  birthdate: string;
+  avatarColor: string;
   avatarEmoji: string;
-  /** Optional — present for children created via Add Child / api */
   password?: string;
   firstName?: string;
   lastName?: string;
@@ -22,77 +21,58 @@ export const AVATAR_PRESETS = [
   { color: "from-primary-glow to-accent", emoji: "🐨" },
   { color: "from-secondary to-primary", emoji: "🦄" },
 ];
+export const calcAge = (birthdate?: string): number | null => {
+  if (!birthdate) return null;
 
-const STORAGE_KEY = "littleminds.children";
+  const birth = new Date(birthdate);
 
-const seed: Child[] = [
-  {
-    id: "c1",
-    name: "Emma Parker",
-    firstName: "Emma",
-    lastName: "Parker",
-    username: "emma_explorer",
-    password: "emma123",
-    birthdate: "2017-04-12",
-    avatarColor: AVATAR_PRESETS[0].color,
-    avatarEmoji: AVATAR_PRESETS[0].emoji,
-    createdAt: "2024-01-20T10:00:00Z",
-  },
-  {
-    id: "c2",
-    name: "Liam Parker",
-    firstName: "Liam",
-    lastName: "Parker",
-    username: "liam_learns",
-    password: "liam123",
-    birthdate: "2019-09-03",
-    avatarColor: AVATAR_PRESETS[3].color,
-    avatarEmoji: AVATAR_PRESETS[3].emoji,
-    createdAt: "2024-02-05T10:00:00Z",
-  },
-  {
-    id: "c_demo",
-    name: "Demo Kid",
-    firstName: "Demo",
-    lastName: "Kid",
-    username: "child",
-    password: "child123",
-    birthdate: "2018-06-15",
-    avatarColor: AVATAR_PRESETS[5].color,
-    avatarEmoji: AVATAR_PRESETS[5].emoji,
-    createdAt: "2024-01-15T10:00:00Z",
-  },
-];
+  if (isNaN(birth.getTime())) return null;
 
-export const loadChildren = (): Child[] => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-      return seed;
-    }
-    const parsed = JSON.parse(raw) as Child[];
-    // Ensure the demo "child" account exists for the documented login creds
-    if (!parsed.find((c) => c.username === "child")) {
-      const merged = [...parsed, seed[2]];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-      return merged;
-    }
-    return parsed;
-  } catch {
-    return seed;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
   }
+
+  return age;
+};
+// GET children
+// export const getChildren = () => {
+//   return http.get<ApiResponse<Child[]>>("/children");
+// };
+export const getChildren = async (): Promise<Child[]> => {
+  const res = await http.get<ApiResponse<Child[]>>("/children");
+  return res.data;
+};
+// CREATE
+export const createChild = (data: {
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  birthdate: string;
+}) => {
+  return http.post<ApiResponse<Child>>("/children", data);
 };
 
-export const saveChildren = (children: Child[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(children));
+// UPDATE
+export const updateChild = (data: {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  birthdate: string;
+  password?: string;
+}) => {
+  return http.post<ApiResponse<Child>>(`/children/${data.id}`, data);
 };
 
-export const calcAge = (birthdate: string): number => {
-  const b = new Date(birthdate);
-  const now = new Date();
-  let age = now.getFullYear() - b.getFullYear();
-  const m = now.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
-  return Math.max(age, 0);
+// DELETE
+export const deleteChildById = (id: string) => {
+  return http.post<ApiResponse<null>>(`/children/${id}/delete`);
+};
+export const getChildById = (id: string) => {
+  return http.get<ApiResponse<Child>>(`/children/${id}`);
 };

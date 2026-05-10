@@ -7,9 +7,8 @@ import { Label } from "@/components/ui/label";
 import { registerSchema } from "@/lib/validation";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { cn } from "@/lib/utils";
-// import { registerParent } from "@/lib/api";
 import { toast } from "sonner";
-import { register } from "@/lib/auth.remote";
+import { register } from "@/lib/auth";
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -69,8 +68,10 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const v = validate(form);
     setErrors(v);
+
     setTouched({
       email: true,
       password: true,
@@ -79,32 +80,55 @@ const Register = () => {
       firstName: true,
       lastName: true,
     });
+
     if (Object.keys(v).length > 0) {
       setShakeKey((k) => k + 1);
       return;
     }
     setLoading(true);
+
     try {
-      await register({
+      // ✅ أضف هذا
+      console.log("REGISTER DATA:", {
+        email: form.email,
+        password: form.password,
+        confirmPassword: form.repeatPassword,
+        username: form.username,
+        firstName: form.firstName,
+        lastName: form.lastName,
+      });
+
+      const res = await register({
         username: form.username.trim(),
         password: form.password,
+        confirmPassword: form.repeatPassword,
         email: form.email.trim(),
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
       });
+
+      console.log("REGISTER RESPONSE:", res);
+
       setLoading(false);
+
       navigate("/verify-email", {
-        state: { email: form.email, username: form.username.trim() },
+        state: {
+          email: form.email,
+          username: form.username.trim(),
+        },
       });
     } catch (err) {
       setLoading(false);
+
       const code = (err as Error).message;
+
       const msg =
         code === "USERNAME_TAKEN"
           ? "That username is already taken 😅"
           : code === "EMAIL_TAKEN"
             ? "An account with this email already exists 💌"
             : "Something went wrong, please try again 💫";
+
       toast.error(msg);
       setShakeKey((k) => k + 1);
     }
@@ -117,10 +141,12 @@ const Register = () => {
       <PlayfulBackground />
 
       <div className="w-full max-w-md relative z-10 animate-fade-slide-up">
-        {/* Logo / Brand */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-button mb-3">
-            <Sparkles className="w-8 h-8 text-primary-foreground" strokeWidth={2.5} />
+            <Sparkles
+              className="w-8 h-8 text-primary-foreground"
+              strokeWidth={2.5}
+            />
           </div>
           <h2 className="text-sm font-semibold text-primary tracking-wide uppercase">
             Little Minds
@@ -170,11 +196,9 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  tabIndex={-1}
-                  aria-label={showPwd ? "Hide password" : "Show password"}
+                  className="text-muted-foreground hover:text-primary"
                 >
-                  {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPwd ? <EyeOff /> : <Eye />}
                 </button>
               }
             />
@@ -193,11 +217,9 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowRepeat((s) => !s)}
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  tabIndex={-1}
-                  aria-label={showRepeat ? "Hide password" : "Show password"}
+                  className="text-muted-foreground hover:text-primary"
                 >
-                  {showRepeat ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showRepeat ? <EyeOff /> : <Eye />}
                 </button>
               }
             />
@@ -224,7 +246,6 @@ const Register = () => {
                 onChange={(v) => update("firstName", v)}
                 onBlur={() => handleBlur("firstName")}
                 error={showError("firstName")}
-                autoComplete="given-name"
               />
               <Field
                 id="lastName"
@@ -235,7 +256,6 @@ const Register = () => {
                 onChange={(v) => update("lastName", v)}
                 onBlur={() => handleBlur("lastName")}
                 error={showError("lastName")}
-                autoComplete="family-name"
               />
             </div>
 
@@ -248,7 +268,7 @@ const Register = () => {
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="animate-spin" />
                   Creating account...
                 </>
               ) : (
@@ -259,18 +279,11 @@ const Register = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-primary font-semibold hover:underline underline-offset-4"
-            >
+            <Link to="/login" className="text-primary font-semibold">
               Login
             </Link>
           </p>
         </div>
-
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          🛡️ Safe, private, and built with love for families.
-        </p>
       </div>
     </div>
   );
@@ -302,9 +315,7 @@ const Field = ({
   rightIcon,
 }: FieldProps) => (
   <div className="space-y-1.5">
-    <Label htmlFor={id} className="text-sm font-semibold text-foreground">
-      {label}
-    </Label>
+    <Label htmlFor={id}>{label}</Label>
     <div className="relative">
       <Input
         id={id}
@@ -314,21 +325,11 @@ const Field = ({
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         autoComplete={autoComplete}
-        aria-invalid={!!error}
-        className={cn(
-          rightIcon && "pr-12",
-          error && "border-destructive focus-visible:border-destructive focus-visible:shadow-[0_0_0_4px_hsl(var(--destructive)/0.15)]",
-        )}
+        className={cn(error && "border-red-500")}
       />
-      {rightIcon && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightIcon}</div>
-      )}
+      {rightIcon && <div className="absolute right-3 top-2">{rightIcon}</div>}
     </div>
-    {error && (
-      <p className="text-xs text-destructive font-medium pl-1 animate-fade-slide-up">
-        {error}
-      </p>
-    )}
+    {error && <p className="text-xs text-red-500">{error}</p>}
   </div>
 );
 

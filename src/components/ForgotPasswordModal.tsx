@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Mail, KeyRound, Lock, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import {
+  Loader2,
+  Mail,
+  KeyRound,
+  Lock,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import OtpInput from "./OtpInput";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { forgotPassword } from "@/lib/auth";
+import { resetPassword } from "@/lib/auth";
 
 type Step = "email" | "otp" | "reset" | "success";
 
@@ -17,9 +33,11 @@ interface ForgotPasswordModalProps {
 
 const RESEND_SECONDS = 60;
 // Demo OTP — in real app this is sent via email
-const DEMO_OTP = "123456";
 
-const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) => {
+const ForgotPasswordModal = ({
+  open,
+  onOpenChange,
+}: ForgotPasswordModalProps) => {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -28,7 +46,9 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [pwdErrors, setPwdErrors] = useState<{ new?: string; repeat?: string }>({});
+  const [pwdErrors, setPwdErrors] = useState<{ new?: string; repeat?: string }>(
+    {},
+  );
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shake, setShake] = useState(0);
@@ -54,83 +74,115 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
   useEffect(() => {
     if (step !== "otp") return;
     if (secondsLeft <= 0) return;
-    const t = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    const t = setInterval(
+      () => setSecondsLeft((s) => Math.max(0, s - 1)),
+      1000,
+    );
     return () => clearInterval(t);
   }, [step, secondsLeft]);
 
   const triggerShake = () => setShake((k) => k + 1);
 
   // STEP 1 — Send OTP
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const trimmed = email.trim();
+
     if (!trimmed) {
-      setEmailError("Oops! Please enter your email 😊");
+      setEmailError("Email is required");
       triggerShake();
       return;
     }
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setEmailError("Hmm, that doesn't look like a valid email 💌");
+      setEmailError("Invalid email format");
       triggerShake();
       return;
     }
+
     setEmailError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
+
+    try {
+      await forgotPassword({ email: trimmed });
+
+      toast.success("OTP sent successfully 💌");
+
+      setStep("otp");
+      setSecondsLeft(RESEND_SECONDS);
+    } catch (err) {
+      setEmailError("Failed to send OTP");
+      triggerShake();
+    }
+
     setLoading(false);
-    setSecondsLeft(RESEND_SECONDS);
-    setStep("otp");
-    toast.success("OTP sent! Check your email 💌", {
-      description: `For demo, use code: ${DEMO_OTP}`,
-    });
   };
 
   // STEP 2 — Verify OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (otp.length !== 6) {
-      setOtpError("Please enter all 6 digits 🔢");
+      setOtpError("Enter 6 digits");
       triggerShake();
       return;
     }
+
     setOtpError("");
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    if (otp !== DEMO_OTP) {
-      setOtpError("Hmm, that code didn't work. Try again 💫");
-      triggerShake();
-      return;
-    }
-    setStep("reset");
+    setStep("reset"); // فقط انتقال للخطوة التالية بدون تحقق وهمي
   };
 
   const handleResend = async () => {
     if (secondsLeft > 0) return;
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 600));
+
+    try {
+      await forgotPassword({ email });
+      toast.success("OTP resent 💌");
+      setSecondsLeft(RESEND_SECONDS);
+    } catch {
+      toast.error("Failed to resend OTP");
+    }
+
     setLoading(false);
-    setOtp("");
-    setOtpError("");
-    setSecondsLeft(RESEND_SECONDS);
-    toast.success("New code sent! 💌", { description: `Demo code: ${DEMO_OTP}` });
   };
 
   // STEP 3 — Reset password
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const errs: { new?: string; repeat?: string } = {};
-    if (newPassword.length < 6) errs.new = "Password needs at least 6 characters 🔒";
-    if (newPassword !== repeatPassword) errs.repeat = "Passwords don't match, try again 💫";
+
+    if (newPassword.length < 6) errs.new = "Minimum 6 chars";
+    if (newPassword !== repeatPassword) errs.repeat = "Passwords don't match";
+
     setPwdErrors(errs);
+
     if (Object.keys(errs).length > 0) {
       triggerShake();
       return;
     }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
+
+    try {
+      await resetPassword({
+        email: email.trim(),
+        otp: otp,
+        newPassword: newPassword,
+      });
+
+      setStep("success");
+    } catch (err) {
+      setOtpError("Invalid or expired OTP ❌");
+      setStep("otp");
+      triggerShake();
+    }
+
     setLoading(false);
-    setStep("success");
   };
 
   const handleFinish = () => {
@@ -154,7 +206,9 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
               <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-button mb-3">
                 <Mail className="w-7 h-7 text-primary-foreground" />
               </div>
-              <DialogTitle className="text-2xl font-bold">Forgot Password?</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">
+                Forgot Password?
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 No worries! Enter your email and we'll send you a code 💌
               </DialogDescription>
@@ -207,12 +261,17 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
 
         {/* STEP 2 — OTP */}
         {step === "otp" && (
-          <form onSubmit={handleVerifyOtp} className="p-8 animate-scale-fade-in">
+          <form
+            onSubmit={handleVerifyOtp}
+            className="p-8 animate-scale-fade-in"
+          >
             <DialogHeader className="text-center items-center mb-6">
               <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-button mb-3">
                 <KeyRound className="w-7 h-7 text-primary-foreground" />
               </div>
-              <DialogTitle className="text-2xl font-bold">Enter Verification Code</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">
+                Enter Verification Code
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 We sent a 6-digit code to{" "}
                 <span className="font-semibold text-foreground">{email}</span>
@@ -239,7 +298,10 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
             <div className="text-center text-sm mb-4">
               {secondsLeft > 0 ? (
                 <p className="text-muted-foreground">
-                  Resend code in <span className="font-semibold text-primary">{secondsLeft}s</span>
+                  Resend code in{" "}
+                  <span className="font-semibold text-primary">
+                    {secondsLeft}s
+                  </span>
                 </p>
               ) : (
                 <button
@@ -278,7 +340,9 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
               <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-button mb-3">
                 <Lock className="w-7 h-7 text-primary-foreground" />
               </div>
-              <DialogTitle className="text-2xl font-bold">Create New Password</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">
+                Create New Password
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 Almost there! Pick a strong, fresh password ✨
               </DialogDescription>
@@ -297,7 +361,8 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
                     value={newPassword}
                     onChange={(e) => {
                       setNewPassword(e.target.value);
-                      if (pwdErrors.new) setPwdErrors((p) => ({ ...p, new: undefined }));
+                      if (pwdErrors.new)
+                        setPwdErrors((p) => ({ ...p, new: undefined }));
                     }}
                     aria-invalid={!!pwdErrors.new}
                     className={cn(
@@ -312,7 +377,11 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                     tabIndex={-1}
                   >
-                    {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPwd ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
                 {pwdErrors.new && (
@@ -333,7 +402,8 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
                   value={repeatPassword}
                   onChange={(e) => {
                     setRepeatPassword(e.target.value);
-                    if (pwdErrors.repeat) setPwdErrors((p) => ({ ...p, repeat: undefined }));
+                    if (pwdErrors.repeat)
+                      setPwdErrors((p) => ({ ...p, repeat: undefined }));
                   }}
                   aria-invalid={!!pwdErrors.repeat}
                   className={cn(
@@ -372,13 +442,21 @@ const ForgotPasswordModal = ({ open, onOpenChange }: ForgotPasswordModalProps) =
         {step === "success" && (
           <div className="p-8 text-center animate-scale-fade-in">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-success to-secondary flex items-center justify-center shadow-button mx-auto mb-4">
-              <CheckCircle2 className="w-10 h-10 text-primary-foreground" strokeWidth={2.2} />
+              <CheckCircle2
+                className="w-10 h-10 text-primary-foreground"
+                strokeWidth={2.2}
+              />
             </div>
             <h2 className="text-2xl font-bold mb-2">Password updated! 🎉</h2>
             <p className="text-muted-foreground text-sm mb-6">
               You can now log in with your new password.
             </p>
-            <Button variant="hero" size="lg" className="w-full" onClick={handleFinish}>
+            <Button
+              variant="hero"
+              size="lg"
+              className="w-full"
+              onClick={handleFinish}
+            >
               Back to Login
             </Button>
           </div>

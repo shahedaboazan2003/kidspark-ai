@@ -26,9 +26,11 @@ const ChildCard = ({ child, onEdit, onDelete, delay = 0 }: Props) => {
         >
           {child.avatarEmoji}
         </div>
-        <h3 className="font-bold text-lg text-foreground">{child.name}</h3>
+        <h3 className="font-bold text-lg text-foreground">
+          {child.firstName} {child.lastName}
+        </h3>
         <div className="text-sm text-muted-foreground mb-1">
-          {age} {age === 1 ? "year" : "years"} old
+          {age !== null ? `${age} ${age === 1 ? "year" : "years"} old` : "N/A"}
         </div>
         <div className="text-xs text-primary font-semibold bg-primary/10 px-3 py-1 rounded-full">
           @{child.username}
@@ -38,7 +40,7 @@ const ChildCard = ({ child, onEdit, onDelete, delay = 0 }: Props) => {
           <button
             onClick={onEdit}
             className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border-2 border-input bg-card text-foreground text-sm font-semibold hover:border-primary hover:text-primary hover:scale-[1.02] transition-all"
-            aria-label={`Edit ${child.name}`}
+            aria-label={`Edit ${child.firstName} {child.lastName}`}
           >
             <Pencil className="w-4 h-4" />
             Edit
@@ -46,7 +48,7 @@ const ChildCard = ({ child, onEdit, onDelete, delay = 0 }: Props) => {
           <button
             onClick={onDelete}
             className="flex-1 inline-flex items-center justify-center gap-1.5 h-10 rounded-xl border-2 border-destructive/20 bg-card text-destructive text-sm font-semibold hover:bg-destructive/10 hover:border-destructive hover:scale-[1.02] transition-all"
-            aria-label={`Delete ${child.name}`}
+            aria-label={`Delete ${child.firstName} {child.lastName}`}
           >
             <Trash2 className="w-4 h-4" />
             Delete

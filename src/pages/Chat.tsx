@@ -8,6 +8,7 @@ import MessageBubble from "@/components/chat/MessageBubble";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatTopControls from "@/components/chat/ChatTopControls";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Conversation,
   DbMessage,
@@ -47,7 +48,7 @@ const Chat = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<{ aborted: boolean }>({ aborted: false });
-
+  const { accessToken } = useAuth();
   // Load conversations on mount
   useEffect(() => {
     (async () => {
