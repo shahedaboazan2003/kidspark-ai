@@ -43,7 +43,7 @@ const Dashboard = () => {
 
   const [deleting, setDeleting] = useState<Child | null>(null);
 
-  // LOAD CHILDREN (mock / fallback)
+  // LOAD CHILDREN 
   useEffect(() => {
     const load = async () => {
       try {
@@ -51,8 +51,6 @@ const Dashboard = () => {
 
         const res = await getChildren();
         setChildren(res.data || []);
-        console.log(">>>>>>>>",res.data)
-        console.log("LEVEL 2:", res.data.data);
         setState("ready");
       } catch (err) {
         console.log(err);

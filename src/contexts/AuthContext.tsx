@@ -8,11 +8,12 @@ import {
 } from "react";
 
 export type UserType = "parent" | "child";
-
+const USER_KEY = "USER_KEY";
 interface AuthState {
   accessToken: string | null;
   userType: UserType | null;
   username: string | null;
+  user: AuthUser | null;
   firstName: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -23,11 +24,20 @@ interface AuthContextValue extends AuthState {
     token: string,
     userType: UserType,
     username: string,
+    user?: AuthUser,
     firstName?: string,
   ) => void;
   logout: () => void;
 }
 
+type AuthUser = {
+  id:number
+  username:string
+  type: UserType
+  firstName?: string
+  lastName?: string
+  email?: string | null
+}
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const TOKEN_KEY = "accessToken";
@@ -40,6 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     accessToken: null,
     userType: null,
     username: null,
+    user: null,
     firstName: null,
     isAuthenticated: false,
     isLoading: true,
@@ -51,12 +62,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const username = localStorage.getItem(USERNAME_KEY);
     const firstName = localStorage.getItem(FIRSTNAME_KEY);
 
+
+    const storedUser = localStorage.getItem(USER_KEY);
+    const user = storedUser ? JSON.parse(storedUser) : null;
     if (token && (userType === "parent" || userType === "child")) {
       setState({
         accessToken: token,
         userType,
         username,
         firstName,
+        user,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -70,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       token: string,
       userType: UserType,
       username: string,
+      user?: AuthUser,
       firstName?: string,
     ) => {
       localStorage.setItem(TOKEN_KEY, token);
@@ -83,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         accessToken: token,
         userType,
         username,
+        user: user ?? null,
         firstName: firstName ?? null,
         isAuthenticated: true,
         isLoading: false,
@@ -98,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       userType: null,
       username: null,
       firstName: null,
+      user: null,
       isAuthenticated: false,
       isLoading: false,
     });

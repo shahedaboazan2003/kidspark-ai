@@ -7,6 +7,38 @@ export type ApiResponse<DATA = unknown> = {
   data: DATA
 }
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+type ErrorResponse = {
+  message?: string | string[]
+  error?: string
+  statusCode?: number
+}
+
+const throwApiError = async (res: Response) => {
+  let data: ErrorResponse = {}
+if (res.status === 401) {
+  localStorage.removeItem('accessToken')
+  window.location.href = '/login'
+}
+  try {
+    data = await res.json()
+  // eslint-disable-next-line no-empty
+  } catch {}
+
+const message = Array.isArray(data.message)
+  ? data.message.join(', ')
+  : data.message || getErrorMessage(res.status)
+
+throw new ApiError(res.status, message)
+}
 
 const getErrorMessage = (status: number) => {
   switch (status) {
@@ -49,12 +81,7 @@ const http = {
 
     //  UPDATED ERROR HANDLING
     if (!res.ok) {
-      console.log('❌ API ERROR:', {
-        status: res.status,
-        data
-      })
-
-      throw new Error(data?.message || getErrorMessage(res.status))
+      await throwApiError(res)
     }
 
     return data as TResponse
@@ -72,20 +99,49 @@ const http = {
       }
     })
 
-    const data = await res.json()
 
     //  UPDATED ERROR HANDLING
     if (!res.ok) {
-      console.log('❌ API ERROR:', {
-        status: res.status,
-        data
-      })
-
-      throw new Error(data?.message || getErrorMessage(res.status))
+      await throwApiError(res)
     }
+    const data = await res.json()
+    return data as TResponse
+  },
 
+  put: async<TResponse, TBody = unknown>(url:string, body?:TBody):Promise<TResponse> => {
+    const res= await fetch(`${API}${url}`,{
+      method:'PUT',
+      headers: {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('accessToken')
+        ? `Bearer ${localStorage.getItem('accessToken')}`
+        : ''
+      },
+      body: body? JSON.stringify(body) : undefined
+    })
+    const data = await res.json()
+    if(!res.ok){
+      await throwApiError(res)
+    }
+    return data as TResponse
+  },
+
+  delete: async<TResponse>(url:string):Promise<TResponse> => {
+    const res= await fetch(`${API}${url}`,{
+      method: 'DELETE',
+      headers:{
+        'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('accessToken')
+        ? `Bearer ${localStorage.getItem('accessToken')}`
+        : ''
+      }
+    })
+    const data = await res.json()
+    if(!res.ok){
+      await throwApiError(res)}
     return data as TResponse
   }
+
 }
 
 export default http

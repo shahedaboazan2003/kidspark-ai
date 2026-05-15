@@ -3,14 +3,13 @@ import { Link } from "react-router-dom";
 import { Conversation } from "@/lib/chat";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
-
+import { format } from "date-fns";
 interface ChatSidebarProps {
   conversations: Conversation[];
-  activeId: string | null;
-  onSelect: (id: string) => void;
+  activeId: number | null;
+  onSelect: (id: number) => void;
   onNew: () => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   loading?: boolean;
   open: boolean;
   onClose: () => void;
@@ -55,11 +54,16 @@ const ChatSidebar = ({
           </Link>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-button">
-              <Sparkles className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+              <Sparkles
+                className="w-5 h-5 text-primary-foreground"
+                strokeWidth={2.5}
+              />
             </div>
             <div>
               <h2 className="font-bold text-base leading-tight">Sparky</h2>
-              <p className="text-[11px] text-muted-foreground">Your learning buddy</p>
+              <p className="text-[11px] text-muted-foreground">
+                Your learning buddy
+              </p>
             </div>
           </div>
           <Button
@@ -81,7 +85,10 @@ const ChatSidebar = ({
           {loading ? (
             <div className="space-y-2 p-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />
+                <div
+                  key={i}
+                  className="h-12 rounded-xl bg-muted animate-pulse"
+                />
               ))}
             </div>
           ) : conversations.length === 0 ? (
@@ -121,11 +128,13 @@ const ChatSidebar = ({
                       {c.title}
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(c.updated_at), { addSuffix: true })}
+                      {c.lastActivity &&
+                      !isNaN(new Date(c.lastActivity).getTime())
+                        ? format(new Date(c.lastActivity), "PPP · p")
+                        : "No activity"}
                     </p>
                   </div>
-                  <button
-                    type="button"
+                  <div
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(c.id);
@@ -134,7 +143,7 @@ const ChatSidebar = ({
                     aria-label="Delete chat"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  </div>
                 </button>
               );
             })

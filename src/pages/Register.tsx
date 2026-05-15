@@ -9,6 +9,7 @@ import PlayfulBackground from "@/components/PlayfulBackground";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { register } from "@/lib/auth";
+import { ApiError } from "@/lib/http";
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -88,15 +89,6 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // ✅ أضف هذا
-      console.log("REGISTER DATA:", {
-        email: form.email,
-        password: form.password,
-        confirmPassword: form.repeatPassword,
-        username: form.username,
-        firstName: form.firstName,
-        lastName: form.lastName,
-      });
 
       const res = await register({
         username: form.username.trim(),
@@ -131,6 +123,11 @@ const Register = () => {
 
       toast.error(msg);
       setShakeKey((k) => k + 1);
+      if (err instanceof ApiError) {
+                toast.error(err.message)
+              } else {
+                toast.error("Unexpected error 💥")
+              }
     }
   };
 

@@ -16,7 +16,7 @@ import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createChild, updateChild } from "@/lib/children";
+import { createChild, getChildById, updateChild } from "@/lib/children";
 import {
   Dialog,
   DialogContent,
@@ -30,11 +30,12 @@ import AppNavbar from "@/components/AppNavbar";
 import { toast } from "sonner";
 import { Child } from "@/lib/children";
 import { useAuth } from "@/contexts/AuthContext";
+import { ApiError } from "@/lib/http";
 
 interface Errors {
   firstName?: string;
   lastName?: string;
-  age?: string;
+  birthDate?: string;
   username?: string;
   password?: string;
   repeatPassword?: string;
@@ -60,10 +61,6 @@ const generatePassword = (length = 10): string => {
   return [...required, ...rest].sort(() => Math.random() - 0.5).join("");
 };
 
-const ageToBirthdate = (age: number): string => {
-  const year = new Date().getFullYear() - age;
-  return `${year}-01-01`;
-};
 
 const AddChild = () => {
   const location = useLocation();
@@ -75,7 +72,8 @@ const AddChild = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [age, setAge] = useState("");
+  // const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -85,7 +83,7 @@ const AddChild = () => {
   const [touched, setTouched] = useState<Record<keyof Errors, boolean>>({
     firstName: false,
     lastName: false,
-    age: false,
+    birthDate: false,
     username: false,
     password: false,
     repeatPassword: false,
@@ -103,10 +101,32 @@ const AddChild = () => {
 
     if (!lastName.trim()) e.lastName = "Last name required";
 
-    const ageNum = Number(age);
-    if (!age) e.age = "Age required";
-    else if (ageNum < 2 || ageNum > 17) e.age = "Age must be 2-17";
 
+  if (!birthDate) {
+  e.birthDate = "Birth date required";
+} else {
+  const today = new Date();
+  const birth = new Date(birthDate);
+
+  let age =
+    today.getFullYear() - birth.getFullYear();
+
+  const monthDiff =
+    today.getMonth() - birth.getMonth();
+
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 &&
+      today.getDate() < birth.getDate())
+  ) {
+    age--;
+  }
+
+  if (age < 2 || age > 17) {
+    e.birthDate =
+      "Age must be between 2 and 17";
+  }
+}
     if (!username.trim()) e.username = "Username required";
 
     if (!isEditMode) {
@@ -130,13 +150,10 @@ const AddChild = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("TOKEN BEFORE CREATE:", accessToken);
     setSubmitted(true);
 
     const v = validate();
     setErrors(v);
-
-    console.log("VALIDATION:", v);
 
     if (Object.keys(v).length > 0) return;
 
@@ -144,41 +161,45 @@ const AddChild = () => {
     setSubmitError("");
 
     try {
-      const birthdate = ageToBirthdate(Number(age));
-
       if (isEditMode && editingChild) {
-        await updateChild({
-          id: editingChild.id,
-          firstName,
-          lastName,
-          username,
-          birthdate,
-          password: password ? password : undefined,
-        });
-
+        const payload = {
+        id: editingChild.id,
+        firstName,
+        lastName,
+        username,
+        birthDate,
+      };
+        await updateChild(payload);
+       console.log(">>>>>>>>>>>>>>>>",birthDate)
         toast.success("Updated");
         navigate("/dashboard");
       } else {
         console.log("STEP 3 CALLING CREATE CHILD");
         console.log("CALLING API WITH TOKEN:", accessToken);
         await createChild({
-          firstName,
-          lastName,
-          username,
-          password,
-          birthdate,
+           firstName,
+            lastName,
+            username,
+            password,
+            birthDate,
         });
 
-        // console.log("API RESPONSE:", res);
 
         toast.success("Child created successfully");
         navigate("/dashboard");
       }
     } catch (err) {
-      const error = err as Error;
-      console.log("ERROR:", err);
-      setSubmitError(error.message || "Error occurred");
-      toast.error(error.message);
+      const error = err as ApiError;
+
+      if (error.status === 409) {
+        setSubmitError("Username already exists");
+      } else if (error.status === 401) {
+        setSubmitError("Please login again");
+      } else if (error.status === 404) {
+        setSubmitError("Child not found");
+      } else {
+        setSubmitError(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -188,21 +209,21 @@ const AddChild = () => {
     setSuccessOpen(false);
     navigate("/dashboard");
   };
+
   useEffect(() => {
     if (!editingChild) return;
 
     setFirstName(editingChild.firstName || "");
     setLastName(editingChild.lastName || "");
-
-    const ageNum =
-      new Date().getFullYear() - new Date(editingChild.birthdate).getFullYear();
-
-    setAge(String(ageNum));
+  
 
     setUsername(editingChild.username || "");
-
+    setBirthDate(
+      editingChild.birthDate.split("T")[0]
+    );
     setPassword("");
     setRepeatPassword("");
+
   }, [editingChild]);
   useEffect(() => {
     if (editId && !editingChild) {
@@ -212,15 +233,27 @@ const AddChild = () => {
           const child = res.data;
           setFirstName(child.firstName || "");
           setLastName(child.lastName || "");
-          const ageNum =
-            new Date().getFullYear() - new Date(child.birthdate).getFullYear();
-          setAge(String(ageNum));
+          
+          // setBirthDate(
+          //   editingChild.birthDate.split("T")[0]
+          // );
+            setBirthDate(child.birthDate.split("T")[0]);
           setUsername(child.username || "");
         })
         .catch(() => navigate("/dashboard"))
         .finally(() => setLoading(false));
     }
   }, [editId, editingChild, navigate]);
+  useEffect(() => {
+    if (isEditMode) return;
+
+    setFirstName("");
+    setLastName("");
+    setBirthDate("");
+    setUsername("");
+    setPassword("");
+    setRepeatPassword("");
+  }, [isEditMode, editId]);
   return (
     <div className="min-h-screen relative">
       <PlayfulBackground />
@@ -258,14 +291,15 @@ const AddChild = () => {
           </div>
 
           <div>
-            <Label>Age</Label>
+            <Label>Birth Date</Label>
             <Input
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              onBlur={() => markTouched("age")}
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              onBlur={() => markTouched("birthDate")}
             />
-            {touched.age && errors.age && (
-              <p className="text-red-500 text-sm">{errors.age}</p>
+            {touched.birthDate && errors.birthDate && (
+              <p className="text-red-500 text-sm">{errors.birthDate}</p>
             )}
           </div>
 
@@ -342,7 +376,7 @@ const AddChild = () => {
               loading ||
               !firstName.trim() ||
               !lastName.trim() ||
-              !age ||
+              !birthDate ||
               !username.trim() ||
               (!isEditMode && (!password || !repeatPassword))
             }

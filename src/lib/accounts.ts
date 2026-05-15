@@ -1,4 +1,4 @@
-import http from "./http";
+import http, { ApiResponse } from "./http";
 
 export interface AccountRow {
   id: string;
@@ -10,6 +10,20 @@ export interface AccountRow {
   lastLogin?: string | null;
 }
 
+// export const listAccounts = async (): Promise<AccountRow[]> => {
+//   const res = await http.get<ApiResponse<AccountRow[]>>(
+//     "/children/accounts"
+//   )
+//   return res.data.data;
+// };
+type AccountsResponse = {
+  data: AccountRow[];
+};
+
 export const listAccounts = async (): Promise<AccountRow[]> => {
-  return http.get("/accounts");
+  const res = await http.get<ApiResponse<AccountsResponse>>(
+    "/children/accounts"
+  );
+
+  return res.data.data;
 };

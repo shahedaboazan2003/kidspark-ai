@@ -1,51 +1,85 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ArrowLeft, BookOpen, Eye, Trash2, Loader2, AlertCircle, Search } from "lucide-react";
 import AppNavbar from "@/components/AppNavbar";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Conversation, listConversations, deleteConversation } from "@/lib/chat";
+import { Conversation, listConversations, deleteConversation, histoyPage } from "@/lib/chat";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { getChildren } from "@/lib/children";
 
 const History = () => {
   const navigate = useNavigate();
   const [convos, setConvos] = useState<Conversation[]>([]);
-  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const [state, setState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [search, setSearch] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const {user}= useAuth()
+  const [children, setChildren] = useState([])
+  const [selectedChild, setSelectedChild] = useState<number | null>(null)
+  const {id} = useParams()
   useEffect(() => {
-    let cancelled = false;
-    listConversations()
-      .then((list) => {
-        if (cancelled) return;
-        setConvos(list);
-        setState("ready");
-      })
-      .catch(() => !cancelled && setState("error"));
-    return () => {
-      cancelled = true;
+    if (!user?.id) return;
+
+    const load = async () => {
+      try {
+        const childrenList = await getChildren();
+        setChildren(childrenList.data || []);
+        console.log("CHILDREN:", childrenList.data);
+        if (childrenList.data?.length > 0) {
+          setSelectedChild(childrenList[0].id);
+        }
+      } catch (e) {
+        console.log(e);
+      }
     };
-  }, []);
+
+    load();
+  }, [user]);
+
+useEffect(() => {
+  if (!selectedChild) return;
+
+  const loadHistory = async () => {
+    try {
+      setState("loading");
+
+      const list = await histoyPage(selectedChild);
+      console.log("HISTORY:", list);
+      setConvos(Object.values(list));
+      setState("ready");
+    } catch {
+      setState("error");
+    }
+  };
+
+  loadHistory();
+}, [selectedChild]);
 
   const filtered = convos.filter((c) =>
     c.title.toLowerCase().includes(search.trim().toLowerCase()),
   );
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
+    console.log("DELETE ID:", id);
     setDeletingId(id);
     try {
-      await deleteConversation(id);
+      const res = await deleteConversation(id);
+      console.log("DELETE RESPONSE:", res);
       setConvos((prev) => prev.filter((c) => c.id !== id));
       toast.success("Conversation removed");
-    } catch {
+    } catch(err) {
+          console.log("DELETE ERROR:", err);
       toast.error("Couldn't delete — please try again 💫");
     } finally {
       setDeletingId(null);
     }
   };
+
+
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -54,6 +88,17 @@ const History = () => {
 
       <div className="relative z-10">
         <AppNavbar />
+
+        <select
+          value={selectedChild ?? ""}
+          onChange={(e) => setSelectedChild(Number(e.target.value))}
+        >
+          {children.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.firstName}
+            </option>
+          ))}
+        </select>
 
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <Link
@@ -84,7 +129,17 @@ const History = () => {
               />
             </div>
           </div>
+          {state === "idle" && (
+            <div className="bg-card rounded-3xl p-12 text-center border border-border/50 shadow-soft">
+              <h3 className="text-xl font-bold mb-2">
+                Select a child 👶
+              </h3>
 
+              <p className="text-muted-foreground text-sm">
+                Choose a child to view conversation history.
+              </p>
+            </div>
+          )}
           {state === "loading" && (
             <div className="bg-card rounded-2xl border border-border/50 p-12 text-center">
               <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
@@ -104,7 +159,7 @@ const History = () => {
             </div>
           )}
 
-          {state === "ready" && filtered.length === 0 && (
+          {state === "ready" && selectedChild && convos.length === 0 && (
             <div className="bg-card rounded-3xl p-12 text-center border border-border/50 shadow-soft animate-scale-fade-in">
               <div className="w-20 h-20 rounded-3xl bg-gradient-primary flex items-center justify-center shadow-button mx-auto mb-4">
                 <BookOpen className="w-10 h-10 text-primary-foreground" />
@@ -140,14 +195,14 @@ const History = () => {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-foreground truncate">{c.title}</h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {format(new Date(c.updated_at), "PPP · p")}
+                        {c.lastActivity ? format(new Date(c.lastActivity), "PPP · p") : "No date"}
                       </p>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/conversation/${c.id}`)}
+                        onClick={() => navigate(`/chat/${c.id}`)}
                       >
                         <Eye className="w-4 h-4" />
                         <span className="hidden sm:inline">View</span>
@@ -172,6 +227,22 @@ const History = () => {
               ))}
             </div>
           )}
+
+          {state === "ready" &&
+          convos.length > 0 &&
+          filtered.length === 0 && (
+            <div className="bg-card rounded-3xl p-12 text-center border border-border/50 shadow-soft">
+
+              <h3 className="text-xl font-bold mb-1">
+                No matches found
+              </h3>
+
+              <p className="text-muted-foreground text-sm">
+                Try a different search term.
+              </p>
+
+            </div>
+        )}
         </main>
       </div>
     </div>

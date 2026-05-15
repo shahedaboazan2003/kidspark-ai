@@ -10,6 +10,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { login as apiLogin } from "@/lib/auth";
+import { ApiError } from "@/lib/http";
+import { toast } from "sonner";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -54,12 +56,17 @@ const Login = () => {
 
       
       localStorage.setItem("userType", user.type);
-      login(token, user.type, user.username);
+      localStorage.setItem("USER_KEY", JSON.stringify(user));
+      login(token, user.type, user.username, user, user.firstName);
 
       navigate(user.type === "parent" ? "/dashboard" : "/chat");
-    } catch (e: unknown) {
-      const err = e as { message?: string };
-      setError(err.message || "Login failed");
+    } catch (err) {
+     
+      if (err instanceof ApiError) {
+          toast.error(err.message)
+        } else {
+          toast.error("Unexpected error 💥")
+        }
     } finally {
       setLoading(false);
     }

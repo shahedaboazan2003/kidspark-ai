@@ -93,21 +93,21 @@ const App = () => (
 
               {/* Chat — accessible to BOTH parent and child */}
               <Route
-                path="/chat"
+                path="/chat/:id?"
                 element={
                   <ProtectedRoute allow={["parent", "child"]}>
                     <Chat />
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/conversation/:id"
+              {/* <Route
+                path="/conversation/:id?"
                 element={
                   <ProtectedRoute allow={["parent", "child"]}>
                     <Chat />
                   </ProtectedRoute>
                 }
-              />
+              /> */}
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

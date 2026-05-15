@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface ChatInputProps {
-  onSend: (text: string) => void;
+  // onSend: (text: string) => void;
+  onSend: (text: string, files: File[]) => void;
   disabled?: boolean;
   isStreaming?: boolean;
   onStop?: () => void;
@@ -14,6 +15,9 @@ interface ChatInputProps {
 const ChatInput = ({ onSend, disabled, isStreaming, onStop }: ChatInputProps) => {
   const [text, setText] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
+const [files, setFiles] = useState<File[]>([]);
+const imageInputRef = useRef<HTMLInputElement>(null);
+const audioInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -25,9 +29,10 @@ const ChatInput = ({ onSend, disabled, isStreaming, onStop }: ChatInputProps) =>
 
   const handleSend = () => {
     const t = text.trim();
-    if (!t || disabled) return;
-    onSend(t);
+    if ((!t && files.length === 0) || disabled) return;
+    onSend(t, files);
     setText("");
+    setFiles([]);
   };
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -51,14 +56,38 @@ const ChatInput = ({ onSend, disabled, isStreaming, onStop }: ChatInputProps) =>
             "focus-within:border-primary focus-within:shadow-glow",
           )}
         >
+            {/* IMAGE INPUT */}
+  <input
+    ref={imageInputRef}
+    type="file"
+    accept="image/*"
+    hidden
+    onChange={(e) => {
+      const selected = Array.from(e.target.files || []);
+      setFiles((prev) => [...prev, ...selected]);
+    }}
+  />
+
+  {/* AUDIO INPUT */}
+  <input
+    ref={audioInputRef}
+    type="file"
+    accept="audio/*"
+    hidden
+    onChange={(e) => {
+      const selected = Array.from(e.target.files || []);
+      setFiles((prev) => [...prev, ...selected]);
+    }}
+  />
           <button
             type="button"
-            onClick={() => stub("Image upload")}
+            onClick={() => imageInputRef.current?.click()}
             className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-110 transition-all shrink-0"
             aria-label="Upload image"
           >
             <Camera className="w-5 h-5" />
           </button>
+
 
           <textarea
             ref={taRef}
@@ -73,7 +102,7 @@ const ChatInput = ({ onSend, disabled, isStreaming, onStop }: ChatInputProps) =>
 
           <button
             type="button"
-            onClick={() => stub("Voice messages")}
+            onClick={() => audioInputRef.current?.click()}
             className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-110 transition-all shrink-0"
             aria-label="Record voice"
           >
@@ -97,7 +126,7 @@ const ChatInput = ({ onSend, disabled, isStreaming, onStop }: ChatInputProps) =>
               size="icon"
               variant="hero"
               onClick={handleSend}
-              disabled={!text.trim() || disabled}
+              disabled={(!text.trim() && files.length === 0) || disabled}
               className="rounded-2xl h-11 w-11 shrink-0"
               aria-label="Send"
             >
