@@ -91,6 +91,12 @@ export interface Child {
   firstName?: string;
   lastName?: string;
   createdAt?: string;
+
+  readingLevel?: string;
+  responseLength?: string;
+  learningStyle?: string;
+  interests?: string[];
+
 }
 
 export const AVATAR_PRESETS = [
@@ -137,6 +143,11 @@ export const createChild = (data: {
   username: string;
   password: string;
   birthDate: string;
+
+  readingLevel?: string;
+  responseLength?: string;
+  learningStyle?: string;
+  interests?: string[];
 }) => {
   return http.post<ApiResponse<Child>>("/children", data);
 };
@@ -149,6 +160,10 @@ export const updateChild = (data: {
   username: string;
   birthDate: string;
   password?: string;
+  readingLevel?: string;
+  responseLength?: string;
+  learningStyle?: string;
+  interests?: string[];
 }) => {
   return http.put<ApiResponse<Child>>(`/children/${data.id}`, data);
 };

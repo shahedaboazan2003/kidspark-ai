@@ -141,12 +141,21 @@ export async function streamChat({
   onDone,
   onError,
   onAudio,
-  onImage
+  onImage,
+  readingLevel,
+  responseLength,
+  learningStyle,
+  interests
+
 }: {
   question: string;
   childId: number;
   conversationId?: number;
   age: number;
+  readingLevel?: string;
+  responseLength?: string;
+  learningStyle?: string;
+  interests?: string[];
   files?: File[];
   onDelta: (chunk: string) => void;
   onDone: (data?: {
@@ -164,7 +173,14 @@ export async function streamChat({
   formData.append("question", question);
   formData.append("childId", String(childId));
   formData.append("age", String(age));
-
+  formData.append("readingLevel", readingLevel || "");
+  formData.append("responseLength", responseLength || "");
+  formData.append("learningStyle", learningStyle || "");
+  if (interests && interests.length > 0) {
+  interests.forEach((interest) => {
+    formData.append("interests", interest);
+  });
+}
   if (conversationId) {
     formData.append(
       "conversationId",

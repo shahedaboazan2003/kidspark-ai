@@ -14,6 +14,7 @@ import {
   Cloud,
   Star,
   Globe2,
+  User,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -30,6 +31,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { User  } from "lucide-react"
 
 interface NavItem {
   to: string;
@@ -44,6 +46,7 @@ const PARENT_LINKS: NavItem[] = [
   { to: "/history", label: "History", emoji: "📚", icon: BookOpen },
   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
+  { to: "/profile", label: "Profile", emoji: "👤", icon: User }
 ];
 
 const CHILD_LINKS: NavItem[] = [

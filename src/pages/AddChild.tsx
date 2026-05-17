@@ -1,16 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Eye,
   EyeOff,
-  Loader2,
-  Sparkles,
-  Wand2,
-  Check,
-  PartyPopper,
-  Pencil,
-  X,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -94,6 +87,11 @@ const AddChild = () => {
   const [submitError, setSubmitError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  const [readingLevel, setReadingLevel] = useState("");
+  const [responseLength, setResponseLength] = useState("");
+  const [learningStyle, setLearningStyle] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
+
   const validate = (): Errors => {
     const e: Errors = {};
 
@@ -168,8 +166,48 @@ const AddChild = () => {
         lastName,
         username,
         birthDate,
+        readingLevel,
+        responseLength,
+        learningStyle,
+        interests
       };
         await updateChild(payload);
+        localStorage.setItem("readingLevel", readingLevel);
+
+        localStorage.setItem(
+          "responseLength",
+          responseLength
+        );
+
+        localStorage.setItem(
+          "learningStyle",
+          learningStyle
+        );
+
+        localStorage.setItem(
+          "interests",
+          JSON.stringify(interests)
+        );
+        const storedUser = localStorage.getItem("USER_KEY");
+
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+
+          if (parsedUser.id === editingChild.id) {
+            const updatedUser = {
+              ...parsedUser,
+              readingLevel,
+              responseLength,
+              learningStyle,
+              interests,
+            };
+
+            localStorage.setItem(
+              "USER_KEY",
+              JSON.stringify(updatedUser)
+            );
+          }
+        }
        console.log(">>>>>>>>>>>>>>>>",birthDate)
         toast.success("Updated");
         navigate("/dashboard");
@@ -182,6 +220,11 @@ const AddChild = () => {
             username,
             password,
             birthDate,
+
+            readingLevel,
+            responseLength,
+            learningStyle,
+            interests,
         });
 
 
@@ -223,6 +266,11 @@ const AddChild = () => {
     );
     setPassword("");
     setRepeatPassword("");
+
+    setReadingLevel(editingChild.readingLevel || "");
+    setResponseLength(editingChild.responseLength || "");
+    setLearningStyle(editingChild.learningStyle || "");
+    setInterests(editingChild.interests || []);
 
   }, [editingChild]);
   useEffect(() => {
@@ -368,7 +416,64 @@ const AddChild = () => {
               </div>
             </>
           )}
+          <div>
+            <Label>Reading Level</Label>
 
+            <select
+              value={readingLevel}
+              onChange={(e) => setReadingLevel(e.target.value)}
+            >
+              <option value="">Select</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+      </div>
+
+      <div>
+        <Label>Response Length</Label>
+
+        <select
+          value={responseLength}
+          onChange={(e) => setResponseLength(e.target.value)}
+        >
+          <option value="">Select</option>
+          <option value="short">Short</option>
+          <option value="medium">Medium</option>
+          <option value="detailed">Detailed</option>
+        </select>
+      </div>
+
+      <div>
+        <Label>Learning Style</Label>
+
+        <select
+          value={learningStyle}
+          onChange={(e) => setLearningStyle(e.target.value)}
+        >
+          <option value="">Select</option>
+          <option value="story">Story</option>
+          <option value="logical">Logical</option>
+          <option value="playful">Playful</option>
+          <option value="visual">Visual</option>
+        </select>
+      </div>
+
+      <div>
+        <Label>Interests</Label>
+
+        <Input
+          placeholder="cats,cars,space"
+          onChange={(e) =>
+            setInterests(
+              e.target.value
+                .split(",")
+                .map((i) => i.trim())
+                .filter(Boolean)
+            )
+          }
+        />
+      </div>
           {submitError && <p className="text-red-500">{submitError}</p>}
 
           <Button
@@ -401,6 +506,7 @@ const AddChild = () => {
             <DialogTitle>Success 🎉</DialogTitle>
             <DialogDescription>Child created successfully</DialogDescription>
           </DialogHeader>
+
           <Button onClick={handleSuccessClose}>OK</Button>
         </DialogContent>
       </Dialog>

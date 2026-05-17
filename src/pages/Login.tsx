@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { login as apiLogin } from "@/lib/auth";
 import { ApiError } from "@/lib/http";
 import { toast } from "sonner";
+import User from "@/models/User";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -41,6 +42,8 @@ const Login = () => {
       setError("Please select Parent or Child");
       return;
     }
+
+    
     try {
       const res = await apiLogin({
         username: username.trim(),
@@ -57,6 +60,34 @@ const Login = () => {
       
       localStorage.setItem("userType", user.type);
       localStorage.setItem("USER_KEY", JSON.stringify(user));
+
+      if (user.readingLevel) {
+    localStorage.setItem(
+      "readingLevel",
+      user.readingLevel
+    );
+  }
+
+  if (user.responseLength) {
+    localStorage.setItem(
+      "responseLength",
+      user.responseLength
+    );
+  }
+
+  if (user.learningStyle) {
+    localStorage.setItem(
+      "learningStyle",
+      user.learningStyle
+    );
+  }
+
+  if (user.interests) {
+    localStorage.setItem(
+      "interests",
+      JSON.stringify(user.interests)
+    );
+  }
       login(token, user.type, user.username, user, user.firstName);
 
       navigate(user.type === "parent" ? "/dashboard" : "/chat");

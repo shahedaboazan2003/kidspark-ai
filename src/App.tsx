@@ -17,6 +17,7 @@ import AddChild from "./pages/AddChild.tsx";
 import Chat from "./pages/Chat.tsx";
 import Accounts from "./pages/Accounts.tsx";
 import History from "./pages/History.tsx";
+import Profile from "./pages/profile.tsx";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,15 @@ const App = () => (
                 element={
                   <ProtectedRoute allow={["parent", "child"]}>
                     <Chat />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/profile/:id?"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />

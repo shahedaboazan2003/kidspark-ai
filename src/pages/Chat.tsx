@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Menu, Sparkles, Bot, ActivitySquare } from "lucide-react";
+import {  useParams } from "react-router-dom";
+import { Menu, Sparkles, Bot } from "lucide-react";
 import { toast } from "sonner";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import ChatSidebar from "@/components/chat/ChatSidebar";
@@ -11,11 +11,9 @@ import ChatTopControls from "@/components/chat/ChatTopControls";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Conversation,
-  DbMessage,
   AskMessage,
   createConversation,
   deleteConversation as dbDeleteConversation,
-  // insertMessage,
   listConversations,
   listMessages,
   streamChat,
@@ -142,6 +140,7 @@ const Chat = () => {
   );
 
   const handleSend = async (text: string, files: File[] = []) => {
+    if (!user) return;
     let convoId = activeId;
     // Auto-create conversation if none active
     if (!convoId) {
@@ -179,6 +178,17 @@ const Chat = () => {
       childId: user!.id,
       conversationId: convoId!,
       age: 10,
+      readingLevel:
+        localStorage.getItem("readingLevel") || "",
+
+      responseLength:
+        localStorage.getItem("responseLength") || "",
+
+      learningStyle:
+        localStorage.getItem("learningStyle") || "",
+
+      interests:
+        JSON.parse(localStorage.getItem("interests") || "[]"),
       files,
       onDelta: (chunk) => {
         if (abortRef.current.aborted) return;
@@ -214,6 +224,8 @@ const Chat = () => {
           prev.map((m) => (m.id === assistantTmpId ? { ...m, imageUrl } : m)),
         );
       },
+
+      
     });
   };
 

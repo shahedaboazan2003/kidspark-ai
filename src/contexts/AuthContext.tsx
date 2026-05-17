@@ -17,6 +17,7 @@ interface AuthState {
   firstName: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  
 }
 
 interface AuthContextValue extends AuthState {
@@ -37,6 +38,11 @@ type AuthUser = {
   firstName?: string
   lastName?: string
   email?: string | null
+  
+  readingLevel?: string
+  responseLength?: string
+  learningStyle?: string
+  interests?: string[]
 }
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -44,6 +50,10 @@ const TOKEN_KEY = "accessToken";
 const USERTYPE_KEY = "userType";
 const USERNAME_KEY = "username";
 const FIRSTNAME_KEY = "firstName";
+const READING_LEVEL_KEY = "readingLevel";
+const RESPONSE_LENGTH_KEY = "responseLength";
+const LEARNING_STYLE_KEY = "learningStyle";
+const INTERESTS_KEY = "interests";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AuthState>({
@@ -65,6 +75,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const storedUser = localStorage.getItem(USER_KEY);
     const user = storedUser ? JSON.parse(storedUser) : null;
+
+    const readingLevel = localStorage.getItem(READING_LEVEL_KEY);
+    const responseLength = localStorage.getItem(RESPONSE_LENGTH_KEY);
+    const learningStyle = localStorage.getItem(LEARNING_STYLE_KEY);
+
+    const interests =
+      JSON.parse(localStorage.getItem(INTERESTS_KEY) || "[]");
+
     if (token && (userType === "parent" || userType === "child")) {
       setState({
         accessToken: token,
@@ -74,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isAuthenticated: true,
         isLoading: false,
+
       });
     } else {
       setState((s) => ({ ...s, isLoading: false }));
@@ -118,6 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       user: null,
       isAuthenticated: false,
       isLoading: false,
+
     });
   }, []);
 

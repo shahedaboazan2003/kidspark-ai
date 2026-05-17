@@ -7,6 +7,11 @@ interface User {
   type: UserType
   firstName: string
   lastName: string
+
+  readingLevel?: string;
+  responseLength?: string;
+  learningStyle?: string;
+  interests?: string[];
 }
 
 export default User
