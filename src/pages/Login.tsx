@@ -55,13 +55,15 @@ const Login = () => {
 
       const token = res.data.accessToken;
       const user = res.data.user;
+      console.log("USER DATA:", res.data.user);
       localStorage.setItem("accessToken", token);
 
       
       localStorage.setItem("userType", user.type);
       localStorage.setItem("USER_KEY", JSON.stringify(user));
 
-      if (user.readingLevel) {
+    if (user.readingLevel) {
+      console.log("reading level:" , user.readingLevel)
     localStorage.setItem(
       "readingLevel",
       user.readingLevel

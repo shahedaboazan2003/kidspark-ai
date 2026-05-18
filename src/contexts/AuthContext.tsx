@@ -64,6 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     firstName: null,
     isAuthenticated: false,
     isLoading: true,
+
+    
   });
 
   useEffect(() => {

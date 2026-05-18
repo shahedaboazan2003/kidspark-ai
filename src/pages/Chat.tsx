@@ -50,29 +50,53 @@ const Chat = () => {
   const { user } = useAuth();
 
   //get all conversations on load + when route param changes
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (!user) return;
+  //   (async () => {
+  //     try {
+  //       const list = await listConversations(user!.id);
+  //       setConversations(list);
+  //       // Prefer conversation from URL param, else first in list
+  //       if (routeConvoId && list.find((c) => c.id === Number(routeConvoId))) {
+  //         setActiveId(Number(routeConvoId));
+  //         console.log("activatedd id :" , activeId , "routtteid:" , routeConvoId)
+  //       } else if (list.length > 0) {
+  //         setActiveId(list[0].id);
+  //       }
+  //     } catch {
+  //       toast.error("Couldn't load chats", {
+  //         description: "Please refresh and try again 💫",
+  //       });
+  //     } finally {
+  //       setLoadingConvos(false);
+  //     }
+  //   })();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [routeConvoId, user]);
+
+    useEffect(() => {
     if (!user) return;
+
     (async () => {
       try {
-        const list = await listConversations(user!.id);
+        const list = await listConversations(user.id);
         setConversations(list);
-        // Prefer conversation from URL param, else first in list
-        if (routeConvoId && list.find((c) => c.id === Number(routeConvoId))) {
-          setActiveId(Number(routeConvoId));
-          console.log("activatedd id :" , activeId , "routtteid:" , routeConvoId)
-        } else if (list.length > 0) {
-          setActiveId(list[0].id);
-        }
       } catch {
-        toast.error("Couldn't load chats", {
-          description: "Please refresh and try again 💫",
-        });
+        toast.error("Couldn't load chats");
       } finally {
         setLoadingConvos(false);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeConvoId, user]);
+  }, [user]);
+
+
+  useEffect(() => {
+    if (routeConvoId ) {
+      setActiveId(Number(routeConvoId));
+    } else if (conversations.length > 0) {
+      setActiveId(conversations[0].id);
+    }
+  }, [routeConvoId, conversations]);
 
   // Load messages when active conversation changes
   // TODO: fix messages state here

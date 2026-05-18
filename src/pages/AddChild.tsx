@@ -188,6 +188,7 @@ const AddChild = () => {
           "interests",
           JSON.stringify(interests)
         );
+        console.log("Updated child with ID:", interests);
         const storedUser = localStorage.getItem("USER_KEY");
 
         if (storedUser) {
@@ -464,6 +465,7 @@ const AddChild = () => {
 
         <Input
           placeholder="cats,cars,space"
+          value={interests.join(", ")}
           onChange={(e) =>
             setInterests(
               e.target.value

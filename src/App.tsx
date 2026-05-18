@@ -103,7 +103,7 @@ const App = () => (
               />
 
               <Route
-                path="/profile/:id?"
+                path="/profile"
                 element={
                   <ProtectedRoute allow={["parent"]}>
                     <Profile />

@@ -160,6 +160,7 @@ export const updateChild = (data: {
   username: string;
   birthDate: string;
   password?: string;
+  
   readingLevel?: string;
   responseLength?: string;
   learningStyle?: string;

@@ -14,7 +14,6 @@ import {
   Cloud,
   Star,
   Globe2,
-  User,
 } from "lucide-react";
 import {
   DropdownMenu,
