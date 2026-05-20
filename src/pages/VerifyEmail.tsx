@@ -46,11 +46,12 @@ const VerifyEmail = () => {
         otp: code.trim(),
       });
 
-      login(
-        res.data.accessToken,
-        res.data.user.type,
-        res.data.user.username,
-      );
+      // login(
+      //   res.data.accessToken,
+      //   res.data.user.type,
+      //   res.data.user.username,
+      // );
+      navigate("/login");
       toast.success("Email verified! 🎉", {
         description: "Welcome to Little Minds — let's get you set up.",
       });
@@ -123,7 +124,7 @@ const VerifyEmail = () => {
             variant="hero"
             size="lg"
             className="w-full mt-6"
-            onClick={() => handleVerify(otp)}
+            // onClick={() => handleVerify(otp)}
             disabled={otp.length !== 6 || loading}
           >
             {loading ? (

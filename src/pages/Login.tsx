@@ -90,6 +90,12 @@ const Login = () => {
       JSON.stringify(user.interests)
     );
   }
+  if (user.blockedTopics) {
+    localStorage.setItem(
+      "blockedTopics",
+      JSON.stringify(user.blockedTopics)
+    );
+  }
       login(token, user.type, user.username, user, user.firstName);
 
       navigate(user.type === "parent" ? "/dashboard" : "/chat");

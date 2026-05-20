@@ -96,7 +96,7 @@ export interface Child {
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
-
+  blockedTopics?: string[];
 }
 
 export const AVATAR_PRESETS = [
@@ -148,6 +148,7 @@ export const createChild = (data: {
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
+  blockedTopics?: string[];
 }) => {
   return http.post<ApiResponse<Child>>("/children", data);
 };
@@ -165,6 +166,7 @@ export const updateChild = (data: {
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
+  blockedTopics?: string[];
 }) => {
   return http.put<ApiResponse<Child>>(`/children/${data.id}`, data);
 };

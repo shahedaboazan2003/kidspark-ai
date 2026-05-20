@@ -12,6 +12,7 @@ interface User {
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
+  blockedTopics?: string[];
 }
 
 export default User
