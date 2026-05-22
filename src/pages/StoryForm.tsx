@@ -206,6 +206,7 @@ One day, he discovered a hidden treasure map...
 
             {/* STORY CONTENT */}
             <textarea
+            
               id="storyContent"
               value={generatedStory.content}
               onChange={handleStoryChange}
