@@ -9,6 +9,7 @@ import {
   UsersRound,
   AlertCircle,
   PlusCircle,
+  Star,
 } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";
@@ -43,7 +44,7 @@ const Dashboard = () => {
 
   const [deleting, setDeleting] = useState<Child | null>(null);
 
-  // LOAD CHILDREN 
+  // LOAD CHILDREN
   useEffect(() => {
     const load = async () => {
       try {
@@ -213,6 +214,21 @@ const Dashboard = () => {
                 description="Manage users"
                 icon={UsersRound}
                 gradient="from-accent to-secondary"
+              />
+              <QuickActionCard
+                to="/story-generator"
+                label="Story Generator"
+                description="Create AI stories"
+                icon={Sparkles}
+                gradient="from-purple-500 to-pink-500"
+              />
+
+              <QuickActionCard
+                to="/my-stories"
+                label="My Stories"
+                description="Read stories"
+                icon={BookOpen}
+                gradient="from-blue-500 to-indigo-500"
               />
             </div>
           </section>

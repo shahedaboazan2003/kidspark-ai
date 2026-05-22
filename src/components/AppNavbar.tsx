@@ -51,12 +51,12 @@ const PARENT_LINKS: NavItem[] = [
   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
   { to: "/profile", label: "Profile", emoji: "👤", icon: User },
-  {
-    to: "/story-generator",
-    label: "Story Generator",
-    emoji: "✨",
-    icon: Sparkles,
-  },
+  // {
+  //   to: "/story-generator",
+  //   label: "Story Generator",
+  //   emoji: "✨",
+  //   icon: Sparkles,
+  // },
   { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
 ];
 

@@ -20,6 +20,7 @@ import History from "./pages/History.tsx";
 import Profile from "./pages/profile.tsx";
 import StoryForm from "./pages/StoryForm";
 import MyStories from "./pages/MyStories";
+
 const queryClient = new QueryClient();
 
 const App = () => (

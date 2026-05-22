@@ -3,10 +3,12 @@ import { useState } from "react";
 export default function StoryForm() {
   const [form, setForm] = useState({
     child: "",
+    behavior: "",
     length: "",
     type: "",
     withImage: false,
     withAudio: false,
+    
   });
 
   const [generatedStory, setGeneratedStory] = useState(null);
@@ -80,10 +82,12 @@ One day, he discovered a hidden treasure map...
 
     setForm({
       child: "",
+      behavior : "",
       length: "",
       type: "",
       withImage: false,
       withAudio: false,
+      
     });
   };
 
@@ -115,6 +119,20 @@ One day, he discovered a hidden treasure map...
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label htmlFor="behavior" className="block mb-2 font-semibold">
+              Educational Behavior
+            </label>
+
+            <textarea
+              id="behavior"
+              name="behavior"
+              value={form.behavior}
+              onChange={handleChange}
+              placeholder="Describe the educational behavior (e.g. honesty, sharing, kindness...)"
+              className="w-full min-h-[120px] border rounded-xl p-3"
+            />
           </div>
 
           {/* STORY LENGTH */}
@@ -206,7 +224,6 @@ One day, he discovered a hidden treasure map...
 
             {/* STORY CONTENT */}
             <textarea
-            
               id="storyContent"
               value={generatedStory.content}
               onChange={handleStoryChange}
