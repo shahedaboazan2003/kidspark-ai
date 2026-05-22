@@ -23,15 +23,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { NavLink } from "@/components/NavLink";
 import LogoutConfirmModal from "@/components/dashboard/LogoutConfirmModal";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { User  } from "lucide-react"
-
+import { User } from "lucide-react";
+import { BookPlus } from "lucide-react";
 interface NavItem {
   to: string;
   label: string;
@@ -45,11 +50,19 @@ const PARENT_LINKS: NavItem[] = [
   { to: "/history", label: "History", emoji: "📚", icon: BookOpen },
   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
-  { to: "/profile", label: "Profile", emoji: "👤", icon: User }
+  { to: "/profile", label: "Profile", emoji: "👤", icon: User },
+  {
+    to: "/story-generator",
+    label: "Story Generator",
+    emoji: "✨",
+    icon: Sparkles,
+  },
+  { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
 ];
 
 const CHILD_LINKS: NavItem[] = [
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
+  { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
 ];
 
 const AppNavbar = () => {
@@ -58,7 +71,12 @@ const AppNavbar = () => {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const links = userType === "parent" ? PARENT_LINKS : userType === "child" ? CHILD_LINKS : [];
+  const links =
+    userType === "parent"
+      ? PARENT_LINKS
+      : userType === "child"
+        ? CHILD_LINKS
+        : [];
   const home = userType === "parent" ? "/dashboard" : "/chat";
 
   const displayName = username
@@ -104,9 +122,15 @@ const AppNavbar = () => {
         <div className="px-3 sm:px-6 pt-3">
           <div className="max-w-7xl mx-auto bg-card/70 backdrop-blur-xl border border-border/50 rounded-2xl shadow-card">
             <div className="h-14 px-3 sm:px-5 flex items-center justify-between gap-3">
-              <Link to={home} className="flex items-center gap-2 group shrink-0">
+              <Link
+                to={home}
+                className="flex items-center gap-2 group shrink-0"
+              >
                 <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-button transition-transform group-hover:scale-110 group-hover:rotate-6">
-                  <Sparkles className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+                  <Sparkles
+                    className="w-5 h-5 text-primary-foreground"
+                    strokeWidth={2.5}
+                  />
                 </div>
                 <span className="font-bold text-base text-foreground hidden sm:inline">
                   Little Minds
@@ -131,7 +155,11 @@ const AppNavbar = () => {
               <div className="flex items-center gap-2 shrink-0">
                 <ThemeToggle className="hidden sm:flex" />
                 <span className="hidden lg:inline text-sm text-muted-foreground">
-                  Hi <span className="font-semibold text-foreground">{displayName}</span> 👋
+                  Hi{" "}
+                  <span className="font-semibold text-foreground">
+                    {displayName}
+                  </span>{" "}
+                  👋
                 </span>
 
                 <DropdownMenu>
@@ -149,7 +177,9 @@ const AppNavbar = () => {
                   >
                     <DropdownMenuLabel>
                       <div className="font-semibold">{displayName}</div>
-                      <div className="text-xs text-muted-foreground font-normal">{roleLabel}</div>
+                      <div className="text-xs text-muted-foreground font-normal">
+                        {roleLabel}
+                      </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -184,7 +214,10 @@ const AppNavbar = () => {
           <SheetHeader className="px-5 pt-5 pb-3 flex-row items-center justify-between space-y-0">
             <SheetTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-gradient-primary flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
+                <Sparkles
+                  className="w-4 h-4 text-primary-foreground"
+                  strokeWidth={2.5}
+                />
               </div>
               Little Minds
             </SheetTitle>
@@ -203,7 +236,9 @@ const AppNavbar = () => {
                 {initial}
               </div>
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">Hi {displayName} 👋</div>
+                <div className="font-semibold text-sm truncate">
+                  Hi {displayName} 👋
+                </div>
                 <div className="text-xs text-muted-foreground">{roleLabel}</div>
               </div>
             </div>
@@ -221,7 +256,9 @@ const AppNavbar = () => {
                 )}
                 activeClassName="!text-primary !bg-primary/10"
               >
-                <span className="text-lg leading-none w-6 text-center">{item.emoji}</span>
+                <span className="text-lg leading-none w-6 text-center">
+                  {item.emoji}
+                </span>
                 <span>{item.label}</span>
               </NavLink>
             ))}
@@ -229,7 +266,9 @@ const AppNavbar = () => {
 
           <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
             <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
-              <span className="text-sm font-semibold text-foreground">Theme</span>
+              <span className="text-sm font-semibold text-foreground">
+                Theme
+              </span>
               <ThemeToggle />
             </div>
             <button
