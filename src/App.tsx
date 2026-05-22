@@ -18,7 +18,8 @@ import Chat from "./pages/Chat.tsx";
 import Accounts from "./pages/Accounts.tsx";
 import History from "./pages/History.tsx";
 import Profile from "./pages/profile.tsx";
-
+import StoryForm from "./pages/StoryForm";
+import MyStories from "./pages/MyStories";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -110,6 +111,24 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/story-generator"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <StoryForm />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/my-stories"
+                element={
+                  <ProtectedRoute allow={["parent", "child"]}>
+                    <MyStories />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* <Route
                 path="/conversation/:id?"
                 element={
