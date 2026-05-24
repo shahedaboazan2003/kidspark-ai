@@ -1,9 +1,11 @@
 import { Plus, MessageCircle, Trash2, Sparkles, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Conversation } from "@/lib/chat";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { BookOpen } from "lucide-react";
+
 interface ChatSidebarProps {
   conversations: Conversation[];
   activeId: number | null;
@@ -25,6 +27,8 @@ const ChatSidebar = ({
   open,
   onClose,
 }: ChatSidebarProps) => {
+  const navigate = useNavigate()
+
   return (
     <>
       {/* Mobile overlay */}
@@ -44,7 +48,7 @@ const ChatSidebar = ({
         )}
       >
         {/* Header */}
-        <div className="p-4 border-b border-border/50">
+        <div className="p-4 border-b border-border/50 space-y-3">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors mb-3"
@@ -69,7 +73,7 @@ const ChatSidebar = ({
           <Button
             variant="hero"
             size="sm"
-            className="w-full rounded-2xl"
+            className="w-full rounded-2xl marginBottom:10px"
             onClick={() => {
               onNew();
               onClose();
@@ -77,6 +81,19 @@ const ChatSidebar = ({
           >
             <Plus className="w-4 h-4" />
             New Chat
+          </Button>
+
+          <Button
+            variant="hero"
+            size="sm"
+            className="w-full rounded-2xl"
+            onClick={() => {
+              navigate("/my-stories");
+              onClose();
+            }}
+          >
+            <BookOpen className="w-4 h-4" />
+            My Stories
           </Button>
         </div>
 
