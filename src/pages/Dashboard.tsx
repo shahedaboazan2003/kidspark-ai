@@ -10,6 +10,7 @@ import {
   AlertCircle,
   PlusCircle,
   Star,
+  Sparkles,
 } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";

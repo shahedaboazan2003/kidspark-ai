@@ -1,82 +1,77 @@
-
-import http, { ApiResponse } from './http'
-import User from '@/models/User'
+import http, { ApiResponse } from "./http";
+import User from "@/models/User";
 
 // REGISTER
 export const register = (data: {
-  email: string
-  password: string
-  confirmPassword: string
-  username: string
-  firstName: string
-  lastName: string
+  email: string;
+  password: string;
+  confirmPassword: string;
+  username: string;
+  firstName: string;
+  lastName: string;
 }) => {
-  return http.post<ApiResponse<{ user: User }>>('/auth/register', data)
-}
+  return http.post<ApiResponse<{ user: User }>>("/auth/register", data);
+};
 
 // LOGIN
 export const login = (data: {
-  username: string
-  password: string
+  username: string;
+  password: string;
   selectedRole?: string;
 }) => {
   return http.post<
     ApiResponse<{
-      accessToken: string
-      user: User
+      accessToken: string;
+      user: User;
     }>
-  >('/auth/login', data)
-}
+  >("/auth/login", data);
+};
 
 // VERIFY EMAIL
 export const verifyEmail = (data: { email: string; otp: string }) => {
   return http.post<
     ApiResponse<{
-      accessToken: string
-      user: {
-        type: "parent" | "child"
-        username: string
-      }
+      userId: number;
     }>
-  >('/auth/verify-email', data)
-}
+  >("/auth/verify-email", data);
+};
 
 // RESEND OTP
 export const resendOtp = (data: { email: string }) => {
   return http.post<
     ApiResponse<{
-      message: string
+      message: string;
     }>
-  >('/auth/resend-otp', data)
-}
+  >("/auth/resend-otp", data);
+};
 
 // FORGOT PASSWORD
 export const forgotPassword = (data: { email: string }) => {
   return http.post<
     ApiResponse<{
-      message: string
+      message: string;
     }>
-  >('/auth/forgot-password', data)
-}
+  >("/auth/forgot-password", data);
+};
 
 // RESET PASSWORD
 export const resetPassword = (data: {
-  email: string
-  otp: string
-  newPassword: string
+  email: string;
+  otp: string;
+  newPassword: string;
 }) => {
   return http.post<
     ApiResponse<{
-      message: string
+      message: string;
     }>
-  >('/auth/reset-password', data)
-}
+  >("/auth/reset-password", data);
+};
 
 // LOGOUT
 export const logout = () => {
   return http.post<
     ApiResponse<{
-      message: string
+      message: string;
     }>
-  >('/auth/logout')
-}
+  >("/auth/logout");
+};
