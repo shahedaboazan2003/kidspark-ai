@@ -62,6 +62,13 @@ const Login = () => {
       localStorage.setItem("userType", user.type);
       localStorage.setItem("USER_KEY", JSON.stringify(user));
 
+    if (user.gender) {
+    localStorage.setItem(
+      "gender",
+      user.gender
+    );
+  }
+
     if (user.readingLevel) {
       console.log("reading level:" , user.readingLevel)
     localStorage.setItem(

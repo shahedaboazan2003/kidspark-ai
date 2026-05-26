@@ -35,6 +35,7 @@ import { ApiError } from "@/lib/http";
 } from "@/components/ui/select"
 interface Errors {
   firstName?: string;
+  gender?:string;
   lastName?: string;
   birthDate?: string;
   username?: string;
@@ -73,6 +74,7 @@ const AddChild = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("")
   // const [age, setAge] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [username, setUsername] = useState("");
@@ -84,6 +86,7 @@ const AddChild = () => {
   const [touched, setTouched] = useState<Record<keyof Errors, boolean>>({
     firstName: false,
     lastName: false,
+    gender:false,
     birthDate: false,
     username: false,
     password: false,
@@ -173,6 +176,7 @@ const AddChild = () => {
         id: editingChild.id,
         firstName,
         lastName,
+        gender,
         username,
         birthDate,
         readingLevel,
@@ -183,7 +187,7 @@ const AddChild = () => {
       };
         await updateChild(payload);
         localStorage.setItem("readingLevel", readingLevel);
-
+        localStorage.setItem("gender", gender)
         localStorage.setItem(
           "responseLength",
           responseLength
@@ -211,6 +215,7 @@ const AddChild = () => {
           if (parsedUser.id === editingChild.id) {
             const updatedUser = {
               ...parsedUser,
+              gender,
               readingLevel,
               responseLength,
               learningStyle,
@@ -233,6 +238,7 @@ const AddChild = () => {
         await createChild({
            firstName,
             lastName,
+            gender,
             username,
             password,
             birthDate,
@@ -275,7 +281,7 @@ const AddChild = () => {
 
     setFirstName(editingChild.firstName || "");
     setLastName(editingChild.lastName || "");
-  
+    setGender(editingChild.gender || "")
 
     setUsername(editingChild.username || "");
     setBirthDate(
@@ -299,7 +305,7 @@ const AddChild = () => {
           const child = res.data;
           setFirstName(child.firstName || "");
           setLastName(child.lastName || "");
-          
+          setGender(child.gender || "")
           // setBirthDate(
           //   editingChild.birthDate.split("T")[0]
           // );
@@ -315,6 +321,7 @@ const AddChild = () => {
 
     setFirstName("");
     setLastName("");
+    setGender("")
     setBirthDate("");
     setUsername("");
     setPassword("");
@@ -355,6 +362,31 @@ const AddChild = () => {
               <p className="text-red-500 text-sm">{errors.lastName}</p>
             )}
           </div>
+
+        <div className="space-y-2">
+          <Label>Gender</Label>
+
+          <Select
+            value={gender}
+            onValueChange={setGender}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select child's gender" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="male">
+                  Male
+                </SelectItem>
+
+                <SelectItem value="female">
+                  Female
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
 
           <div>
             <Label>Birth Date</Label>
@@ -566,6 +598,7 @@ const AddChild = () => {
               loading ||
               !firstName.trim() ||
               !lastName.trim() ||
+              !gender.trim() ||
               !birthDate ||
               !username.trim() ||
               (!isEditMode && (!password || !repeatPassword))

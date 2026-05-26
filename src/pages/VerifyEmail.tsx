@@ -4,7 +4,6 @@ import { Mail, Loader2, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import OtpInput from "@/components/OtpInput";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { verifyEmail } from "@/lib/auth";
@@ -14,7 +13,6 @@ const RESEND_SECONDS = 30;
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
   const email =
     (location.state as { email?: string } | null)?.email ?? "your inbox";
 
@@ -46,12 +44,10 @@ const VerifyEmail = () => {
         otp: code.trim(),
       });
 
-      // login(
-      //   res.data.accessToken,
-      //   res.data.user.type,
-      //   res.data.user.username,
-      // );
-      navigate("/login");
+      if (res?.data?.userId) {
+        navigate("/login");
+      }
+
       toast.success("Email verified! 🎉", {
         description: "Welcome to Little Minds — let's get you set up.",
       });

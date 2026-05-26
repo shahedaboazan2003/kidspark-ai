@@ -90,6 +90,7 @@ export interface Child {
   password?: string;
   firstName?: string;
   lastName?: string;
+  gender?:string;
   createdAt?: string;
 
   readingLevel?: string;
@@ -140,6 +141,7 @@ export const getChildren = async (): Promise<Child[]> => {
 export const createChild = (data: {
   firstName: string;
   lastName: string;
+  gender:string
   username: string;
   password: string;
   birthDate: string;
@@ -158,6 +160,7 @@ export const updateChild = (data: {
   id: string;
   firstName: string;
   lastName: string;
+  gender: string;
   username: string;
   birthDate: string;
   password?: string;

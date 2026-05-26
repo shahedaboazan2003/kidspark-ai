@@ -83,3 +83,38 @@ export const getChildStories = async (childId:number) => {
   console.log("get children stories by father", res)
   return await res.json();
 };
+
+export const updateStoryWithAi = async (storyId:number, data) =>{
+    const token = localStorage.getItem("accessToken")
+    const url = `${import.meta.env.VITE_API_URL}/story/${storyId}/ai-edit`;
+    const res = await fetch(url , {
+        method:"POST",
+        headers:{
+            "Content-Type": "application/json",
+            Authorization:token? `Bearer ${token}` : ''
+        },
+        body:JSON.stringify(data)
+    })
+    return await res.json()
+}
+
+export const getStoryEditMessages =
+  async (storyId:number) => {
+
+  const token =
+    localStorage.getItem("accessToken");
+
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/story/${storyId}/edit-messages`,
+    {
+      headers: {
+        Authorization:
+          token
+            ? `Bearer ${token}`
+            : "",
+      },
+    }
+  );
+
+  return await res.json();
+};

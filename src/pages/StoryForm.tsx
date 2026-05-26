@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select"
 import { getChildren } from "@/lib/children";
 import { useAuth } from "@/contexts/AuthContext";
-import { approveStory, generateStory, updateStory } from "@/lib/story";
+import { approveStory, generateStory, getStoryEditMessages, updateStory, updateStoryWithAi } from "@/lib/story";
 import { useNavigate } from "react-router-dom";
 
 export default function StoryForm() {
@@ -27,7 +27,17 @@ export default function StoryForm() {
   const {user}= useAuth()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false);
+  const [showAiEditor, setShowAiEditor] =
+    useState(false);
 
+  const [aiMessage, setAiMessage] =
+    useState("");
+
+  const [chatMessages, setChatMessages] =
+    useState<any[]>([]);
+
+  const [aiLoading, setAiLoading] =
+    useState(false);
   //useeffect to get children's names 
   useEffect(() => {
       if (!user?.id) return;
@@ -38,7 +48,7 @@ export default function StoryForm() {
           setChildren(childrenList.data || []);
           console.log("CHILDREN:", childrenList.data);
           if (childrenList.data?.length > 0) {
-            setSelectedChild(childrenList[0].id);
+            setSelectedChild(childrenList.data[0].id);
           }
         } catch (e) {
           console.log(e);
@@ -48,6 +58,44 @@ export default function StoryForm() {
       load();
     }, [user]);
 
+    useEffect(() => {
+
+    if (
+      !showAiEditor ||
+      !generatedStory?.story?.id
+    ) return;
+
+    const loadMessages = async () => {
+
+    try {
+
+      const res =
+        await getStoryEditMessages(
+          generatedStory.story.id
+        );
+
+      const formatted =
+        res.map((msg:any) => ({
+          role: msg.role,
+          text: msg.content
+        }));
+
+      setChatMessages(formatted);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+  };
+
+  loadMessages();
+
+  }, [
+    showAiEditor,
+    generatedStory
+  ]);
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -78,6 +126,60 @@ export default function StoryForm() {
       content: e.target.value,
     });
   };
+
+const handleEditWithAi = async () => {
+
+  if (!aiMessage.trim()) return;
+
+  try {
+
+    setAiLoading(true);
+
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        text: aiMessage,
+      },
+    ]);
+console.log("SENDING:", {
+  editRequest: aiMessage,
+});
+    const res =
+      await updateStoryWithAi(
+        generatedStory.story.id,
+        {
+          editRequest: aiMessage,
+        },
+      );
+      console.log(res)
+
+    // update story on screen
+    setGeneratedStory(res.data);
+
+    // add assistant message
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        text:
+          res.data.summaryOfChanges ||
+          "Story updated successfully",
+      },
+    ]);
+
+    setAiMessage("");
+
+  } catch (err) {
+
+    console.log(err);
+
+  } finally {
+
+    setAiLoading(false);
+
+  }
+};
 
   const handleSaveEdit = async () => {
     try{
@@ -364,15 +466,6 @@ export default function StoryForm() {
               </audio>
             )}
 
-            {/* {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-xl mb-4"
-              >
-                Edit Story
-              </button>
-            )} */}
-
             {/* SCENES */}
             {generatedStory.scenes.map(
               (scene: any) => (
@@ -451,6 +544,13 @@ export default function StoryForm() {
                 </button>
 
                 <button
+                  onClick={() => setShowAiEditor(true)}
+                  className="bg-blue-500 text-white px-5 py-2 rounded-xl"
+                >
+                  Edit using AI
+                </button>
+
+                <button
                   onClick={handleApprove}
                   className="bg-green-600 text-white px-5 py-2 rounded-xl"
                 >
@@ -458,29 +558,94 @@ export default function StoryForm() {
                 </button>
               </div>
             )}
-            {/* <div className="flex gap-4 mt-6">
-
-              <button
-                onClick={handleSaveEdit}
-                className="bg-yellow-500 text-white px-5 py-2 rounded-xl"
-              >
-                Save Edit
-              </button>
-
-              <button
-                onClick={handleApprove}
-                className="bg-green-600 text-white px-5 py-2 rounded-xl"
-              >
-                Approve Story
-              </button>
-
-            </div> */}
 
           </div>
         )}
 
       </div>
+{showAiEditor && (
 
+  <div className="fixed top-0 right-0 w-[400px] h-screen bg-white shadow-2xl border-l z-50 flex flex-col">
+
+    {/* HEADER */}
+    <div className="p-4 border-b flex justify-between items-center">
+
+      <h2 className="text-xl font-bold">
+        AI Story Editor
+      </h2>
+
+      <button
+        onClick={() => setShowAiEditor(false)}
+        className="text-gray-500"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    {/* CHAT */}
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+      {chatMessages.map(
+        (msg, index) => (
+
+          <div
+            key={index}
+            className={`p-3 rounded-xl max-w-[85%] ${
+              msg.role === "user"
+                ? "bg-purple-600 text-white ml-auto"
+                : "bg-gray-200 text-black"
+            }`}
+          >
+
+            {msg.text}
+
+          </div>
+
+        ),
+      )}
+
+      {aiLoading && (
+
+        <div className="bg-gray-200 p-3 rounded-xl w-fit">
+
+          Updating story...
+
+        </div>
+
+      )}
+
+    </div>
+
+    {/* INPUT */}
+    <div className="p-4 border-t flex gap-2">
+
+      <input
+        value={aiMessage}
+        onChange={(e) =>
+          setAiMessage(e.target.value)
+        }
+
+        placeholder="Ask AI to modify the story..."
+
+        className="flex-1 border rounded-xl px-3 py-2"
+      />
+
+      <button
+        onClick={handleEditWithAi}
+        disabled={aiLoading}
+        className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+      >
+
+        Send
+
+      </button>
+
+    </div>
+
+  </div>
+
+)}
     </div>
   );
 }

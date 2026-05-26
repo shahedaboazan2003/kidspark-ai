@@ -205,16 +205,6 @@ export default function MyStories() {
                     {story.title}
 
                   </h2>
-
-                  {/* STATUS */}
-                  <p className="text-sm text-purple-600 mb-4">
-
-                    Status: {
-                      story.status
-                    }
-
-                  </p>
-
                   {/* CONTENT */}
                   <p className="text-gray-700 mb-6 whitespace-pre-line">
 
