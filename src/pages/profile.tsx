@@ -34,18 +34,17 @@ const Profile = () => {
   };
   useEffect(() => {
     getTokenStats().then(setData);
-  });
- /*  if (!data) return <div>Loading....</div>; */
- if (!data || !data.data) {
-  return <div>Loading or API error...</div>;
-}
+  }, []);
+  /*  if (!data) return <div>Loading....</div>; */
+  if (!data || !data.data) {
+    return <div>Loading or API error...</div>;
+  }
   return (
     <div className="min-h-screen bg-background relative">
       <PlayfulBackground />
 
       <div className="relative z-10">
         <AppNavbar />
-
         <main className="max-w-2xl mx-auto px-4 py-10">
           <h1 className="text-3xl font-bold mb-6">My Profile 👤</h1>
 

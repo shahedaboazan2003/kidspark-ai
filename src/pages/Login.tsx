@@ -62,6 +62,13 @@ const Login = () => {
       localStorage.setItem("userType", user.type);
       localStorage.setItem("USER_KEY", JSON.stringify(user));
 
+    if (user.gender) {
+    localStorage.setItem(
+      "gender",
+      user.gender
+    );
+  }
+
     if (user.readingLevel) {
       console.log("reading level:" , user.readingLevel)
     localStorage.setItem(
@@ -88,6 +95,12 @@ const Login = () => {
     localStorage.setItem(
       "interests",
       JSON.stringify(user.interests)
+    );
+  }
+  if (user.blockedTopics) {
+    localStorage.setItem(
+      "blockedTopics",
+      JSON.stringify(user.blockedTopics)
     );
   }
       login(token, user.type, user.username, user, user.firstName);

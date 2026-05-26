@@ -120,7 +120,7 @@ const VerifyEmail = () => {
             variant="hero"
             size="lg"
             className="w-full mt-6"
-            onClick={() => handleVerify(otp)}
+            // onClick={() => handleVerify(otp)}
             disabled={otp.length !== 6 || loading}
           >
             {loading ? (

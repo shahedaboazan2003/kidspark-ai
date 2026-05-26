@@ -10,9 +10,10 @@ interface ChatInputProps {
   disabled?: boolean;
   isStreaming?: boolean;
   onStop?: () => void;
+  tokenBalance?: number;
 }
 
-const ChatInput = ({ onSend, disabled, isStreaming, onStop }: ChatInputProps) => {
+const ChatInput = ({ onSend, disabled, isStreaming, onStop, tokenBalance }: ChatInputProps) => {
   const [text, setText] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
 const [files, setFiles] = useState<File[]>([]);
@@ -28,6 +29,10 @@ const audioInputRef = useRef<HTMLInputElement>(null);
   }, [text]);
 
   const handleSend = () => {
+    if (tokenBalance <= 0) {
+    toast.error("Your balance has expired 🚫");
+    return;
+    }
     const t = text.trim();
     if ((!t && files.length === 0) || disabled) return;
     onSend(t, files);
@@ -57,28 +62,28 @@ const audioInputRef = useRef<HTMLInputElement>(null);
           )}
         >
             {/* IMAGE INPUT */}
-  <input
-    ref={imageInputRef}
-    type="file"
-    accept="image/*"
-    hidden
-    onChange={(e) => {
-      const selected = Array.from(e.target.files || []);
-      setFiles((prev) => [...prev, ...selected]);
-    }}
-  />
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            const selected = Array.from(e.target.files || []);
+            setFiles((prev) => [...prev, ...selected]);
+          }}
+        />
 
-  {/* AUDIO INPUT */}
-  <input
-    ref={audioInputRef}
-    type="file"
-    accept="audio/*"
-    hidden
-    onChange={(e) => {
-      const selected = Array.from(e.target.files || []);
-      setFiles((prev) => [...prev, ...selected]);
-    }}
-  />
+        {/* AUDIO INPUT */}
+        <input
+          ref={audioInputRef}
+          type="file"
+          accept="audio/*"
+          hidden
+          onChange={(e) => {
+            const selected = Array.from(e.target.files || []);
+            setFiles((prev) => [...prev, ...selected]);
+          }}
+        />
           <button
             type="button"
             onClick={() => imageInputRef.current?.click()}
@@ -126,7 +131,7 @@ const audioInputRef = useRef<HTMLInputElement>(null);
               size="icon"
               variant="hero"
               onClick={handleSend}
-              disabled={(!text.trim() && files.length === 0) || disabled}
+              disabled={(!text.trim() && files.length === 0) || disabled || tokenBalance <= 0}
               className="rounded-2xl h-11 w-11 shrink-0"
               aria-label="Send"
             >
@@ -137,6 +142,11 @@ const audioInputRef = useRef<HTMLInputElement>(null);
         <p className="text-[11px] text-center text-muted-foreground mt-2">
           🛡️ Sparky keeps things safe & friendly. Always learning together!
         </p>
+        {tokenBalance <= 0 && (
+          <p className="text-sm text-red-500 text-center mt-2">
+            Your token balance is empty. Please recharge.
+          </p>
+        )}
       </div>
     </div>
   );

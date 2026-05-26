@@ -90,13 +90,14 @@ export interface Child {
   password?: string;
   firstName?: string;
   lastName?: string;
+  gender?:string;
   createdAt?: string;
 
   readingLevel?: string;
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
-
+  blockedTopics?: string[];
 }
 
 export const AVATAR_PRESETS = [
@@ -140,6 +141,7 @@ export const getChildren = async (): Promise<Child[]> => {
 export const createChild = (data: {
   firstName: string;
   lastName: string;
+  gender:string
   username: string;
   password: string;
   birthDate: string;
@@ -148,6 +150,7 @@ export const createChild = (data: {
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
+  blockedTopics?: string[];
 }) => {
   return http.post<ApiResponse<Child>>("/children", data);
 };
@@ -157,6 +160,7 @@ export const updateChild = (data: {
   id: string;
   firstName: string;
   lastName: string;
+  gender: string;
   username: string;
   birthDate: string;
   password?: string;
@@ -165,6 +169,7 @@ export const updateChild = (data: {
   responseLength?: string;
   learningStyle?: string;
   interests?: string[];
+  blockedTopics?: string[];
 }) => {
   return http.put<ApiResponse<Child>>(`/children/${data.id}`, data);
 };

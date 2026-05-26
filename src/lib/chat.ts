@@ -133,29 +133,16 @@ export const listMessages = async (conversationId: number) => {
 
 export async function streamChat({
   question,
-  childId,
   conversationId,
-  age,
   files,
   onDelta,
   onDone,
   onError,
   onAudio,
   onImage,
-  readingLevel,
-  responseLength,
-  learningStyle,
-  interests
-
 }: {
   question: string;
-  childId: number;
   conversationId?: number;
-  age: number;
-  readingLevel?: string;
-  responseLength?: string;
-  learningStyle?: string;
-  interests?: string[];
   files?: File[];
   onDelta: (chunk: string) => void;
   onDone: (data?: {
@@ -171,16 +158,8 @@ export async function streamChat({
   const formData = new FormData();
 
   formData.append("question", question);
-  formData.append("childId", String(childId));
-  formData.append("age", String(age));
-  formData.append("readingLevel", readingLevel || "");
-  formData.append("responseLength", responseLength || "");
-  formData.append("learningStyle", learningStyle || "");
-  if (interests && interests.length > 0) {
-  interests.forEach((interest) => {
-    formData.append("interests", interest);
-  });
-}
+
+  
   if (conversationId) {
     formData.append(
       "conversationId",
@@ -199,6 +178,11 @@ export async function streamChat({
   try {
     resp = await fetch(url, {
       method: "POST",
+      headers: {
+    Authorization: localStorage.getItem("accessToken")
+      ? `Bearer ${localStorage.getItem("accessToken")}`
+      : "",
+  },
       body: formData,
     });
     console.log("STREAM RESPONSE", resp);

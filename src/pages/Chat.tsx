@@ -18,6 +18,7 @@ import {
   listMessages,
   streamChat,
 } from "@/lib/chat";
+import { getTokenStats } from "@/lib/profile";
 
 type UiMessage = {
   id: number | string;
@@ -48,6 +49,13 @@ const Chat = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<{ aborted: boolean }>({ aborted: false });
   const { user } = useAuth();
+  const [tokenBalance, setTokenBalance] = useState<number>(0);
+
+  useEffect(() => {
+    getTokenStats().then((res) => {
+    setTokenBalance(res.data.tokenBalance);
+  });
+  },[])
 
   //get all conversations on load + when route param changes
   // useEffect(() => {
@@ -73,7 +81,6 @@ const Chat = () => {
   //   })();
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [routeConvoId, user]);
-
     useEffect(() => {
     if (!user) return;
 
@@ -199,20 +206,7 @@ const Chat = () => {
     let acc = "";
     await streamChat({
       question: text,
-      childId: user!.id,
       conversationId: convoId!,
-      age: 10,
-      readingLevel:
-        localStorage.getItem("readingLevel") || "",
-
-      responseLength:
-        localStorage.getItem("responseLength") || "",
-
-      learningStyle:
-        localStorage.getItem("learningStyle") || "",
-
-      interests:
-        JSON.parse(localStorage.getItem("interests") || "[]"),
       files,
       onDelta: (chunk) => {
         if (abortRef.current.aborted) return;
@@ -250,7 +244,7 @@ const Chat = () => {
       },
 
       
-    });
+  });
   };
 
   const handleStop = () => {
@@ -376,6 +370,7 @@ const Chat = () => {
           disabled={streaming}
           isStreaming={streaming}
           onStop={handleStop}
+          tokenBalance={tokenBalance}
         />
       </div>
     </div>

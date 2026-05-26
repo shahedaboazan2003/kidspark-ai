@@ -122,7 +122,7 @@ const App = () => (
               />
 
               <Route
-                path="/my-stories"
+                path="/my-stories/:childId?"
                 element={
                   <ProtectedRoute allow={["parent", "child"]}>
                     <MyStories />

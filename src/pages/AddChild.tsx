@@ -24,9 +24,18 @@ import { toast } from "sonner";
 import { Child } from "@/lib/children";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/lib/http";
-
+  import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 interface Errors {
   firstName?: string;
+  gender?:string;
   lastName?: string;
   birthDate?: string;
   username?: string;
@@ -65,6 +74,7 @@ const AddChild = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("")
   // const [age, setAge] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [username, setUsername] = useState("");
@@ -76,6 +86,7 @@ const AddChild = () => {
   const [touched, setTouched] = useState<Record<keyof Errors, boolean>>({
     firstName: false,
     lastName: false,
+    gender:false,
     birthDate: false,
     username: false,
     password: false,
@@ -91,6 +102,7 @@ const AddChild = () => {
   const [responseLength, setResponseLength] = useState("");
   const [learningStyle, setLearningStyle] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
+  const [blockedTopics, setBlockedTopics] = useState<string[]>([]);
 
   const validate = (): Errors => {
     const e: Errors = {};
@@ -164,16 +176,18 @@ const AddChild = () => {
         id: editingChild.id,
         firstName,
         lastName,
+        gender,
         username,
         birthDate,
         readingLevel,
         responseLength,
         learningStyle,
-        interests
+        interests,
+        blockedTopics
       };
         await updateChild(payload);
         localStorage.setItem("readingLevel", readingLevel);
-
+        localStorage.setItem("gender", gender)
         localStorage.setItem(
           "responseLength",
           responseLength
@@ -188,7 +202,11 @@ const AddChild = () => {
           "interests",
           JSON.stringify(interests)
         );
-        console.log("Updated child with ID:", interests);
+
+        localStorage.setItem(
+          "blockedTopics",
+          JSON.stringify(blockedTopics)
+        );
         const storedUser = localStorage.getItem("USER_KEY");
 
         if (storedUser) {
@@ -197,10 +215,12 @@ const AddChild = () => {
           if (parsedUser.id === editingChild.id) {
             const updatedUser = {
               ...parsedUser,
+              gender,
               readingLevel,
               responseLength,
               learningStyle,
               interests,
+              blockedTopics
             };
 
             localStorage.setItem(
@@ -218,6 +238,7 @@ const AddChild = () => {
         await createChild({
            firstName,
             lastName,
+            gender,
             username,
             password,
             birthDate,
@@ -226,6 +247,7 @@ const AddChild = () => {
             responseLength,
             learningStyle,
             interests,
+            blockedTopics
         });
 
 
@@ -259,7 +281,7 @@ const AddChild = () => {
 
     setFirstName(editingChild.firstName || "");
     setLastName(editingChild.lastName || "");
-  
+    setGender(editingChild.gender || "")
 
     setUsername(editingChild.username || "");
     setBirthDate(
@@ -272,6 +294,7 @@ const AddChild = () => {
     setResponseLength(editingChild.responseLength || "");
     setLearningStyle(editingChild.learningStyle || "");
     setInterests(editingChild.interests || []);
+    setBlockedTopics(editingChild.blockedTopics || []);
 
   }, [editingChild]);
   useEffect(() => {
@@ -282,7 +305,7 @@ const AddChild = () => {
           const child = res.data;
           setFirstName(child.firstName || "");
           setLastName(child.lastName || "");
-          
+          setGender(child.gender || "")
           // setBirthDate(
           //   editingChild.birthDate.split("T")[0]
           // );
@@ -298,6 +321,7 @@ const AddChild = () => {
 
     setFirstName("");
     setLastName("");
+    setGender("")
     setBirthDate("");
     setUsername("");
     setPassword("");
@@ -338,6 +362,31 @@ const AddChild = () => {
               <p className="text-red-500 text-sm">{errors.lastName}</p>
             )}
           </div>
+
+        <div className="space-y-2">
+          <Label>Gender</Label>
+
+          <Select
+            value={gender}
+            onValueChange={setGender}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select child's gender" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="male">
+                  Male
+                </SelectItem>
+
+                <SelectItem value="female">
+                  Female
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
 
           <div>
             <Label>Birth Date</Label>
@@ -417,50 +466,99 @@ const AddChild = () => {
               </div>
             </>
           )}
-          <div>
-            <Label>Reading Level</Label>
 
-            <select
-              value={readingLevel}
-              onChange={(e) => setReadingLevel(e.target.value)}
-            >
-              <option value="">Select</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-      </div>
+        <div className="space-y-2">
+          <Label>Reading Level</Label>
 
-      <div>
-        <Label>Response Length</Label>
+          <Select
+            value={readingLevel}
+            onValueChange={setReadingLevel}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select reading level" />
+            </SelectTrigger>
 
-        <select
-          value={responseLength}
-          onChange={(e) => setResponseLength(e.target.value)}
-        >
-          <option value="">Select</option>
-          <option value="short">Short</option>
-          <option value="medium">Medium</option>
-          <option value="detailed">Detailed</option>
-        </select>
-      </div>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="beginner">
+                  Beginner
+                </SelectItem>
 
-      <div>
-        <Label>Learning Style</Label>
+                <SelectItem value="intermediate">
+                  Intermediate
+                </SelectItem>
 
-        <select
-          value={learningStyle}
-          onChange={(e) => setLearningStyle(e.target.value)}
-        >
-          <option value="">Select</option>
-          <option value="story">Story</option>
-          <option value="logical">Logical</option>
-          <option value="playful">Playful</option>
-          <option value="visual">Visual</option>
-        </select>
-      </div>
+                <SelectItem value="advanced">
+                  Advanced
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div>
+        <div className="space-y-2">
+          <Label>Response Length</Label>
+
+          <Select
+            value={responseLength}
+            onValueChange={setResponseLength}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select response length" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="short">
+                  Short
+                </SelectItem>
+
+                <SelectItem value="medium">
+                  Medium
+                </SelectItem>
+
+                <SelectItem value="detailed">
+                  Detailed
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Learning Style</Label>
+
+          <Select
+            value={learningStyle}
+            onValueChange={setLearningStyle}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select learning style" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="story">
+                  Story
+                </SelectItem>
+
+                <SelectItem value="logical">
+                  Logical
+                </SelectItem>
+
+                <SelectItem value="playful">
+                  Playful
+                </SelectItem>
+
+                <SelectItem value="visual">
+                  Visual
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+      <div className="space-y-2">
         <Label>Interests</Label>
 
         <Input
@@ -476,6 +574,23 @@ const AddChild = () => {
           }
         />
       </div>
+
+      <div className="space-y-2">
+        <Label>Blocked Topics</Label>
+
+        <Input
+          placeholder="cats,cars,space"
+          value={blockedTopics.join(", ")}
+          onChange={(e) =>
+            setBlockedTopics(
+              e.target.value
+                .split(",")
+                .map((i) => i.trim())
+                .filter(Boolean)
+            )
+          }
+        />
+      </div>
           {submitError && <p className="text-red-500">{submitError}</p>}
 
           <Button
@@ -483,6 +598,7 @@ const AddChild = () => {
               loading ||
               !firstName.trim() ||
               !lastName.trim() ||
+              !gender.trim() ||
               !birthDate ||
               !username.trim() ||
               (!isEditMode && (!password || !repeatPassword))

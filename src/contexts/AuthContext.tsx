@@ -43,6 +43,8 @@ type AuthUser = {
   responseLength?: string
   learningStyle?: string
   interests?: string[]
+  gender?:string[]
+  blockedTopics?: string[]
 }
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -54,6 +56,8 @@ const READING_LEVEL_KEY = "readingLevel";
 const RESPONSE_LENGTH_KEY = "responseLength";
 const LEARNING_STYLE_KEY = "learningStyle";
 const INTERESTS_KEY = "interests";
+const GENDER_KEY ="gender"
+const BLOCKED_TOPICS_KEY = "blockedTopics";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AuthState>({
@@ -77,14 +81,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const storedUser = localStorage.getItem(USER_KEY);
     const user = storedUser ? JSON.parse(storedUser) : null;
-
+    const gender = localStorage.getItem(GENDER_KEY)
     const readingLevel = localStorage.getItem(READING_LEVEL_KEY);
     const responseLength = localStorage.getItem(RESPONSE_LENGTH_KEY);
     const learningStyle = localStorage.getItem(LEARNING_STYLE_KEY);
 
     const interests =
       JSON.parse(localStorage.getItem(INTERESTS_KEY) || "[]");
-
+    
+    const blockedTopics =
+      JSON.parse(localStorage.getItem(BLOCKED_TOPICS_KEY) || "[]");
     if (token && (userType === "parent" || userType === "child")) {
       setState({
         accessToken: token,

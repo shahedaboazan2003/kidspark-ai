@@ -10,6 +10,15 @@ import { Conversation, listConversations, deleteConversation, histoyPage } from 
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { getChildren } from "@/lib/children";
+  import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const History = () => {
   const navigate = useNavigate();
@@ -88,18 +97,6 @@ useEffect(() => {
 
       <div className="relative z-10">
         <AppNavbar />
-
-        <select
-          value={selectedChild ?? ""}
-          onChange={(e) => setSelectedChild(Number(e.target.value))}
-        >
-          {children.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.firstName}
-            </option>
-          ))}
-        </select>
-
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <Link
             to="/dashboard"
@@ -109,13 +106,36 @@ useEffect(() => {
             Back to Dashboard
           </Link>
 
-          <div className="mb-6 animate-fade-slide-up">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
-              Activity History <span className="text-3xl">📚</span>
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Browse and manage past conversations.
-            </p>
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-slide-up">
+            
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
+                Activity History <span className="text-3xl">📚</span>
+              </h1>
+
+              <p className="text-muted-foreground mt-1">
+                Browse and manage past conversations.
+              </p>
+            </div>
+
+            <Select
+              value={selectedChild ? String(selectedChild) : ""}
+              onValueChange={(value) => setSelectedChild(Number(value))}
+            >
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Choose a child" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  {children.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.firstName}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="bg-card rounded-2xl shadow-soft border border-border/50 p-4 mb-5 animate-fade-slide-up">
