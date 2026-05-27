@@ -51,13 +51,7 @@ const PARENT_LINKS: NavItem[] = [
   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
   { to: "/profile", label: "Profile", emoji: "👤", icon: User },
-  // {
-  //   to: "/story-generator",
-  //   label: "Story Generator",
-  //   emoji: "✨",
-  //   icon: Sparkles,
-  // },
-  { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
+  // { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
 ];
 
 const CHILD_LINKS: NavItem[] = [
@@ -68,9 +62,11 @@ const CHILD_LINKS: NavItem[] = [
 const AppNavbar = () => {
   const navigate = useNavigate();
   const { username, userType, logout } = useAuth();
+  const isParent = userType === "parent";
+  const isChild = userType === "child";
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  const [openMore, setOpenMore] = useState(false);
   const links =
     userType === "parent"
       ? PARENT_LINKS
@@ -150,6 +146,37 @@ const AppNavbar = () => {
                     <span>{item.label}</span>
                   </NavLink>
                 ))}
+                <div className="relative ml-1">
+                  <button
+                    onClick={() => setOpenMore(!openMore)}
+                    className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                  >
+                    More
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+
+                  {openMore && (
+                    <div className="absolute right-0 mt-2 w-56 bg-card border border-border/50 rounded-2xl shadow-lg overflow-hidden z-50">
+                      {/* Story Generator */}
+                      <Link
+                        to="/story-generator"
+                        onClick={() => setOpenMore(false)}
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
+                      >
+                        ✨ Story Generator
+                      </Link>
+
+                      {/* My Stories */}
+                      <Link
+                        to="/my-stories"
+                        onClick={() => setOpenMore(false)}
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
+                      >
+                        📖 My Stories
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </nav>
 
               <div className="flex items-center gap-2 shrink-0">

@@ -20,10 +20,21 @@ import History from "./pages/History.tsx";
 import Profile from "./pages/profile.tsx";
 import StoryForm from "./pages/StoryForm";
 import MyStories from "./pages/MyStories";
-
+import AppNavbar from "@/components/AppNavbar";
 const queryClient = new QueryClient();
+import { useAuth } from "@/contexts/AuthContext";
 
+const NavbarController = () => {
+  const { userType, isLoading } = useAuth();
+
+  if (isLoading) return null;
+
+  if (userType !== "parent") return null;
+
+  return <AppNavbar />;
+};
 const App = () => (
+  
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
@@ -31,6 +42,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <NavbarController />
             <Routes>
               {/* Public */}
               <Route path="/" element={<Index />} />

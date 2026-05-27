@@ -330,7 +330,6 @@ const AddChild = () => {
   return (
     <div className="min-h-screen relative">
       <PlayfulBackground />
-      <AppNavbar />
 
       <main className="max-w-2xl mx-auto p-6">
         <Link to="/dashboard" className="flex items-center gap-2 mb-4">

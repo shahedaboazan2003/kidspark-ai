@@ -49,13 +49,7 @@ const ChatSidebar = ({
       >
         {/* Header */}
         <div className="p-4 border-b border-border/50 space-y-3">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors mb-3"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Dashboard
-          </Link>
+
           <div className="flex items-center gap-2 mb-4">
             <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-button">
               <Sparkles

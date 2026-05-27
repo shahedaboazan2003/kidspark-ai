@@ -75,17 +75,9 @@ const Accounts = () => {
       <PlayfulBackground />
 
       <div className="relative z-10">
-        <AppNavbar />
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          <Link
-          
-            to="/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Link>
+
 
           <div className="mb-6 animate-fade-slide-up">
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">

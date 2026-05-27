@@ -96,16 +96,7 @@ useEffect(() => {
       <PlayfulBackground />
 
       <div className="relative z-10">
-        <AppNavbar />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Link>
-
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-slide-up">
             
             <div>

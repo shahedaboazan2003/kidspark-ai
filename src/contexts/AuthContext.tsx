@@ -17,7 +17,6 @@ interface AuthState {
   firstName: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  
 }
 
 interface AuthContextValue extends AuthState {
@@ -32,20 +31,20 @@ interface AuthContextValue extends AuthState {
 }
 
 type AuthUser = {
-  id:number
-  username:string
-  type: UserType
-  firstName?: string
-  lastName?: string
-  email?: string | null
-  
-  readingLevel?: string
-  responseLength?: string
-  learningStyle?: string
-  interests?: string[]
-  gender?:string[]
-  blockedTopics?: string[]
-}
+  id: number;
+  username: string;
+  type: UserType;
+  firstName?: string;
+  lastName?: string;
+  email?: string | null;
+
+  readingLevel?: string;
+  responseLength?: string;
+  learningStyle?: string;
+  interests?: string[];
+  gender?: string[];
+  blockedTopics?: string[];
+};
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const TOKEN_KEY = "accessToken";
@@ -56,7 +55,7 @@ const READING_LEVEL_KEY = "readingLevel";
 const RESPONSE_LENGTH_KEY = "responseLength";
 const LEARNING_STYLE_KEY = "learningStyle";
 const INTERESTS_KEY = "interests";
-const GENDER_KEY ="gender"
+const GENDER_KEY = "gender";
 const BLOCKED_TOPICS_KEY = "blockedTopics";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -68,8 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     firstName: null,
     isAuthenticated: false,
     isLoading: true,
-
-    
   });
 
   useEffect(() => {
@@ -78,32 +75,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const username = localStorage.getItem(USERNAME_KEY);
     const firstName = localStorage.getItem(FIRSTNAME_KEY);
 
-
     const storedUser = localStorage.getItem(USER_KEY);
     const user = storedUser ? JSON.parse(storedUser) : null;
-    const gender = localStorage.getItem(GENDER_KEY)
+    const gender = localStorage.getItem(GENDER_KEY);
     const readingLevel = localStorage.getItem(READING_LEVEL_KEY);
     const responseLength = localStorage.getItem(RESPONSE_LENGTH_KEY);
     const learningStyle = localStorage.getItem(LEARNING_STYLE_KEY);
 
-    const interests =
-      JSON.parse(localStorage.getItem(INTERESTS_KEY) || "[]");
-    
-    const blockedTopics =
-      JSON.parse(localStorage.getItem(BLOCKED_TOPICS_KEY) || "[]");
-    if (token && (userType === "parent" || userType === "child")) {
+    const interests = JSON.parse(localStorage.getItem(INTERESTS_KEY) || "[]");
+
+    const blockedTopics = JSON.parse(
+      localStorage.getItem(BLOCKED_TOPICS_KEY) || "[]",
+    );
+    // if (token && (userType === "parent" || userType === "child")) {
+    //   setState({
+    //     accessToken: token,
+    //     userType,
+    //     username,
+    //     firstName,
+    //     user,
+    //     isAuthenticated: true,
+    //     isLoading: false,
+
+    //   });
+    // } else {
+    //   setState((s) => ({ ...s, isLoading: false }));
+    // }
+    const isDev = true;
+
+    if (isDev) {
       setState({
-        accessToken: token,
-        userType,
-        username,
-        firstName,
-        user,
+        accessToken: "dev-token",
+        userType: "parent",
+        username: "Dev User",
+        firstName: "Dev",
+        user: {
+          id: 1,
+          username: "Dev User",
+          type: "parent",
+        },
         isAuthenticated: true,
         isLoading: false,
-
       });
-    } else {
-      setState((s) => ({ ...s, isLoading: false }));
+      return;
     }
   }, []);
 
@@ -145,7 +159,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       user: null,
       isAuthenticated: false,
       isLoading: false,
-
     });
   }, []);
 
