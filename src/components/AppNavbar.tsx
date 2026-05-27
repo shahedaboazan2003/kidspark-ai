@@ -14,6 +14,7 @@ import {
   Cloud,
   Star,
   Globe2,
+  FolderOpen,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,6 +38,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 import { BookPlus } from "lucide-react";
+// import { Link } from "react-router-dom";
 interface NavItem {
   to: string;
   label: string;
@@ -51,6 +53,12 @@ const PARENT_LINKS: NavItem[] = [
   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
   { to: "/profile", label: "Profile", emoji: "👤", icon: User },
+  {
+    to: "/my-files",
+    label: "My Files",
+    emoji: "📁",
+    icon: FolderOpen,
+  },
   // { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
 ];
 
@@ -173,6 +181,14 @@ const AppNavbar = () => {
                         className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
                       >
                         📖 My Stories
+                      </Link>
+                      {/* My Files */}
+                      <Link
+                        to="/my-files"
+                        onClick={() => setOpenMore(false)}
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
+                      >
+                        📁 My Files
                       </Link>
                     </div>
                   )}

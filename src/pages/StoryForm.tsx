@@ -235,7 +235,7 @@ console.log("SENDING:", {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-100">
+    <div className="min-h-screen p-6 bg-background">
 
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-6">
 
@@ -509,7 +509,7 @@ console.log("SENDING:", {
                       });
                     }}
                     className={`w-full min-h-[120px] border rounded-xl p-3 ${
-                    isEditing ? "bg-white" : "bg-gray-100"
+                    isEditing ? "bg-white" : "bg-background"
                   }`}
                   />
 

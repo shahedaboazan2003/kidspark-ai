@@ -23,7 +23,7 @@ import MyStories from "./pages/MyStories";
 import AppNavbar from "@/components/AppNavbar";
 const queryClient = new QueryClient();
 import { useAuth } from "@/contexts/AuthContext";
-
+import MyFiles from "./pages/MyFiles";
 const NavbarController = () => {
   const { userType, isLoading } = useAuth();
 
@@ -34,7 +34,6 @@ const NavbarController = () => {
   return <AppNavbar />;
 };
 const App = () => (
-  
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
@@ -138,6 +137,14 @@ const App = () => (
                 element={
                   <ProtectedRoute allow={["parent", "child"]}>
                     <MyStories />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-files"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <MyFiles />
                   </ProtectedRoute>
                 }
               />
