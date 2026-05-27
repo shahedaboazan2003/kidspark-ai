@@ -1,6 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trash2, Upload, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { getChildren } from "@/lib/children";
+import { useAuth } from "@/contexts/AuthContext";
+import { deleteFile, getFiles, uploadFile } from "@/lib/file";
 
 export default function MyFiles() {
 
@@ -10,21 +22,46 @@ export default function MyFiles() {
 
   const [selectedChildren, setSelectedChildren] = useState<string[]>([]);
 
-  const [files, setFiles] = useState<any[]>([
-    {
-      id: 1,
-      name: "Math Notes.pdf",
-      children: ["Lana", "Omar"],
-      date: "2026-05-27",
-    },
-  ]);
+  const [selectedChild, setSelectedChild] = useState<number | null>(null)
 
-  // مؤقتاً لحد API
-  const children = [
-    "Lana",
-    "Omar",
-    "Kareem",
-  ];
+  const [children, setChildren] = useState([])
+
+  const [files, setFiles] = useState<any[]>([]);
+
+  const {user}= useAuth()
+  
+  useEffect(() => {
+      if (!user?.id) return;
+  
+      const load = async () => {
+        try {
+          const childrenList = await getChildren();
+          setChildren(childrenList.data || []);
+          console.log("CHILDREN:", childrenList.data);
+          if (childrenList.data?.length > 0) {
+            setSelectedChild(childrenList.data[0].id);
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      };
+  
+      load();
+    }, [user]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const loadFiles = async () =>{
+      try{
+        const data = await getFiles()
+        console.log("uploadedd files", data)
+        setFiles(data.data.documents || [])
+      }catch(err){
+        console.log(err)
+      }
+    }
+    loadFiles()
+  },[user])
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -43,53 +80,31 @@ export default function MyFiles() {
 
   };
 
-  const handleChildSelect = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-
-    const value = e.target.value;
-
-    if (
-      value &&
-      !selectedChildren.includes(value)
-    ) {
-
-      setSelectedChildren([
-        ...selectedChildren,
-        value,
-      ]);
-
+  const handleUpload = async() => {
+    if(!selectedFile) return
+    if (selectedChildren.length === 0) {
+      alert("Please select at least one child");
+      return;
     }
-  };
-
-  const handleUpload = () => {
-
-    if (!selectedFile) return;
-
-    const newFile = {
-
-      id: Date.now(),
-
-      name: selectedFile.name,
-
-      children: selectedChildren,
-
-      date: new Date().toLocaleDateString(),
-
-    };
-
-    setFiles([newFile, ...files]);
-
-    setSelectedFile(null);
-
-    setSelectedChildren([]);
+    try{
+      await uploadFile(selectedFile, selectedChildren.map(Number))
+      const data = await getFiles()
+      setFiles(data.data.documents || [])
+      setSelectedFile(null)
+      setSelectedChildren([])
+    }catch(err){
+      console.log(err)
+    }
 
   };
 
-  const handleDelete = (id: number) => {
-
-    setFiles(files.filter((f) => f.id !== id));
-
+  const handleDelete = async(id: number) => {
+    try{
+      await deleteFile(id)
+      setFiles(files.filter((f) => f.id !== id));
+    }catch(err){
+      console.log(err)
+    }
   };
 
   return (
@@ -179,30 +194,29 @@ export default function MyFiles() {
               Select Children
             </label>
 
-            <select
-              id="children"
-              onChange={handleChildSelect}
-              className="w-full border rounded-xl p-3"
-            >
+            <Select
+              value={selectedChild ? String(selectedChild) : ""}
+              onValueChange={(value) => {
+                setSelectedChild(Number(value));
 
-              <option value="">
+                if (!selectedChildren.includes(value)) {
+                  setSelectedChildren([...selectedChildren, value]);
+                }
+              }}            >
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Choose a child" />
+              </SelectTrigger>
 
-                Select Child
-
-              </option>
-
-              {children.map((child) => (
-
-                <option
-                  key={child}
-                  value={child}
-                >
-                  {child}
-                </option>
-
-              ))}
-
-            </select>
+              <SelectContent>
+                <SelectGroup>
+                  {children.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.firstName}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
           </div>
 
@@ -211,16 +225,20 @@ export default function MyFiles() {
 
             <div className="flex flex-wrap gap-2 mb-6">
 
-              {selectedChildren.map((child) => (
+              {selectedChildren.map((childId) => {
+                const child = children.find(
+                  (c: any) => String(c.id) === childId
+                );
 
-                <div
-                  key={child}
-                  className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm"
-                >
-                  {child}
-                </div>
-
-              ))}
+                return (
+                  <div
+                    key={childId}
+                    className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm"
+                  >
+                    {child?.firstName}
+                  </div>
+                );
+              })}
 
             </div>
 
@@ -268,13 +286,13 @@ export default function MyFiles() {
 
                       <h3 className="font-bold">
 
-                        {file.name}
+                        {file.title}
 
                       </h3>
 
                       <p className="text-sm text-muted-foreground">
 
-                        {file.date}
+                        {new Date(file.createdAt).toLocaleDateString()}
 
                       </p>
 
@@ -296,14 +314,14 @@ export default function MyFiles() {
                 {/* CHILDREN */}
                 <div className="flex flex-wrap gap-2">
 
-                  {file.children.map((child: string) => (
+                  {file.children.map((item: any) => (
 
                     <span
-                      key={child}
+                      key={item.child.id}
                       className="bg-secondary px-3 py-1 rounded-full text-sm"
                     >
 
-                      {child}
+                      {item.child.firstName}
 
                     </span>
 

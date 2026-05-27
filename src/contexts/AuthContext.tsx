@@ -87,39 +87,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const blockedTopics = JSON.parse(
       localStorage.getItem(BLOCKED_TOPICS_KEY) || "[]",
     );
-    // if (token && (userType === "parent" || userType === "child")) {
-    //   setState({
-    //     accessToken: token,
-    //     userType,
-    //     username,
-    //     firstName,
-    //     user,
-    //     isAuthenticated: true,
-    //     isLoading: false,
-
-    //   });
-    // } else {
-    //   setState((s) => ({ ...s, isLoading: false }));
-    // }
-    const isDev = true;
-
-    if (isDev) {
+    if (token && (userType === "parent" || userType === "child")) {
       setState({
-        accessToken: "dev-token",
-        userType: "parent",
-        username: "Dev User",
-        firstName: "Dev",
-        user: {
-          id: 1,
-          username: "Dev User",
-          type: "parent",
-        },
+        accessToken: token,
+        userType,
+        username,
+        firstName,
+        user,
         isAuthenticated: true,
         isLoading: false,
+
       });
-      return;
+    } else {
+      setState((s) => ({ ...s, isLoading: false }));
     }
-  }, []);
+}, []);
 
   const login = useCallback(
     (
@@ -132,7 +114,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USERTYPE_KEY, userType);
       localStorage.setItem(USERNAME_KEY, username);
-
+      if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(USER_KEY);
+      }
       if (firstName) localStorage.setItem(FIRSTNAME_KEY, firstName);
       else localStorage.removeItem(FIRSTNAME_KEY);
 
@@ -167,10 +153,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
-};
+}
