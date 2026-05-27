@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Sparkles,
@@ -70,6 +71,10 @@ const CHILD_LINKS: NavItem[] = [
 const AppNavbar = () => {
   const navigate = useNavigate();
   const { username, userType, logout } = useAuth();
+  const { i18n } = useTranslation();
+  const changeLang = (lang: string) => {
+    i18n.changeLanguage(lang);
+  };
   const isParent = userType === "parent";
   const isChild = userType === "child";
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -190,6 +195,14 @@ const AppNavbar = () => {
                       >
                         📁 My Files
                       </Link>
+                      {/* Children's Stories */}
+                      <Link
+                        to="/children-stories"
+                        onClick={() => setOpenMore(false)}
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
+                      >
+                        👧 Children's Stories
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -307,13 +320,70 @@ const AppNavbar = () => {
             ))}
           </nav>
 
+          {/* <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
+              <span className="text-sm font-semibold text-foreground">
+                Theme
+              </span>
+              <ThemeToggle />
+              <button
+                onClick={() => changeLang("ar")}
+                className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
+              >
+                AR
+              </button>
+
+              <button
+                onClick={() => changeLang("en")}
+                className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
+              >
+                EN
+              </button>
+            </div>
+            <button
+              onClick={() => {
+                setMobileOpen(false);
+                setLogoutOpen(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div> */}
           <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
+            {/* THEME */}
             <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
               <span className="text-sm font-semibold text-foreground">
                 Theme
               </span>
               <ThemeToggle />
             </div>
+
+            {/* LANGUAGE */}
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
+              <span className="text-sm font-semibold text-foreground">
+                Language
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => changeLang("ar")}
+                  className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
+                >
+                  AR
+                </button>
+
+                <button
+                  onClick={() => changeLang("en")}
+                  className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
+                >
+                  EN
+                </button>
+              </div>
+            </div>
+
+            {/* LOGOUT */}
             <button
               onClick={() => {
                 setMobileOpen(false);

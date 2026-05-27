@@ -8,7 +8,9 @@ import {
 } from "react";
 
 export type UserType = "parent" | "child";
+
 const USER_KEY = "USER_KEY";
+
 interface AuthState {
   accessToken: string | null;
   userType: UserType | null;
@@ -27,6 +29,7 @@ interface AuthContextValue extends AuthState {
     user?: AuthUser,
     firstName?: string,
   ) => void;
+
   logout: () => void;
 }
 
@@ -34,6 +37,7 @@ type AuthUser = {
   id: number;
   username: string;
   type: UserType;
+
   firstName?: string;
   lastName?: string;
   email?: string | null;
@@ -41,16 +45,19 @@ type AuthUser = {
   readingLevel?: string;
   responseLength?: string;
   learningStyle?: string;
+
   interests?: string[];
   gender?: string[];
   blockedTopics?: string[];
 };
+
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const TOKEN_KEY = "accessToken";
 const USERTYPE_KEY = "userType";
 const USERNAME_KEY = "username";
 const FIRSTNAME_KEY = "firstName";
+
 const READING_LEVEL_KEY = "readingLevel";
 const RESPONSE_LENGTH_KEY = "responseLength";
 const LEARNING_STYLE_KEY = "learningStyle";
@@ -71,53 +78,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
-    const userType = localStorage.getItem(USERTYPE_KEY) as UserType | null;
+
+    const userType = localStorage.getItem(
+      USERTYPE_KEY,
+    ) as UserType | null;
+
     const username = localStorage.getItem(USERNAME_KEY);
+
     const firstName = localStorage.getItem(FIRSTNAME_KEY);
 
     const storedUser = localStorage.getItem(USER_KEY);
-    const user = storedUser ? JSON.parse(storedUser) : null;
-    const gender = localStorage.getItem(GENDER_KEY);
-    const readingLevel = localStorage.getItem(READING_LEVEL_KEY);
-    const responseLength = localStorage.getItem(RESPONSE_LENGTH_KEY);
-    const learningStyle = localStorage.getItem(LEARNING_STYLE_KEY);
 
-    const interests = JSON.parse(localStorage.getItem(INTERESTS_KEY) || "[]");
+    const user: AuthUser | null = storedUser
+      ? JSON.parse(storedUser)
+      : null;
 
-    const blockedTopics = JSON.parse(
-      localStorage.getItem(BLOCKED_TOPICS_KEY) || "[]",
-    );
-    // if (token && (userType === "parent" || userType === "child")) {
-    //   setState({
-    //     accessToken: token,
-    //     userType,
-    //     username,
-    //     firstName,
-    //     user,
-    //     isAuthenticated: true,
-    //     isLoading: false,
+    localStorage.getItem(GENDER_KEY);
+    localStorage.getItem(READING_LEVEL_KEY);
+    localStorage.getItem(RESPONSE_LENGTH_KEY);
+    localStorage.getItem(LEARNING_STYLE_KEY);
 
-    //   });
-    // } else {
-    //   setState((s) => ({ ...s, isLoading: false }));
-    // }
-    const isDev = true;
+    JSON.parse(localStorage.getItem(INTERESTS_KEY) || "[]");
 
-    if (isDev) {
+    JSON.parse(localStorage.getItem(BLOCKED_TOPICS_KEY) || "[]");
+
+    if (token && (userType === "parent" || userType === "child")) {
       setState({
-        accessToken: "dev-token",
-        userType: "parent",
-        username: "Dev User",
-        firstName: "Dev",
-        user: {
-          id: 1,
-          username: "Dev User",
-          type: "parent",
-        },
+        accessToken: token,
+        userType,
+        username,
+        firstName,
+        user,
         isAuthenticated: true,
         isLoading: false,
       });
-      return;
+    } else {
+      setState({
+        accessToken: null,
+        userType: null,
+        username: null,
+        user: null,
+        firstName: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
     }
   }, []);
 
@@ -130,11 +134,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       firstName?: string,
     ) => {
       localStorage.setItem(TOKEN_KEY, token);
+
       localStorage.setItem(USERTYPE_KEY, userType);
+
       localStorage.setItem(USERNAME_KEY, username);
 
-      if (firstName) localStorage.setItem(FIRSTNAME_KEY, firstName);
-      else localStorage.removeItem(FIRSTNAME_KEY);
+      if (user) {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+      }
+
+      if (firstName) {
+        localStorage.setItem(FIRSTNAME_KEY, firstName);
+      } else {
+        localStorage.removeItem(FIRSTNAME_KEY);
+      }
 
       setState({
         accessToken: token,
@@ -151,6 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     localStorage.clear();
+
     setState({
       accessToken: null,
       userType: null,
@@ -163,7 +177,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -171,6 +191,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+
+  if (!ctx) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+
   return ctx;
 };
