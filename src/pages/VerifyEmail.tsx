@@ -7,10 +7,11 @@ import OtpInput from "@/components/OtpInput";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { verifyEmail } from "@/lib/auth";
-
+import { useTranslation } from "react-i18next";
 const RESEND_SECONDS = 30;
 
 const VerifyEmail = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const email =
@@ -94,10 +95,10 @@ const VerifyEmail = () => {
             />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            Check your email 💌
+            {t("checkEmail")}
           </h1>
           <p className="text-muted-foreground text-sm mb-7">
-            We sent a 6-digit code to{" "}
+            {t("weSentCode")}{" "}
             <span className="font-semibold text-foreground break-all">
               {email}
             </span>
@@ -129,15 +130,15 @@ const VerifyEmail = () => {
                 Verifying...
               </>
             ) : (
-              "Verify Email"
+              t("verifyEmail")
             )}
           </Button>
 
           <div className="mt-5 text-sm text-muted-foreground">
-            Didn't get a code?{" "}
+            {t("noCode")}{" "}
             {resendIn > 0 ? (
               <span className="text-muted-foreground/70">
-                Resend in {resendIn}s
+                {t("resendIn")} {resendIn}s
               </span>
             ) : (
               <button
@@ -146,7 +147,7 @@ const VerifyEmail = () => {
                 className="text-primary font-semibold hover:underline underline-offset-4 inline-flex items-center gap-1"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                Resend code
+                {t("resendCode")}
               </button>
             )}
           </div>
@@ -156,12 +157,12 @@ const VerifyEmail = () => {
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors mt-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Register
+            {t("backToRegister")}
           </Link>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          🛡️ Tip for demo: any 6 digits work. Try{" "}
+          {t("verifyTip")}{" "}
           <code className="font-mono">000000</code> for invalid,{" "}
           <code className="font-mono">111111</code> for expired.
         </p>

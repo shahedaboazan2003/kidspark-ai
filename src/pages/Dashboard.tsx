@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+// import { useTranslation } from "react-i18next";
 import {
   Users,
   MessageCircleQuestion,
@@ -10,7 +12,7 @@ import {
   AlertCircle,
   PlusCircle,
   Star,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";
@@ -33,6 +35,7 @@ import {
 type LoadState = "loading" | "ready" | "error";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { firstName, username, accessToken } = useAuth();
   const navigate = useNavigate();
 
@@ -75,9 +78,9 @@ const Dashboard = () => {
 
       setChildren((prev) => prev.filter((c) => c.id !== child.id));
 
-      toast.success(`${child.firstName} ${child.lastName} has been removed`);
+      toast.success(t("childRemoved"));
     } catch {
-      toast.error("Failed to delete child");
+      toast.error(t("failedDeleteChild"));
     }
   };
 
@@ -93,20 +96,19 @@ const Dashboard = () => {
       <PlayfulBackground />
 
       <div className="relative z-10">
-
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold">
-              Welcome back, {greetingName} 👋
+              {t("welcomeBack")} {greetingName} 👋
             </h1>
             <p className="text-muted-foreground mt-1">
-              Here's what's happening with your little learners today.
+              {t("dashboardDescription")}
             </p>
           </div>
 
           <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             <StatCard
-              label="Total Children"
+              label={t("totalChildren")}
               value={stats.totalChildren}
               icon={Users}
               emoji="👶"
@@ -114,7 +116,7 @@ const Dashboard = () => {
               delay={0}
             />
             <StatCard
-              label="Questions Today"
+              label={t("questionsToday")}
               value={stats.questionsToday}
               icon={MessageCircleQuestion}
               emoji="❓"
@@ -122,9 +124,9 @@ const Dashboard = () => {
               delay={100}
             />
             <StatCard
-              label="Active Time"
+              label={t("activeTime")}
               value={stats.activeMinutes}
-              suffix="min"
+              suffix={t("minutes")}
               icon={Clock}
               emoji="⏱"
               gradient="from-accent to-secondary"
@@ -135,16 +137,16 @@ const Dashboard = () => {
           <section>
             <div className="flex justify-between items-center mb-5">
               <div>
-                <h2 className="text-2xl font-bold">Your Children 🧸</h2>
+                <h2 className="text-2xl font-bold">{t("yourChildren")}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Manage profiles and keep them safe.
+                  {t("manageProfiles")}
                 </p>
               </div>
 
               <Link to="/add-child">
                 <Button variant="hero">
                   <PlusCircle className="w-4 h-4" />
-                  Add Child
+                  {t("addChild")}
                 </Button>
               </Link>
             </div>
@@ -160,15 +162,15 @@ const Dashboard = () => {
             {state === "error" && (
               <div className="text-center p-10 border border-red-200 rounded-2xl">
                 <AlertCircle className="mx-auto text-red-500" />
-                <p className="mt-2">Failed to load children</p>
+                <p className="mt-2">{t("failedLoadChildren")}</p>
               </div>
             )}
 
             {state === "ready" && children.length === 0 && (
               <div className="text-center p-10">
-                <p>No children yet</p>
+                <p>{t("noChildrenYet")}</p>
                 <Link to="/add-child">
-                  <Button className="mt-4">Add First Child</Button>
+                  <Button className="mt-4">{t("addFirstChild")}</Button>
                 </Link>
               </div>
             )}
@@ -191,42 +193,42 @@ const Dashboard = () => {
           </section>
 
           <section className="mt-10">
-            <h2 className="text-2xl font-bold mb-5">Quick Actions ⚡</h2>
+            <h2 className="text-2xl font-bold mb-5">{t("quickActions")}</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <QuickActionCard
                 to="/add-child"
-                label="Add Child"
-                description="Create profile"
+                label={t("addChild")}
+                description={t("createProfile")}
                 icon={UserPlus}
                 gradient="from-primary to-primary-glow"
               />
               <QuickActionCard
                 to="/history"
-                label="History"
-                description="View chats"
+                label={t("history")}
+                description={t("viewChats")}
                 icon={BookOpen}
                 gradient="from-secondary to-primary-glow"
               />
               <QuickActionCard
                 to="/accounts"
-                label="Accounts"
-                description="Manage users"
+                label={t("accounts")}
+                description={t("manageUsers")}
                 icon={UsersRound}
                 gradient="from-accent to-secondary"
               />
               <QuickActionCard
                 to="/story-generator"
-                label="Story Generator"
-                description="Create AI stories"
+                label={t("storyGenerator")}
+                description={t("createAIStories")}
                 icon={Sparkles}
                 gradient="from-purple-500 to-pink-500"
               />
 
               <QuickActionCard
                 to="/my-stories"
-                label="My Stories"
-                description="Read stories"
+                label={t("myStories")}
+                description={t("readStories")}
                 icon={BookOpen}
                 gradient="from-blue-500 to-indigo-500"
               />

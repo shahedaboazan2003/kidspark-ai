@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
 import { BookPlus } from "lucide-react";
+import { Globe } from "lucide-react";
 // import { Link } from "react-router-dom";
 interface NavItem {
   to: string;
@@ -60,7 +61,12 @@ const PARENT_LINKS: NavItem[] = [
     emoji: "📁",
     icon: FolderOpen,
   },
-  // { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
+  {
+    to: "/children-stories",
+    label: "Children Stories",
+    emoji: "👧",
+    icon: BookOpen,
+  },
 ];
 
 const CHILD_LINKS: NavItem[] = [
@@ -72,8 +78,10 @@ const AppNavbar = () => {
   const navigate = useNavigate();
   const { username, userType, logout } = useAuth();
   const { i18n } = useTranslation();
-  const changeLang = (lang: string) => {
-    i18n.changeLanguage(lang);
+  const toggleLang = () => {
+    const newLang = i18n.language === "ar" ? "en" : "ar";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("lang", newLang);
   };
   const isParent = userType === "parent";
   const isChild = userType === "child";
@@ -351,36 +359,25 @@ const AppNavbar = () => {
               Logout
             </button>
           </div> */}
-          <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
-            {/* THEME */}
+          <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-3 bg-background">
+            {/* CONTROLS ROW */}
             <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
-              <span className="text-sm font-semibold text-foreground">
-                Theme
-              </span>
-              <ThemeToggle />
-            </div>
-
-            {/* LANGUAGE */}
-            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
-              <span className="text-sm font-semibold text-foreground">
-                Language
-              </span>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => changeLang("ar")}
-                  className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
-                >
-                  AR
-                </button>
-
-                <button
-                  onClick={() => changeLang("en")}
-                  className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
-                >
-                  EN
-                </button>
+              {/* THEME */}
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <span className="text-xs font-semibold text-foreground">
+                  Theme
+                </span>
               </div>
+
+              {/* LANGUAGE */}
+              <button
+                onClick={toggleLang}
+                className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition"
+                title="Change Language"
+              >
+                <Globe className="w-4 h-4" />
+              </button>
             </div>
 
             {/* LOGOUT */}
@@ -408,3 +405,47 @@ const AppNavbar = () => {
 };
 
 export default AppNavbar;
+// <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
+//   {/* THEME */}
+//   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
+//     <span className="text-sm font-semibold text-foreground">
+//       Theme
+//     </span>
+//     <ThemeToggle />
+//   </div>
+
+//   {/* LANGUAGE */}
+//   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
+//     <span className="text-sm font-semibold text-foreground">
+//       Language
+//     </span>
+
+//     <div className="flex gap-2">
+//       <button
+//         onClick={() => changeLang("ar")}
+//         className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
+//       >
+//         AR
+//       </button>
+
+//       <button
+//         onClick={() => changeLang("en")}
+//         className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
+//       >
+//         EN
+//       </button>
+//     </div>
+//   </div>
+
+//   {/* LOGOUT */}
+//   <button
+//     onClick={() => {
+//       setMobileOpen(false);
+//       setLogoutOpen(true);
+//     }}
+//     className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors"
+//   >
+//     <LogOut className="w-4 h-4" />
+//     Logout
+//   </button>
+// </div>

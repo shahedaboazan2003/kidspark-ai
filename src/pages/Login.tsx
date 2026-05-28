@@ -13,7 +13,9 @@ import { login as apiLogin } from "@/lib/auth";
 import { ApiError } from "@/lib/http";
 import { toast } from "sonner";
 import User from "@/models/User";
+import { useTranslation } from "react-i18next";
 const Login = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useAuth();
   const [username, setUsername] = useState("");
@@ -31,7 +33,7 @@ const Login = () => {
     if (loading) return;
 
     if (!username.trim() || !password) {
-      setError("Please fill all fields");
+      setError(t("fillAllFields"));
       return;
     }
 
@@ -39,11 +41,10 @@ const Login = () => {
     setError("");
 
     if (!userType) {
-      setError("Please select Parent or Child");
+      setError(t("selectRole"));
       return;
     }
 
-    
     try {
       const res = await apiLogin({
         username: username.trim(),
@@ -58,61 +59,44 @@ const Login = () => {
       console.log("USER DATA:", res.data.user);
       localStorage.setItem("accessToken", token);
 
-      
       localStorage.setItem("userType", user.type);
       localStorage.setItem("USER_KEY", JSON.stringify(user));
 
-    if (user.gender) {
-    localStorage.setItem(
-      "gender",
-      user.gender
-    );
-  }
+      if (user.gender) {
+        localStorage.setItem("gender", user.gender);
+      }
 
-    if (user.readingLevel) {
-      console.log("reading level:" , user.readingLevel)
-    localStorage.setItem(
-      "readingLevel",
-      user.readingLevel
-    );
-  }
+      if (user.readingLevel) {
+        console.log("reading level:", user.readingLevel);
+        localStorage.setItem("readingLevel", user.readingLevel);
+      }
 
-  if (user.responseLength) {
-    localStorage.setItem(
-      "responseLength",
-      user.responseLength
-    );
-  }
+      if (user.responseLength) {
+        localStorage.setItem("responseLength", user.responseLength);
+      }
 
-  if (user.learningStyle) {
-    localStorage.setItem(
-      "learningStyle",
-      user.learningStyle
-    );
-  }
+      if (user.learningStyle) {
+        localStorage.setItem("learningStyle", user.learningStyle);
+      }
 
-  if (user.interests) {
-    localStorage.setItem(
-      "interests",
-      JSON.stringify(user.interests)
-    );
-  }
-  if (user.blockedTopics) {
-    localStorage.setItem(
-      "blockedTopics",
-      JSON.stringify(user.blockedTopics)
-    );
-  }
+      if (user.interests) {
+        localStorage.setItem("interests", JSON.stringify(user.interests));
+      }
+      if (user.blockedTopics) {
+        localStorage.setItem(
+          "blockedTopics",
+          JSON.stringify(user.blockedTopics),
+        );
+      }
       login(token, user.type, user.username, user, user.firstName);
 
       navigate(user.type === "parent" ? "/dashboard" : "/chat");
     } catch (err) {
-     
       if (err instanceof ApiError) {
-          toast.error(err.message)
-        } else {
-          toast.error("Unexpected error 💥")
-        }
+        toast.error(err.message);
+      } else {
+        toast.error(t("unexpectedError"));
+      }
     } finally {
       setLoading(false);
     }
@@ -129,12 +113,12 @@ const Login = () => {
         <div className={cn("bg-card p-8 rounded-2xl")}>
           <div className="flex items-center justify-center mb-4">
             <Sparkles />
-            <h1 className="ml-2 font-bold">Login</h1>
+            <h1 className="ml-2 font-bold">{t("login")}</h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>Username</Label>
+              <Label>{t("username")}</Label>
               <Input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -142,7 +126,7 @@ const Login = () => {
             </div>
 
             <div>
-              <Label>Password</Label>
+              <Label>{t("password")}</Label>
               <div className="relative">
                 <Input
                   type={showPwd ? "text" : "password"}
@@ -159,7 +143,7 @@ const Login = () => {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm font-semibold">Login as</Label>
+              <Label className="text-sm font-semibold">{t("loginAs")}</Label>
 
               <div className="flex gap-3">
                 <button
@@ -172,7 +156,7 @@ const Login = () => {
                       : "bg-transparent hover:bg-muted",
                   )}
                 >
-                  👨‍👩‍👧 Parent
+                  {t("parent")}
                 </button>
 
                 <button
@@ -185,7 +169,7 @@ const Login = () => {
                       : "bg-transparent hover:bg-muted",
                   )}
                 >
-                  🧒 Child
+                  {t("child")}
                 </button>
               </div>
             </div>
@@ -194,18 +178,18 @@ const Login = () => {
             )}
 
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? <Loader2 className="animate-spin" /> : "Login"}
+              {loading ? <Loader2 className="animate-spin" /> : t("login")}
             </Button>
           </form>
 
           <p className="text-center mt-4 text-sm  text-muted-foreground ">
             <button onClick={() => setForgotOpen(true)}>
-              Forgot password?
+              {t("forgotPassword")}
             </button>
           </p>
 
           <p className="text-center mt-2 text-sm text-primary font-semibold">
-            <Link to="/register">Create account</Link>
+            <Link to="/register">{t("createAccount")}</Link>
           </p>
         </div>
       </div>

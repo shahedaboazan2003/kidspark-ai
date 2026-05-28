@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 export default function MyStories() {
+  const { t } = useTranslation();
   const [stories, setStories] = useState([
   {
     title: "The Brave Little Fox",
@@ -32,16 +34,10 @@ export default function MyStories() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="mb-4 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl"
-        >
-          ← Back to Dashboard
-        </button>
-        <h1 className="text-3xl font-bold mb-8">My Stories</h1>
+        <h1 className="text-3xl font-bold mb-8">{t("myStories")}</h1>
 
         {stories.length === 0 ? (
-          <div className="bg-white p-6 rounded-2xl shadow">No stories yet.</div>
+          <div className="bg-white p-6 rounded-2xl shadow">{t("noStoriesYet")}</div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {stories.map((story, index) => (
@@ -64,12 +60,12 @@ export default function MyStories() {
 
                   {/* CHILD */}
                   <p className="text-sm text-gray-500 mb-2">
-                    Child: {story.child}
+                    {t("child")}: {story.child}
                   </p>
 
                   {/* STATUS */}
                   <p className="text-sm text-purple-600 mb-4">
-                    Status: {story.status}
+                    {t("status")}: {story.status}
                   </p>
 
                   {/* CONTENT */}

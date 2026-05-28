@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { useTranslation } from "react-i18next";
 type Story = {
   id: number;
   title: string;
@@ -8,8 +8,8 @@ type Story = {
   image?: string;
 };
 
-export default function ChildrensStories() {
-
+export default function ChildrenStories() {
+  const { t } = useTranslation();
   const [stories, setStories] = useState<Story[]>([]);
   const [filteredStories, setFilteredStories] = useState<Story[]>([]);
   const [search, setSearch] = useState("");
@@ -68,7 +68,7 @@ export default function ChildrensStories() {
 
         {/* TITLE */}
         <h1 className="text-4xl font-bold mb-8">
-          Children's Stories
+          {t("childrenStories")}
         </h1>
 
         {/* SEARCH */}
@@ -76,7 +76,7 @@ export default function ChildrensStories() {
 
           <input
             type="text"
-            placeholder="Search by child name..."
+            placeholder={t("searchByChildName")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full p-4 rounded-2xl border border-border bg-card"
@@ -88,7 +88,7 @@ export default function ChildrensStories() {
         {filteredStories.length === 0 ? (
 
           <div className="bg-card rounded-2xl p-8 text-center shadow">
-            No stories found.
+            {t("noStoriesFound")}   
           </div>
 
         ) : (
@@ -119,7 +119,7 @@ export default function ChildrensStories() {
                   </h2>
 
                   <p className="text-sm text-purple-500 mb-4">
-                    Child: {story.childName}
+                   {t("child")}: {story.childName}
                   </p>
 
                   <p className="text-muted-foreground whitespace-pre-line">

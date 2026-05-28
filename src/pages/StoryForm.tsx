@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -6,13 +7,21 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { getChildren } from "@/lib/children";
 import { useAuth } from "@/contexts/AuthContext";
-import { approveStory, generateStory, getStoryEditMessages, updateStory, updateStoryWithAi } from "@/lib/story";
+import {
+  approveStory,
+  generateStory,
+  getStoryEditMessages,
+  updateStory,
+  updateStoryWithAi,
+} from "@/lib/story";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function StoryForm() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     behavior: "",
     length: "",
@@ -20,82 +29,61 @@ export default function StoryForm() {
     withImage: false,
     withAudio: false,
   });
-  const [children, setChildren] = useState([])
-  const [selectedChild, setSelectedChild] = useState<number | null>(null)
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState<number | null>(null);
   const [generatedStory, setGeneratedStory] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const {user}= useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [showAiEditor, setShowAiEditor] =
-    useState(false);
+  const [showAiEditor, setShowAiEditor] = useState(false);
 
-  const [aiMessage, setAiMessage] =
-    useState("");
+  const [aiMessage, setAiMessage] = useState("");
 
-  const [chatMessages, setChatMessages] =
-    useState<any[]>([]);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
 
-  const [aiLoading, setAiLoading] =
-    useState(false);
-  //useeffect to get children's names 
+  const [aiLoading, setAiLoading] = useState(false);
+  //useeffect to get children's names
   useEffect(() => {
-      if (!user?.id) return;
-  
-      const load = async () => {
-        try {
-          const childrenList = await getChildren();
-          setChildren(childrenList.data || []);
-          console.log("CHILDREN:", childrenList.data);
-          if (childrenList.data?.length > 0) {
-            setSelectedChild(childrenList.data[0].id);
-          }
-        } catch (e) {
-          console.log(e);
+    if (!user?.id) return;
+
+    const load = async () => {
+      try {
+        const childrenList = await getChildren();
+        setChildren(childrenList.data || []);
+        console.log("CHILDREN:", childrenList.data);
+        if (childrenList.data?.length > 0) {
+          setSelectedChild(childrenList.data[0].id);
         }
-      };
-  
-      load();
-    }, [user]);
+      } catch (e) {
+        console.log(e);
+      }
+    };
 
-    useEffect(() => {
+    load();
+  }, [user]);
 
-    if (
-      !showAiEditor ||
-      !generatedStory?.story?.id
-    ) return;
+  useEffect(() => {
+    if (!showAiEditor || !generatedStory?.story?.id) return;
 
     const loadMessages = async () => {
+      try {
+        const res = await getStoryEditMessages(generatedStory.story.id);
 
-    try {
-
-      const res =
-        await getStoryEditMessages(
-          generatedStory.story.id
-        );
-
-      const formatted =
-        res.map((msg:any) => ({
+        const formatted = res.map((msg: any) => ({
           role: msg.role,
-          text: msg.content
+          text: msg.content,
         }));
 
-      setChatMessages(formatted);
+        setChatMessages(formatted);
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-    } catch (err) {
+    loadMessages();
+  }, [showAiEditor, generatedStory]);
 
-      console.log(err);
-
-    }
-  };
-
-  loadMessages();
-
-  }, [
-    showAiEditor,
-    generatedStory
-  ]);
-  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -106,18 +94,24 @@ export default function StoryForm() {
   };
 
   const handleGenerate = async () => {
-    try{
-      setLoading(true)
-      const response = await generateStory({ educationalGoal:form.behavior, storyType:form.type, storyLength:form.length, withImages: form.withImage, withAudio: form.withAudio, childId:selectedChild})
-      console.log(response)
-      setGeneratedStory(response.data)
-      setIsEditing(false)
-    }catch(err){
-      console.log(err)
-    }finally{
-      setLoading(false)
+    try {
+      setLoading(true);
+      const response = await generateStory({
+        educationalGoal: form.behavior,
+        storyType: form.type,
+        storyLength: form.length,
+        withImages: form.withImage,
+        withAudio: form.withAudio,
+        childId: selectedChild,
+      });
+      console.log(response);
+      setGeneratedStory(response.data);
+      setIsEditing(false);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-
   };
 
   const handleStoryChange = (e) => {
@@ -127,62 +121,49 @@ export default function StoryForm() {
     });
   };
 
-const handleEditWithAi = async () => {
+  const handleEditWithAi = async () => {
+    if (!aiMessage.trim()) return;
 
-  if (!aiMessage.trim()) return;
+    try {
+      setAiLoading(true);
 
-  try {
-
-    setAiLoading(true);
-
-    setChatMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
-        text: aiMessage,
-      },
-    ]);
-console.log("SENDING:", {
-  editRequest: aiMessage,
-});
-    const res =
-      await updateStoryWithAi(
-        generatedStory.story.id,
+      setChatMessages((prev) => [
+        ...prev,
         {
-          editRequest: aiMessage,
+          role: "user",
+          text: aiMessage,
         },
-      );
-      console.log(res)
+      ]);
+      console.log("SENDING:", {
+        editRequest: aiMessage,
+      });
+      const res = await updateStoryWithAi(generatedStory.story.id, {
+        editRequest: aiMessage,
+      });
+      console.log(res);
 
-    // update story on screen
-    setGeneratedStory(res.data);
+      // update story on screen
+      setGeneratedStory(res.data);
 
-    // add assistant message
-    setChatMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        text:
-          res.data.summaryOfChanges ||
-          "Story updated successfully",
-      },
-    ]);
+      // add assistant message
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: res.data.summaryOfChanges || "Story updated successfully",
+        },
+      ]);
 
-    setAiMessage("");
-
-  } catch (err) {
-
-    console.log(err);
-
-  } finally {
-
-    setAiLoading(false);
-
-  }
-};
+      setAiMessage("");
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleSaveEdit = async () => {
-    try{
+    try {
       const res = await updateStory(generatedStory.story.id, {
         educationalGoal: form.behavior,
         storyType: form.type,
@@ -194,24 +175,24 @@ console.log("SENDING:", {
           title: s.title,
           content: s.content,
         })),
-      })
+      });
 
-      setGeneratedStory(res.data)
-      setIsEditing(false)
-    }catch(err){
-      console.log(err)
+      setGeneratedStory(res.data);
+      setIsEditing(false);
+    } catch (err) {
+      console.log(err);
     }
 
     alert("Story edited successfully!");
   };
 
   const handleApprove = async () => {
-    try{
-      await approveStory(generatedStory.story.id)
-      console.log("approve",generatedStory)
-      navigate(`/my-stories/${generatedStory.story.childId}`)
-    }catch(err){
-      console.log(err)
+    try {
+      await approveStory(generatedStory.story.id);
+      console.log("approve", generatedStory);
+      navigate(`/my-stories/${generatedStory.story.childId}`);
+    } catch (err) {
+      console.log(err);
     }
 
     const approvedStories = JSON.parse(localStorage.getItem("stories")) || [];
@@ -226,7 +207,7 @@ console.log("SENDING:", {
     setGeneratedStory(null);
 
     setForm({
-      behavior : "",
+      behavior: "",
       length: "",
       type: "",
       withImage: false,
@@ -236,88 +217,56 @@ console.log("SENDING:", {
 
   return (
     <div className="min-h-screen p-6 bg-background">
-
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-6">
-
-        <h1 className="text-3xl font-bold mb-6">
-          Story Generator
-        </h1>
+        <h1 className="text-3xl font-bold mb-6">{t("storyGeneratorTitle")}</h1>
 
         {/* FORM */}
         <div className="space-y-4">
-
           {/* CHILD SELECT */}
           <div>
-
             <label className="block mb-2 font-semibold">
-              Choose Child
+              {t("chooseChild")}
             </label>
 
             <Select
-              value={
-                selectedChild
-                  ? String(selectedChild)
-                  : ""
-              }
-
-              onValueChange={(value) =>
-                setSelectedChild(
-                  Number(value)
-                )
-              }
+              value={selectedChild ? String(selectedChild) : ""}
+              onValueChange={(value) => setSelectedChild(Number(value))}
             >
-
               <SelectTrigger className="w-[220px]">
-
-                <SelectValue placeholder="Choose child" />
-
+                <SelectValue placeholder={t("selectChild")} />
               </SelectTrigger>
 
               <SelectContent>
-
                 <SelectGroup>
-
                   {children.map((c: any) => (
-
-                    <SelectItem
-                      key={c.id}
-                      value={String(c.id)}
-                    >
+                    <SelectItem key={c.id} value={String(c.id)}>
                       {c.firstName}
                     </SelectItem>
-
                   ))}
-
                 </SelectGroup>
-
               </SelectContent>
-
             </Select>
-
           </div>
 
           {/* EDUCATIONAL GOAL */}
           <div>
-
             <label className="block mb-2 font-semibold">
-              Educational Goal
+              {t("educationalGoal")}
             </label>
 
             <textarea
               name="behavior"
               value={form.behavior}
               onChange={handleChange}
-              placeholder="honesty, kindness..."
+              placeholder={t("behaviorPlaceholder")}
               className="w-full min-h-[120px] border rounded-xl p-3"
             />
-
           </div>
 
           {/* LENGTH */}
           <div>
-
             <label className="block mb-2 font-semibold">
-              Story Length
+              {t("storyLength")}
             </label>
 
             <select
@@ -326,33 +275,19 @@ console.log("SENDING:", {
               onChange={handleChange}
               className="w-full border rounded-xl p-3"
             >
+              <option value="">{t("selectLength")}</option>
 
-              <option value="">
-                Select Length
-              </option>
+              <option value="short">{t("short")}</option>
 
-              <option value="short">
-                Short
-              </option>
+              <option value="medium">{t("medium")}</option>
 
-              <option value="medium">
-                Medium
-              </option>
-
-              <option value="long">
-                Long
-              </option>
-
+              <option value="long">{t("long")}</option>
             </select>
-
           </div>
 
           {/* TYPE */}
           <div>
-
-            <label className="block mb-2 font-semibold">
-              Story Type
-            </label>
+            <label className="block mb-2 font-semibold">{t("storyType")}</label>
 
             <select
               name="type"
@@ -360,60 +295,39 @@ console.log("SENDING:", {
               onChange={handleChange}
               className="w-full border rounded-xl p-3"
             >
+              <option value="">{t("selectType")}</option>
 
-              <option value="">
-                Select Type
-              </option>
+              <option value="adventure">{t("adventure")}</option>
 
-              <option value="adventure">
-                Adventure
-              </option>
+              <option value="fantasy">{t("fantasy")}</option>
 
-              <option value="fantasy">
-                Fantasy
-              </option>
+              <option value="educational">{t("educational")}</option>
 
-              <option value="educational">
-                Educational
-              </option>
-
-              <option value="funny">
-                Funny
-              </option>
-
+              <option value="funny">{t("funny")}</option>
             </select>
-
           </div>
 
           {/* CHECKBOXES */}
           <div className="flex gap-6">
-
             <label className="flex items-center gap-2">
-
               <input
                 type="checkbox"
                 name="withImage"
                 checked={form.withImage}
                 onChange={handleChange}
               />
-
-              With Images
-
+              {t("withImages")}
             </label>
 
             <label className="flex items-center gap-2">
-
               <input
                 type="checkbox"
                 name="withAudio"
                 checked={form.withAudio}
                 onChange={handleChange}
               />
-
-              With Audio
-
+              {t("withAudio")}
             </label>
-
           </div>
 
           {/* BUTTON */}
@@ -422,115 +336,79 @@ console.log("SENDING:", {
             disabled={loading}
             className="bg-purple-600 text-white px-6 py-3 rounded-xl"
           >
-
-            {loading
-              ? "Generating..."
-              : "Generate Story"}
-
+            {loading ? t("generating") : t("generateStory")}
           </button>
-
         </div>
 
         {/* GENERATED STORY */}
         {generatedStory && (
-
           <div className="mt-10 border rounded-2xl p-6 bg-gray-50">
-
             {/* TITLE */}
             <h2 className="text-3xl font-bold mb-4">
-
               {generatedStory.story.title}
-
             </h2>
 
             {/* SUMMARY */}
-            <p className="mb-6 text-gray-700">
-
-              {generatedStory.story.content}
-
-            </p>
+            <p className="mb-6 text-gray-700">{generatedStory.story.content}</p>
 
             {/* AUDIO */}
             {generatedStory.story.audioUrl && (
-
-              <audio
-                controls
-                className="w-full mb-6"
-              >
-
+              <audio controls className="w-full mb-6">
                 <source
                   src={`http://localhost:3000${generatedStory.story.audioUrl}`}
                   type="audio/mpeg"
                 />
-
               </audio>
             )}
 
             {/* SCENES */}
-            {generatedStory.scenes.map(
-              (scene: any) => (
+            {generatedStory.scenes.map((scene: any) => (
+              <div key={scene.id} className="mb-10">
+                <h3 className="text-xl font-bold mb-3">{scene.title}</h3>
 
-                <div
-                  key={scene.id}
-                  className="mb-10"
-                >
+                {/* IMAGE */}
+                {scene.imageUrl && (
+                  <img
+                    src={`http://localhost:3000${scene.imageUrl}`}
+                    alt={scene.title}
+                    className="w-full rounded-xl mb-4"
+                  />
+                )}
 
-                  <h3 className="text-xl font-bold mb-3">
+                {/* CONTENT */}
+                <textarea
+                  value={scene.content}
+                  readOnly={!isEditing}
+                  onChange={(e) => {
+                    const updatedScenes = generatedStory.scenes.map((s: any) =>
+                      s.id === scene.id ? { ...s, content: e.target.value } : s,
+                    );
 
-                    {scene.title}
-
-                  </h3>
-
-                  {/* IMAGE */}
-                  {scene.imageUrl && (
-
-                    <img
-                      src={`http://localhost:3000${scene.imageUrl}`}
-                      alt={scene.title}
-                      className="w-full rounded-xl mb-4"
-                    />
-
-                  )}
-
-                  {/* CONTENT */}
-                  <textarea
-                    value={scene.content}
-                    readOnly={!isEditing}
-                    onChange={(e) => {
-                      const updatedScenes = generatedStory.scenes.map((s: any) =>
-                        s.id === scene.id
-                          ? { ...s, content: e.target.value }
-                          : s
-                      );
-
-                      setGeneratedStory({
-                        ...generatedStory,
-                        scenes: updatedScenes,
-                      });
-                    }}
-                    className={`w-full min-h-[120px] border rounded-xl p-3 ${
+                    setGeneratedStory({
+                      ...generatedStory,
+                      scenes: updatedScenes,
+                    });
+                  }}
+                  className={`w-full min-h-[120px] border rounded-xl p-3 ${
                     isEditing ? "bg-white" : "bg-background"
                   }`}
-                  />
-
-                </div>
-
-              )
-            )}
-            {isEditing &&  (
+                />
+              </div>
+            ))}
+            {isEditing && (
               <div className="flex gap-4">
                 <button
                   onClick={handleSaveEdit}
                   className="bg-yellow-500 text-white px-5 py-2 rounded-xl"
                 >
-                  Save Edit
+                  {t("saveEdit")}
                 </button>
 
                 <button
                   onClick={() => setIsEditing(false)}
                   className="bg-gray-500 text-white px-5 py-2 rounded-xl"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             )}
@@ -540,112 +418,82 @@ console.log("SENDING:", {
                   onClick={() => setIsEditing(true)}
                   className="bg-blue-500 text-white px-5 py-2 rounded-xl"
                 >
-                  Edit Story
+                  {t("editStory")}
                 </button>
 
                 <button
                   onClick={() => setShowAiEditor(true)}
                   className="bg-blue-500 text-white px-5 py-2 rounded-xl"
                 >
-                  Edit using AI
+                  {t("editUsingAI")}
                 </button>
 
                 <button
                   onClick={handleApprove}
                   className="bg-green-600 text-white px-5 py-2 rounded-xl"
                 >
-                  Approve Story
+                  {t("approveStory")}
                 </button>
               </div>
             )}
-
           </div>
         )}
-
       </div>
-{showAiEditor && (
+      {showAiEditor && (
+        <div className="fixed top-0 right-0 w-[400px] h-screen bg-white shadow-2xl border-l z-50 flex flex-col">
+          {/* HEADER */}
+          <div className="p-4 border-b flex justify-between items-center">
+            <h2 className="text-xl font-bold">{t("aiStoryEditor")}</h2>
 
-  <div className="fixed top-0 right-0 w-[400px] h-screen bg-white shadow-2xl border-l z-50 flex flex-col">
-
-    {/* HEADER */}
-    <div className="p-4 border-b flex justify-between items-center">
-
-      <h2 className="text-xl font-bold">
-        AI Story Editor
-      </h2>
-
-      <button
-        onClick={() => setShowAiEditor(false)}
-        className="text-gray-500"
-      >
-        ✕
-      </button>
-
-    </div>
-
-    {/* CHAT */}
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
-      {chatMessages.map(
-        (msg, index) => (
-
-          <div
-            key={index}
-            className={`p-3 rounded-xl max-w-[85%] ${
-              msg.role === "user"
-                ? "bg-purple-600 text-white ml-auto"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-
-            {msg.text}
-
+            <button
+              onClick={() => setShowAiEditor(false)}
+              className="text-gray-500"
+            >
+              ✕
+            </button>
           </div>
 
-        ),
-      )}
+          {/* CHAT */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {chatMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`p-3 rounded-xl max-w-[85%] ${
+                  msg.role === "user"
+                    ? "bg-purple-600 text-white ml-auto"
+                    : "bg-gray-200 text-black"
+                }`}
+              >
+                {msg.text}
+              </div>
+            ))}
 
-      {aiLoading && (
+            {aiLoading && (
+              <div className="bg-gray-200 p-3 rounded-xl w-fit">
+                {t("updatingStory")}
+              </div>
+            )}
+          </div>
 
-        <div className="bg-gray-200 p-3 rounded-xl w-fit">
+          {/* INPUT */}
+          <div className="p-4 border-t flex gap-2">
+            <input
+              value={aiMessage}
+              onChange={(e) => setAiMessage(e.target.value)}
+              placeholder={t("askAiToModifyStory")}
+              className="flex-1 border rounded-xl px-3 py-2"
+            />
 
-          Updating story...
-
+            <button
+              onClick={handleEditWithAi}
+              disabled={aiLoading}
+              className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+            >
+              {t("send")}
+            </button>
+          </div>
         </div>
-
       )}
-
-    </div>
-
-    {/* INPUT */}
-    <div className="p-4 border-t flex gap-2">
-
-      <input
-        value={aiMessage}
-        onChange={(e) =>
-          setAiMessage(e.target.value)
-        }
-
-        placeholder="Ask AI to modify the story..."
-
-        className="flex-1 border rounded-xl px-3 py-2"
-      />
-
-      <button
-        onClick={handleEditWithAi}
-        disabled={aiLoading}
-        className="bg-purple-600 text-white px-4 py-2 rounded-xl"
-      >
-
-        Send
-
-      </button>
-
-    </div>
-
-  </div>
-
-)}
     </div>
   );
 }

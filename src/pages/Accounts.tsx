@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Search, Users, UserCheck, Baby, Loader2, AlertCircle } from "lucide-react";
+import React from "react";
+// import { useTranslation } from "react-i18next";
+import {
+  Search,
+  Users,
+  UserCheck,
+  Baby,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import AppNavbar from "@/components/AppNavbar";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { listAccounts } from "@/lib/accounts";
+import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -26,6 +36,7 @@ type AccountRow = {
   lastLogin?: string | null;
 };
 const Accounts = () => {
+  const { t } = useTranslation();
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [search, setSearch] = useState("");
@@ -75,16 +86,14 @@ const Accounts = () => {
       <PlayfulBackground />
 
       <div className="relative z-10">
-
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-
-
           <div className="mb-6 animate-fade-slide-up">
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center gap-3">
-              Accounts <span className="text-3xl">👥</span>
+              {t("accountsTitle")}
+              <span className="text-3xl">👥</span>
             </h1>
             <p className="text-muted-foreground mt-1">
-              All parent and child profiles in your family.
+              {t("accountsSubtitle")}
             </p>
           </div>
 
@@ -96,14 +105,29 @@ const Accounts = () => {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name, username, or email..."
+                  placeholder={t("searchAccounts")}
                   className="pl-10"
                 />
               </div>
               <div className="flex gap-2">
-                <FilterPill active={filter === "all"} onClick={() => setFilter("all")} icon={Users} label={`All (${counts.all})`} />
-                <FilterPill active={filter === "parent"} onClick={() => setFilter("parent")} icon={UserCheck} label={`Parents (${counts.parent})`} />
-                <FilterPill active={filter === "child"} onClick={() => setFilter("child")} icon={Baby} label={`Children (${counts.child})`} />
+                <FilterPill
+                  active={filter === "all"}
+                  onClick={() => setFilter("all")}
+                  icon={Users}
+                  label={`${t("all")} (${counts.all})`}
+                />
+                <FilterPill
+                  active={filter === "parent"}
+                  onClick={() => setFilter("parent")}
+                  icon={UserCheck}
+                  label={`${t("parents")} (${counts.parent})`}
+                />
+                <FilterPill
+                  active={filter === "child"}
+                  onClick={() => setFilter("child")}
+                  icon={Baby}
+                  label={`${t("children")} (${counts.child})`}
+                />
               </div>
             </div>
           </div>
@@ -112,7 +136,9 @@ const Accounts = () => {
           {state === "loading" && (
             <div className="bg-card rounded-2xl border border-border/50 p-12 text-center">
               <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-              <p className="text-muted-foreground text-sm">Loading accounts...</p>
+              <p className="text-muted-foreground text-sm">
+                {t("loadingAccounts")}
+              </p>
             </div>
           )}
 
@@ -121,10 +147,15 @@ const Accounts = () => {
               <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-3">
                 <AlertCircle className="w-8 h-8 text-destructive" />
               </div>
-              <h3 className="font-bold text-lg">Couldn't load accounts</h3>
-              <p className="text-sm text-muted-foreground mt-1 mb-4">Please try again.</p>
-              <Button variant="outline" onClick={() => window.location.reload()}>
-                Try again
+              <h3 className="font-bold text-lg">{t("couldntLoadAccounts")}</h3>
+              <p className="text-sm text-muted-foreground mt-1 mb-4">
+                {t("tryAgain")}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+              >
+                {t("tryAgain")}
               </Button>
             </div>
           )}
@@ -132,9 +163,9 @@ const Accounts = () => {
           {state === "ready" && filtered.length === 0 && (
             <div className="bg-card rounded-3xl p-12 text-center border border-border/50 shadow-soft animate-scale-fade-in">
               <div className="text-5xl mb-3">👀</div>
-              <h3 className="text-xl font-bold mb-1">No accounts found</h3>
+              <h3 className="text-xl font-bold mb-1">{t("noAccountsFound")}</h3>
               <p className="text-muted-foreground text-sm">
-                Try a different search or filter.
+                {t("noAccountsFoundHint")}
               </p>
             </div>
           )}
@@ -144,11 +175,15 @@ const Accounts = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40 hover:bg-muted/40">
-                    <TableHead className="font-bold">User</TableHead>
-                    <TableHead className="font-bold">Username</TableHead>
-                    <TableHead className="font-bold">Type</TableHead>
-                    <TableHead className="font-bold hidden md:table-cell">Email</TableHead>
-                    <TableHead className="font-bold hidden lg:table-cell">Last login</TableHead>
+                    <TableHead>{t("user")}</TableHead>
+                    <TableHead>{t("username")}</TableHead>
+                    <TableHead>{t("type")}</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      {t("email")}
+                    </TableHead>
+                    <TableHead className="hidden lg:table-cell">
+                      {t("lastLogin")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -156,7 +191,10 @@ const Accounts = () => {
                     <TableRow
                       key={a.id}
                       className="animate-fade-slide-up opacity-0"
-                      style={{ animationDelay: `${i * 60}ms`, animationFillMode: "forwards" }}
+                      style={{
+                        animationDelay: `${i * 60}ms`,
+                        animationFillMode: "forwards",
+                      }}
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -180,7 +218,9 @@ const Accounts = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">@{a.username}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        @{a.username}
+                      </TableCell>
                       <TableCell>
                         <span
                           className={cn(
@@ -190,11 +230,11 @@ const Accounts = () => {
                               : "bg-secondary/30 text-secondary-foreground",
                           )}
                         >
-                          {a.type === "parent" ? "👤 Parent" : "🧒 Child"}
+                         {a.type === "parent" ? `👤 ${t("parents")}` : `🧒 ${t("children")}`}
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
-                        {a.email ?? "—"}
+                        {a.email ?? t("none")}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
                         {formatRelative(a.lastLogin)}
@@ -218,7 +258,12 @@ interface FilterPillProps {
   label: string;
 }
 
-const FilterPill = ({ active, onClick, icon: Icon, label }: FilterPillProps) => (
+const FilterPill = ({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: FilterPillProps) => (
   <button
     onClick={onClick}
     className={cn(
