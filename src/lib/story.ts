@@ -98,8 +98,7 @@ export const updateStoryWithAi = async (storyId:number, data) =>{
     return await res.json()
 }
 
-export const getStoryEditMessages =
-  async (storyId:number) => {
+export const getStoryEditMessages = async (storyId:number) => {
 
   const token =
     localStorage.getItem("accessToken");
@@ -118,3 +117,29 @@ export const getStoryEditMessages =
 
   return await res.json();
 };
+
+export const getChildrenStories = async () => {
+  const token = localStorage.getItem("accessToken")
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/story/children`,
+    {
+      headers:{
+        Authorization:token?`Bearer ${token}` : ""
+      }
+    }
+  )
+  return await res.json()
+}
+
+export const deleteStory = async (storyId:number) => {
+  const token = localStorage.getItem("accessToken")
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/story/${storyId}`,
+    {
+      method: "DELETE",
+      headers:{
+        Authorization : token? `Bearer ${token}`: ""
+      }
+    }
+  )
+  return await res.json()
+}

@@ -24,6 +24,7 @@ import AppNavbar from "@/components/AppNavbar";
 const queryClient = new QueryClient();
 import { useAuth } from "@/contexts/AuthContext";
 import MyFiles from "./pages/MyFiles";
+import ChildrenStories from "./pages/ChildrenStories";
 const NavbarController = () => {
   const { userType, isLoading } = useAuth();
 
@@ -145,6 +146,14 @@ const App = () => (
                 element={
                   <ProtectedRoute allow={["parent"]}>
                     <MyFiles />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/children-stories"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <ChildrenStories />
                   </ProtectedRoute>
                 }
               />
