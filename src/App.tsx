@@ -21,10 +21,15 @@ import Profile from "./pages/profile.tsx";
 import StoryForm from "./pages/StoryForm";
 import MyStories from "./pages/MyStories";
 import AppNavbar from "@/components/AppNavbar";
-const queryClient = new QueryClient();
 import { useAuth } from "@/contexts/AuthContext";
 import MyFiles from "./pages/MyFiles";
 import ChildrenStories from "./pages/ChildrenStories";
+import { useFirebaseNotifications } from "./hooks/useFirebaseNotifications.ts";
+import { getToken } from "firebase/messaging";
+import { messaging } from "./lib/firebase.ts";
+import { useEffect } from "react";
+const queryClient = new QueryClient();
+
 const NavbarController = () => {
   const { userType, isLoading } = useAuth();
 
@@ -34,7 +39,37 @@ const NavbarController = () => {
 
   return <AppNavbar />;
 };
-const App = () => (
+// async function requestNotificationPermission(){
+//   const permission= await Notification.requestPermission()
+//   const authToken = localStorage.getItem("accessToken")
+//   if(permission !== 'granted') return
+//   const token = await getToken (messaging , {
+//     vapidKey:import.meta.env.VITE_FIREBASE_VAPID_KEY,
+//   })
+//   localStorage.setItem("fcmToken",token)
+//   console.log("AUTH TOKEN:", authToken);
+//   await fetch(
+//   `${import.meta.env.VITE_API_URL}/ai/fcm-token`,
+//   {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${authToken}`,
+//     },
+//     body: JSON.stringify({
+//       token,
+//     }),
+//   }
+// );
+//     console.log("FCM Token:", token);
+// }
+const App = () => {
+  useFirebaseNotifications()
+  //  useEffect(() => {
+  //   requestNotificationPermission();
+  // }, []);
+
+  return(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
@@ -175,6 +210,8 @@ const App = () => (
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
-);
+  )
+  
+};
 
 export default App;

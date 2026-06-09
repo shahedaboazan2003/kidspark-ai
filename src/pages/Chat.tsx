@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import {  useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Menu, Sparkles, Bot } from "lucide-react";
 import { toast } from "sonner";
 import PlayfulBackground from "@/components/PlayfulBackground";
@@ -9,6 +9,7 @@ import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatInput from "@/components/chat/ChatInput";
 import ChatTopControls from "@/components/chat/ChatTopControls";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 import {
   Conversation,
   AskMessage,
@@ -29,14 +30,16 @@ type UiMessage = {
   imageUrl?: string;
 };
 
-const SUGGESTED = [
-  { emoji: "🌍", text: "Why is the sky blue?" },
-  { emoji: "🦖", text: "Tell me a fun fact about dinosaurs!" },
-  { emoji: "🚀", text: "How do rockets fly to space?" },
-  { emoji: "🐙", text: "Why do octopuses have 8 arms?" },
-];
 
 const Chat = () => {
+  const { t } = useTranslation();
+  const SUGGESTED = [
+  { emoji: "🌍", text: t("suggestedQuestion1") },
+  { emoji: "🦖", text: t("suggestedQuestion2") },
+  { emoji: "🚀", text: t("suggestedQuestion3") },
+  { emoji: "🐙", text: t("suggestedQuestion4") },
+];
+
   const { id: routeConvoId } = useParams<{ id?: string }>();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -53,9 +56,9 @@ const Chat = () => {
 
   useEffect(() => {
     getTokenStats().then((res) => {
-    setTokenBalance(res.data.tokenBalance);
-  });
-  },[])
+      setTokenBalance(res.data.tokenBalance);
+    });
+  }, []);
 
   //get all conversations on load + when route param changes
   // useEffect(() => {
@@ -81,7 +84,7 @@ const Chat = () => {
   //   })();
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [routeConvoId, user]);
-    useEffect(() => {
+  useEffect(() => {
     if (!user) return;
 
     (async () => {
@@ -89,16 +92,15 @@ const Chat = () => {
         const list = await listConversations(user.id);
         setConversations(list);
       } catch {
-        toast.error("Couldn't load chats");
+        toast.error(t("couldntLoadChats"));
       } finally {
         setLoadingConvos(false);
       }
     })();
   }, [user]);
 
-
   useEffect(() => {
-    if (routeConvoId ) {
+    if (routeConvoId) {
       setActiveId(Number(routeConvoId));
     } else if (conversations.length > 0) {
       setActiveId(conversations[0].id);
@@ -109,12 +111,12 @@ const Chat = () => {
   // TODO: fix messages state here
   useEffect(() => {
     if (!activeId || streaming) return;
-    console.log("activ id",activeId)
+    console.log("activ id", activeId);
     setLoadingMsgs(true);
     (async () => {
       try {
         const msgs: AskMessage[] = await listMessages(activeId);
-        console.log("messageeeee",msgs)
+        console.log("messageeeee", msgs);
         // setMessages(msgs.map((m: DbMessage) => ({ id: m.id, role: m.role, content: m.content })));
         setMessages(
           msgs.flatMap((m) => [
@@ -133,7 +135,7 @@ const Chat = () => {
           ]),
         );
       } catch {
-        toast.error("Couldn't load messages 💫");
+        toast.error(t("couldntLoadMessages"));
       } finally {
         setLoadingMsgs(false);
       }
@@ -162,9 +164,9 @@ const Chat = () => {
           setActiveId(null);
           setMessages([]);
         }
-        toast.success("Chat removed");
+        toast.success(t("chatRemoved"));
       } catch {
-        toast.error("Couldn't delete chat 💫");
+        toast.error(t("couldntDeleteChat"));
       }
     },
     [activeId],
@@ -181,7 +183,7 @@ const Chat = () => {
         setActiveId(c.id);
         convoId = c.id;
       } catch {
-        toast.error("Couldn't start chat 💫");
+        toast.error(t("couldntStartChat"));
         return;
       }
     }
@@ -242,9 +244,7 @@ const Chat = () => {
           prev.map((m) => (m.id === assistantTmpId ? { ...m, imageUrl } : m)),
         );
       },
-
-      
-  });
+    });
   };
 
   const handleStop = () => {
@@ -282,7 +282,7 @@ const Chat = () => {
           <button
             onClick={() => setSidebarOpen(true)}
             className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-muted transition-colors"
-            aria-label="Open chats"
+            aria-label={t("openChats")}
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -293,7 +293,7 @@ const Chat = () => {
                 strokeWidth={2.5}
               />
             </div>
-            <span className="font-bold">Sparky</span>
+            <span className="font-bold">{t("sparkyName")}</span>
           </div>
           <ChatTopControls className="ml-auto" />
         </header>
@@ -326,10 +326,9 @@ const Chat = () => {
                     strokeWidth={2.2}
                   />
                 </div>
-                <h1 className="text-3xl font-bold mb-2">Hi! I'm Sparky 👋</h1>
+                <h1 className="text-3xl font-bold mb-2">{t("chatWelcome")}</h1>
                 <p className="text-muted-foreground mb-8 max-w-md">
-                  Ask me anything — I love stories, science, animals, space, and
-                  big questions!
+                  {t("chatDescription")}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
                   {SUGGESTED.map((s) => (

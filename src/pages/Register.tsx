@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { register } from "@/lib/auth";
 import { ApiError } from "@/lib/http";
+import { useTranslation } from "react-i18next";
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -32,6 +33,7 @@ const initial: FormState = {
 };
 
 const Register = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(initial);
   const [errors, setErrors] = useState<Errors>({});
@@ -89,7 +91,6 @@ const Register = () => {
     setLoading(true);
 
     try {
-
       const res = await register({
         username: form.username.trim(),
         password: form.password,
@@ -124,10 +125,10 @@ const Register = () => {
       toast.error(msg);
       setShakeKey((k) => k + 1);
       if (err instanceof ApiError) {
-                toast.error(err.message)
-              } else {
-                toast.error("Unexpected error 💥")
-              }
+        toast.error(err.message);
+      } else {
+        toast.error("Unexpected error 💥");
+      }
     }
   };
 
@@ -159,19 +160,17 @@ const Register = () => {
         >
           <div className="text-center mb-7">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Create Parent Account
+              {t("createParentAccount")}
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Start your child's learning journey ✨
-            </p>
+            <p className="text-muted-foreground text-sm">{t("startJourney")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <Field
               id="email"
-              label="Email"
+              label={t("email")}
               type="email"
-              placeholder="parent@example.com"
+              placeholder={t("emailPlaceholder")}
               value={form.email}
               onChange={(v) => update("email", v)}
               onBlur={() => handleBlur("email")}
@@ -181,9 +180,9 @@ const Register = () => {
 
             <Field
               id="password"
-              label="Password"
+              label={t("password")}
               type={showPwd ? "text" : "password"}
-              placeholder="At least 6 characters"
+              placeholder={t("passwordPlaceholder")}
               value={form.password}
               onChange={(v) => update("password", v)}
               onBlur={() => handleBlur("password")}
@@ -202,9 +201,9 @@ const Register = () => {
 
             <Field
               id="repeatPassword"
-              label="Repeat Password"
+              label={t("repeatPassword")}
               type={showRepeat ? "text" : "password"}
-              placeholder="Type your password again"
+              placeholder={t("repeatPasswordPlaceholder")}
               value={form.repeatPassword}
               onChange={(v) => update("repeatPassword", v)}
               onBlur={() => handleBlur("repeatPassword")}
@@ -223,9 +222,9 @@ const Register = () => {
 
             <Field
               id="username"
-              label="Username"
+              label={t("username")}
               type="text"
-              placeholder="Pick a friendly username"
+              placeholder={t("usernamePlaceholder")}
               value={form.username}
               onChange={(v) => update("username", v)}
               onBlur={() => handleBlur("username")}
@@ -236,9 +235,9 @@ const Register = () => {
             <div className="grid grid-cols-2 gap-3">
               <Field
                 id="firstName"
-                label="First Name"
+                label={t("firstName")}
                 type="text"
-                placeholder="Jane"
+                placeholder={t("firstNamePlaceholder")}
                 value={form.firstName}
                 onChange={(v) => update("firstName", v)}
                 onBlur={() => handleBlur("firstName")}
@@ -246,9 +245,9 @@ const Register = () => {
               />
               <Field
                 id="lastName"
-                label="Last Name"
+                label={t("lastName")}
                 type="text"
-                placeholder="Doe"
+                placeholder={t("lastNamePlaceholder")}
                 value={form.lastName}
                 onChange={(v) => update("lastName", v)}
                 onBlur={() => handleBlur("lastName")}
@@ -266,18 +265,18 @@ const Register = () => {
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" />
-                  Creating account...
+                  {t("creatingAccount")}
                 </>
               ) : (
-                "Create Account"
+                t("createAccount")
               )}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Already have an account?{" "}
+            {t("alreadyHaveAccount")}{" "}
             <Link to="/login" className="text-primary font-semibold">
-              Login
+              {t("login")}
             </Link>
           </p>
         </div>

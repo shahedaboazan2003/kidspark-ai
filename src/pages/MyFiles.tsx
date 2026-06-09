@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trash2, Upload, FileText } from "lucide-react";
+import { Trash2, Upload, FileText, Edit2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -12,10 +12,17 @@ import {
 } from "@/components/ui/select"
 import { getChildren } from "@/lib/children";
 import { useAuth } from "@/contexts/AuthContext";
-import { deleteFile, getFiles, uploadFile } from "@/lib/file";
+import { deleteFile, getFiles, updateFile, uploadFile } from "@/lib/file";
+import { useTranslation } from "react-i18next";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function MyFiles() {
-
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -30,6 +37,12 @@ export default function MyFiles() {
 
   const {user}= useAuth()
   
+  const [editOpen, setEditOpen] = useState(false);
+
+  const [editingFile, setEditingFile] = useState<any>(null);
+
+  const [editChildren, setEditChildren] = useState<string[]>([]);
+
   useEffect(() => {
       if (!user?.id) return;
   
@@ -63,21 +76,14 @@ export default function MyFiles() {
     loadFiles()
   },[user])
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
-
       setSelectedFile(e.target.files[0]);
-
     }
   };
 
   const handleRemoveFile = () => {
-
     setSelectedFile(null);
-
   };
 
   const handleUpload = async() => {
@@ -107,44 +113,50 @@ export default function MyFiles() {
     }
   };
 
+  const openEditDialog = (file:any) => {
+  setEditingFile(file);
+
+  setEditChildren(
+    file.children.map(
+      (c:any) => String(c.child.id)
+    )
+  );
+
+  setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingFile) return
+    try{
+      // if (editChildren.length === 0) {
+      //   alert("Select at least one child");
+      //   return;
+      // }
+      await updateFile(editingFile.id, editChildren.map(Number))
+      const data = await getFiles()
+      setFiles(data.data.documents)
+      setEditOpen(false)
+      setEditingFile(null);
+      setEditChildren([]);
+    }catch(err){
+      console.log(err)
+    }
+  }
+
   return (
-
     <div className="min-h-screen bg-background p-6">
-
       <div className="max-w-5xl mx-auto">
-
-        {/* BACK */}
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="mb-6 bg-muted hover:bg-muted/70 px-4 py-2 rounded-xl"
-        >
-          ← Back
-        </button>
-
         {/* TITLE */}
-        <h1 className="text-4xl font-bold mb-8">
-
-          My Files
-
-        </h1>
+        <h1 className="text-4xl font-bold mb-8">{t("myFiles")}</h1>
 
         {/* UPLOAD CARD */}
         <div className="bg-card rounded-2xl shadow-md p-6 mb-10 border">
-
-          <h2 className="text-2xl font-bold mb-6">
-
-            Upload New File
-
-          </h2>
+          <h2 className="text-2xl font-bold mb-6">{t("uploadNewFile")}</h2>
 
           {/* FILE INPUT */}
           <div className="mb-6">
-
-            <label
-              htmlFor="fileUpload"
-              className="block mb-2 font-semibold"
-            >
-              Choose File
+            <label htmlFor="fileUpload" className="block mb-2 font-semibold">
+              {t("chooseFile")}
             </label>
 
             <input
@@ -153,24 +165,15 @@ export default function MyFiles() {
               onChange={handleFileChange}
               className="w-full border rounded-xl p-3"
             />
-
           </div>
 
           {/* FILE PREVIEW */}
           {selectedFile && (
-
             <div className="flex items-center justify-between bg-muted rounded-xl p-4 mb-6">
-
               <div className="flex items-center gap-3">
-
                 <FileText className="w-5 h-5" />
 
-                <span>
-
-                  {selectedFile.name}
-
-                </span>
-
+                <span>{selectedFile.name}</span>
               </div>
 
               <button
@@ -181,17 +184,12 @@ export default function MyFiles() {
               </button>
 
             </div>
-
           )}
 
           {/* CHILD SELECT */}
           <div className="mb-6">
-
-            <label
-              htmlFor="children"
-              className="block mb-2 font-semibold"
-            >
-              Select Children
+            <label htmlFor="children" className="block mb-2 font-semibold">
+              {t("selectChildren")}
             </label>
 
             <Select
@@ -222,7 +220,6 @@ export default function MyFiles() {
 
           {/* SELECTED CHILDREN */}
           {selectedChildren.length > 0 && (
-
             <div className="flex flex-wrap gap-2 mb-6">
 
               {selectedChildren.map((childId) => {
@@ -241,7 +238,6 @@ export default function MyFiles() {
               })}
 
             </div>
-
           )}
 
           {/* UPLOAD BUTTON */}
@@ -249,37 +245,24 @@ export default function MyFiles() {
             onClick={handleUpload}
             className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl hover:opacity-90"
           >
-
             <Upload className="w-5 h-5" />
 
-            Upload File
-
+            {t("uploadFile")}
           </button>
-
         </div>
 
         {/* FILES LIST */}
         <div>
-
-          <h2 className="text-2xl font-bold mb-6">
-
-            Uploaded Files
-
-          </h2>
+          <h2 className="text-2xl font-bold mb-6">{t("uploadedFiles")}</h2>
 
           <div className="grid md:grid-cols-2 gap-6">
-
             {files.map((file) => (
-
               <div
                 key={file.id}
                 className="bg-card rounded-2xl shadow-md p-5 border"
               >
-
                 <div className="flex items-start justify-between mb-4">
-
                   <div className="flex items-center gap-3">
-
                     <FileText className="w-6 h-6" />
 
                     <div>
@@ -295,20 +278,24 @@ export default function MyFiles() {
                         {new Date(file.createdAt).toLocaleDateString()}
 
                       </p>
-
                     </div>
-
                   </div>
+
+                  <div className="flex gap-2">
+                  <button
+                  onClick={() => openEditDialog(file)}
+                  >
+                    <Edit2/>
+                  </button>
 
                   <button
                     onClick={() => handleDelete(file.id)}
                     className="text-red-500 hover:text-red-700"
                   >
-
                     <Trash2 className="w-5 h-5" />
-
                   </button>
-
+                  </div>
+                  
                 </div>
 
                 {/* CHILDREN */}
@@ -324,21 +311,67 @@ export default function MyFiles() {
                       {item.child.firstName}
 
                     </span>
-
                   ))}
-
                 </div>
-
               </div>
-
             ))}
-
           </div>
-
         </div>
 
-      </div>
+        <Dialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          >
+          <DialogContent>
 
+            <DialogHeader>
+              <DialogTitle>
+                Edit Children
+              </DialogTitle>
+            </DialogHeader>
+
+            <p>{editingFile?.title}</p>
+
+            {children.map((child:any) => (
+              <label
+                key={child.id}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="checkbox"
+                  checked={editChildren.includes(
+                    String(child.id)
+                  )}
+                  onChange={(e) => {
+
+                    if (e.target.checked) {
+                      setEditChildren([
+                        ...editChildren,
+                        String(child.id),
+                      ]);
+                    } else {
+                      setEditChildren(
+                        editChildren.filter(
+                          id => id !== String(child.id)
+                        )
+                      );
+                    }
+                  }}
+                />
+
+                {child.firstName}
+              </label>
+            ))}
+
+            <button
+              onClick={handleSaveEdit}
+            >
+              Save
+            </button>
+
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

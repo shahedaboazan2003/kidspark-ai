@@ -71,3 +71,24 @@ export const deleteFile = async (id: number) => {
 
   return res.json();
 };
+
+export const updateFile = async (documentId:number , childIds: number[]) => {
+    const token = localStorage.getItem("accessToken")
+    const url = `${import.meta.env.VITE_API_URL}/documents/${documentId}/children`;
+    const res = await fetch(url , {
+        method: "PATCH",
+        headers:{
+            Authorization : token? `Bearer ${token}` :"",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+        childIds,
+        }),
+    })
+    if(!res.ok){
+        throw new Error ("Update faild")
+    }
+
+    return res.json()
+
+}

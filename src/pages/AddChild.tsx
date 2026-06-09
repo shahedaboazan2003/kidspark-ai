@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +21,7 @@ import { toast } from "sonner";
 import { Child } from "@/lib/children";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/lib/http";
-  import {
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -32,10 +29,10 @@ import { ApiError } from "@/lib/http";
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 interface Errors {
   firstName?: string;
-  gender?:string;
+  gender?: string;
   lastName?: string;
   birthDate?: string;
   username?: string;
@@ -63,8 +60,8 @@ const generatePassword = (length = 10): string => {
   return [...required, ...rest].sort(() => Math.random() - 0.5).join("");
 };
 
-
 const AddChild = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const editingChild = location.state as Child | null;
   const isEditMode = !!editingChild;
@@ -74,7 +71,7 @@ const AddChild = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("")
+  const [gender, setGender] = useState("");
   // const [age, setAge] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [username, setUsername] = useState("");
@@ -86,7 +83,7 @@ const AddChild = () => {
   const [touched, setTouched] = useState<Record<keyof Errors, boolean>>({
     firstName: false,
     lastName: false,
-    gender:false,
+    gender: false,
     birthDate: false,
     username: false,
     password: false,
@@ -107,44 +104,39 @@ const AddChild = () => {
   const validate = (): Errors => {
     const e: Errors = {};
 
-    if (!firstName.trim()) e.firstName = "First name required";
+    if (!firstName.trim()) e.firstName = t("firstNameRequired");
 
-    if (!lastName.trim()) e.lastName = "Last name required";
+    if (!lastName.trim()) e.lastName = t("lastNameRequired");
 
+    if (!birthDate) {
+      e.birthDate = t("birthDateRequired");
+    } else {
+      const today = new Date();
+      const birth = new Date(birthDate);
 
-  if (!birthDate) {
-  e.birthDate = "Birth date required";
-} else {
-  const today = new Date();
-  const birth = new Date(birthDate);
+      let age = today.getFullYear() - birth.getFullYear();
 
-  let age =
-    today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
 
-  const monthDiff =
-    today.getMonth() - birth.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birth.getDate())
+      ) {
+        age--;
+      }
 
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 &&
-      today.getDate() < birth.getDate())
-  ) {
-    age--;
-  }
-
-  if (age < 2 || age > 17) {
-    e.birthDate =
-      "Age must be between 2 and 17";
-  }
-}
-    if (!username.trim()) e.username = "Username required";
+      if (age < 2 || age > 17) {
+        e.birthDate = t("ageBetween2And17");
+      }
+    }
+    if (!username.trim()) e.username = t("usernameRequired");
 
     if (!isEditMode) {
-      if (!password) e.password = "Password required";
-      else if (password.length < 6) e.password = "Min 6 characters";
+      if (!password) e.password = t("passwordRequired");
+      else if (password.length < 6) e.password = t("passwordMin6");
 
       if (password !== repeatPassword)
-        e.repeatPassword = "Passwords don't match";
+        e.repeatPassword = t("passwordsDontMatch");
     }
 
     return e;
@@ -173,40 +165,28 @@ const AddChild = () => {
     try {
       if (isEditMode && editingChild) {
         const payload = {
-        id: editingChild.id,
-        firstName,
-        lastName,
-        gender,
-        username,
-        birthDate,
-        readingLevel,
-        responseLength,
-        learningStyle,
-        interests,
-        blockedTopics
-      };
+          id: editingChild.id,
+          firstName,
+          lastName,
+          gender,
+          username,
+          birthDate,
+          readingLevel,
+          responseLength,
+          learningStyle,
+          interests,
+          blockedTopics,
+        };
         await updateChild(payload);
         localStorage.setItem("readingLevel", readingLevel);
-        localStorage.setItem("gender", gender)
-        localStorage.setItem(
-          "responseLength",
-          responseLength
-        );
+        localStorage.setItem("gender", gender);
+        localStorage.setItem("responseLength", responseLength);
 
-        localStorage.setItem(
-          "learningStyle",
-          learningStyle
-        );
+        localStorage.setItem("learningStyle", learningStyle);
 
-        localStorage.setItem(
-          "interests",
-          JSON.stringify(interests)
-        );
+        localStorage.setItem("interests", JSON.stringify(interests));
 
-        localStorage.setItem(
-          "blockedTopics",
-          JSON.stringify(blockedTopics)
-        );
+        localStorage.setItem("blockedTopics", JSON.stringify(blockedTopics));
         const storedUser = localStorage.getItem("USER_KEY");
 
         if (storedUser) {
@@ -220,49 +200,45 @@ const AddChild = () => {
               responseLength,
               learningStyle,
               interests,
-              blockedTopics
+              blockedTopics,
             };
 
-            localStorage.setItem(
-              "USER_KEY",
-              JSON.stringify(updatedUser)
-            );
+            localStorage.setItem("USER_KEY", JSON.stringify(updatedUser));
           }
         }
-       console.log(">>>>>>>>>>>>>>>>",birthDate)
-        toast.success("Updated");
+        console.log(">>>>>>>>>>>>>>>>", birthDate);
+        toast.success(t("updated"));
         navigate("/dashboard");
       } else {
         console.log("STEP 3 CALLING CREATE CHILD");
         console.log("CALLING API WITH TOKEN:", accessToken);
         await createChild({
-           firstName,
-            lastName,
-            gender,
-            username,
-            password,
-            birthDate,
+          firstName,
+          lastName,
+          gender,
+          username,
+          password,
+          birthDate,
 
-            readingLevel,
-            responseLength,
-            learningStyle,
-            interests,
-            blockedTopics
+          readingLevel,
+          responseLength,
+          learningStyle,
+          interests,
+          blockedTopics,
         });
 
-
-        toast.success("Child created successfully");
+        toast.success(t("childCreatedSuccess"));
         navigate("/dashboard");
       }
     } catch (err) {
       const error = err as ApiError;
 
       if (error.status === 409) {
-        setSubmitError("Username already exists");
+        setSubmitError(t("usernameExists"));
       } else if (error.status === 401) {
-        setSubmitError("Please login again");
+        setSubmitError(t("loginAgain"));
       } else if (error.status === 404) {
-        setSubmitError("Child not found");
+        setSubmitError(t("childNotFound"));
       } else {
         setSubmitError(error.message);
       }
@@ -270,7 +246,7 @@ const AddChild = () => {
       setLoading(false);
     }
   };
-
+  // ظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظظ
   const handleSuccessClose = () => {
     setSuccessOpen(false);
     navigate("/dashboard");
@@ -281,12 +257,10 @@ const AddChild = () => {
 
     setFirstName(editingChild.firstName || "");
     setLastName(editingChild.lastName || "");
-    setGender(editingChild.gender || "")
+    setGender(editingChild.gender || "");
 
     setUsername(editingChild.username || "");
-    setBirthDate(
-      editingChild.birthDate.split("T")[0]
-    );
+    setBirthDate(editingChild.birthDate.split("T")[0]);
     setPassword("");
     setRepeatPassword("");
 
@@ -295,7 +269,6 @@ const AddChild = () => {
     setLearningStyle(editingChild.learningStyle || "");
     setInterests(editingChild.interests || []);
     setBlockedTopics(editingChild.blockedTopics || []);
-
   }, [editingChild]);
   useEffect(() => {
     if (editId && !editingChild) {
@@ -305,11 +278,11 @@ const AddChild = () => {
           const child = res.data;
           setFirstName(child.firstName || "");
           setLastName(child.lastName || "");
-          setGender(child.gender || "")
+          setGender(child.gender || "");
           // setBirthDate(
           //   editingChild.birthDate.split("T")[0]
           // );
-            setBirthDate(child.birthDate.split("T")[0]);
+          setBirthDate(child.birthDate.split("T")[0]);
           setUsername(child.username || "");
         })
         .catch(() => navigate("/dashboard"))
@@ -321,7 +294,7 @@ const AddChild = () => {
 
     setFirstName("");
     setLastName("");
-    setGender("")
+    setGender("");
     setBirthDate("");
     setUsername("");
     setPassword("");
@@ -332,14 +305,9 @@ const AddChild = () => {
       <PlayfulBackground />
 
       <main className="max-w-2xl mx-auto p-6">
-        <Link to="/dashboard" className="flex items-center gap-2 mb-4">
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Link>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>First Name</Label>
+            <Label>{t("firstName")}</Label>
             <Input
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
@@ -351,7 +319,7 @@ const AddChild = () => {
           </div>
 
           <div>
-            <Label>Last Name</Label>
+            <Label>{t("lastName")}</Label>
             <Input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
@@ -362,33 +330,25 @@ const AddChild = () => {
             )}
           </div>
 
-        <div className="space-y-2">
-          <Label>Gender</Label>
+          <div className="space-y-2">
+            <Label>{t("gender")}</Label>
 
-          <Select
-            value={gender}
-            onValueChange={setGender}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select child's gender" />
-            </SelectTrigger>
+            <Select value={gender} onValueChange={setGender}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectGender")} />
+              </SelectTrigger>
 
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="male">
-                  Male
-                </SelectItem>
-
-                <SelectItem value="female">
-                  Female
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="male">{t("male")}</SelectItem>
+                  <SelectItem value="female">{t("female")}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div>
-            <Label>Birth Date</Label>
+            <Label>{t("birthDate")}</Label>
             <Input
               type="date"
               value={birthDate}
@@ -401,7 +361,7 @@ const AddChild = () => {
           </div>
 
           <div>
-            <Label>Username</Label>
+            <Label>{t("username")}</Label>
             <Input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -415,7 +375,7 @@ const AddChild = () => {
           {!isEditMode && (
             <>
               <div>
-                <Label>Password</Label>
+                <Label>{t("password")}</Label>
                 <div className="relative">
                   <Input
                     type={showPwd ? "text" : "password"}
@@ -439,7 +399,7 @@ const AddChild = () => {
               </div>
 
               <div>
-                <Label>Repeat Password</Label>
+                <Label>{t("repeatPassword")}</Label>
                 <div className="relative">
                   <Input
                     type={showPwd ? "text" : "password"}
@@ -465,131 +425,104 @@ const AddChild = () => {
               </div>
             </>
           )}
+          {/* ///////////////////////////////////////////////////////////////////////////////////////////////////////////// */}
+          <div className="space-y-2">
+            <Label>{t("readingLevel")}</Label>
 
-        <div className="space-y-2">
-          <Label>Reading Level</Label>
+            <Select value={readingLevel} onValueChange={setReadingLevel}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectReadingLevel")} />
+              </SelectTrigger>
 
-          <Select
-            value={readingLevel}
-            onValueChange={setReadingLevel}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select reading level" />
-            </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="beginner">{t("beginner")}</SelectItem>
 
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="beginner">
-                  Beginner
-                </SelectItem>
+                  <SelectItem value="intermediate">
+                    {t("intermediate")}
+                  </SelectItem>
 
-                <SelectItem value="intermediate">
-                  Intermediate
-                </SelectItem>
+                  <SelectItem value="advanced">{t("advanced")}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
-                <SelectItem value="advanced">
-                  Advanced
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label>{t("responseLength")}</Label>
 
-        <div className="space-y-2">
-          <Label>Response Length</Label>
+            <Select value={responseLength} onValueChange={setResponseLength}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectResponseLength")} />
+              </SelectTrigger>
 
-          <Select
-            value={responseLength}
-            onValueChange={setResponseLength}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select response length" />
-            </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="short">{t("short")}</SelectItem>
 
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="short">
-                  Short
-                </SelectItem>
+                  <SelectItem value="medium">{t("medium")}</SelectItem>
 
-                <SelectItem value="medium">
-                  Medium
-                </SelectItem>
+                  <SelectItem value="detailed">{t("detailed")}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
-                <SelectItem value="detailed">
-                  Detailed
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label>{t("learningStyle")}</Label>
 
-        <div className="space-y-2">
-          <Label>Learning Style</Label>
+            <Select value={learningStyle} onValueChange={setLearningStyle}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectLearningStyle")} />
+              </SelectTrigger>
 
-          <Select
-            value={learningStyle}
-            onValueChange={setLearningStyle}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select learning style" />
-            </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="story">{t("story")}</SelectItem>
 
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="story">
-                  Story
-                </SelectItem>
+                  <SelectItem value="logical">{t("logical")}</SelectItem>
 
-                <SelectItem value="logical">
-                  Logical
-                </SelectItem>
+                  <SelectItem value="playful">{t("playful")}</SelectItem>
 
-                <SelectItem value="playful">
-                  Playful
-                </SelectItem>
+                  <SelectItem value="visual">{t("visual")}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
-                <SelectItem value="visual">
-                  Visual
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label>{t("interests")}</Label>
 
-      <div className="space-y-2">
-        <Label>Interests</Label>
+            <Input
+              placeholder="cats,cars,space"
+              value={interests.join(", ")}
+              onChange={(e) =>
+                setInterests(
+                  e.target.value
+                    .split(",")
+                    .map((i) => i.trim())
+                    .filter(Boolean),
+                )
+              }
+            />
+          </div>
 
-        <Input
-          placeholder="cats,cars,space"
-          value={interests.join(", ")}
-          onChange={(e) =>
-            setInterests(
-              e.target.value
-                .split(",")
-                .map((i) => i.trim())
-                .filter(Boolean)
-            )
-          }
-        />
-      </div>
+          <div className="space-y-2">
+            <Label>{t("blockedTopics")}</Label>
 
-      <div className="space-y-2">
-        <Label>Blocked Topics</Label>
-
-        <Input
-          placeholder="cats,cars,space"
-          value={blockedTopics.join(", ")}
-          onChange={(e) =>
-            setBlockedTopics(
-              e.target.value
-                .split(",")
-                .map((i) => i.trim())
-                .filter(Boolean)
-            )
-          }
-        />
-      </div>
+            <Input
+              placeholder="cats,cars,space"
+              value={blockedTopics.join(", ")}
+              onChange={(e) =>
+                setBlockedTopics(
+                  e.target.value
+                    .split(",")
+                    .map((i) => i.trim())
+                    .filter(Boolean),
+                )
+              }
+            />
+          </div>
           {submitError && <p className="text-red-500">{submitError}</p>}
 
           <Button
@@ -604,10 +537,10 @@ const AddChild = () => {
             }
           >
             {loading
-              ? "Saving..."
+              ? t("saving")
               : isEditMode
-                ? "Update Child"
-                : "Create Child"}
+                ? t("updateChild")
+                : t("createChild")}
           </Button>
         </form>
       </main>
@@ -620,11 +553,11 @@ const AddChild = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Success 🎉</DialogTitle>
-            <DialogDescription>Child created successfully</DialogDescription>
+          <DialogTitle>{t("success")}</DialogTitle>
+           <DialogDescription>{t("childCreatedSuccess")}</DialogDescription>
           </DialogHeader>
 
-          <Button onClick={handleSuccessClose}>OK</Button>
+          <Button onClick={handleSuccessClose}>{t("ok")}</Button>
         </DialogContent>
       </Dialog>
     </div>

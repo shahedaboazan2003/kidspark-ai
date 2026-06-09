@@ -1,6 +1,18 @@
 import { approveStory, deleteStory, getChildrenStories, updateStory, updateStoryWithAi } from "@/lib/story";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type Scene = {
   id: number;
@@ -19,8 +31,8 @@ type Story = {
   scenes: Scene[];
 };
 
-export default function ChildrensStories() {
-
+export default function ChildrenStories() {
+  const { t } = useTranslation();
   const [stories, setStories] = useState<Story[]>([]);
   const [filteredStories, setFilteredStories] = useState<Story[]>([]);
   const [search, setSearch] = useState("");
@@ -72,13 +84,10 @@ export default function ChildrensStories() {
       const res = await updateStory(story.id, {
         scenes: story.scenes.map((scene) => ({ id: scene.id, title: scene.title, content: scene.content, })),
       })
-
       setEditingStoryId(null)
     }catch(err){
       console.log(err)
     }
-
-    alert("Story edited successfully!");
   };
 
   const handleApprove = async (storyId:number) => {
@@ -205,23 +214,12 @@ export default function ChildrensStories() {
   };
 
   const handleDelete = async (storyId: number) => {
-
-      const confirmDelete = window.confirm(
-      "Are you sure you want to delete this story?"
-      );
-
-      if (!confirmDelete) return;
-
       try {
-
-      
       await deleteStory(storyId);
 
       setStories((prev) =>
         prev.filter((story) => story.id !== storyId)
       );
-    
-
       } catch (err) {
       console.log(err);
 
@@ -237,7 +235,7 @@ export default function ChildrensStories() {
 
         {/* TITLE */}
         <h1 className="text-4xl font-bold mb-8">
-          Children's Stories
+          {t("childrenStories")}
         </h1>
 
         {/* SEARCH */}
@@ -245,7 +243,7 @@ export default function ChildrensStories() {
 
           <input
             type="text"
-            placeholder="Search by child name..."
+            placeholder={t("searchByChildName")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full p-4 rounded-2xl border border-border bg-card"
@@ -257,7 +255,7 @@ export default function ChildrensStories() {
         {filteredStories.length === 0 ? (
 
           <div className="bg-card rounded-2xl p-8 text-center shadow">
-            No stories found.
+            {t("noStoriesFound")}   
           </div>
 
         ) : (
@@ -270,9 +268,6 @@ export default function ChildrensStories() {
                 key={story.id}
                 className="bg-card rounded-2xl shadow-md overflow-hidden"
               >
-
-                
-
                 <div className="p-5">
 
                   <h2 className="text-2xl font-bold mb-2">
@@ -280,7 +275,7 @@ export default function ChildrensStories() {
                   </h2>
 
                   <p className="text-sm text-purple-500 mb-4">
-                    Child: {story.childName}
+                   {t("child")}: {story.childName}
                   </p>
 
                   <p className="text-sm text-purple-500 mb-4">
@@ -355,12 +350,37 @@ export default function ChildrensStories() {
 
             {editingStoryId === story.id &&  (
               <div className="flex gap-4">
-                <button
-                  onClick={() => handleSaveEdit(story)}
-                  className="bg-yellow-500 text-white px-5 py-2 rounded-xl"
-                >
-                  Save Edit
-                </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="bg-yellow-600 text-white px-4 py-2 rounded-xl">
+                    Save Edit
+                  </button>
+                </AlertDialogTrigger>
+
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Save Edit
+                    </AlertDialogTitle>
+
+                    <AlertDialogDescription>
+                      Are you sure you want to save edit?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      Cancel
+                    </AlertDialogCancel>
+
+                    <AlertDialogAction
+                      onClick={() => handleSaveEdit(story)}
+                    >
+                      Save
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
                 <button
                   onClick={() => setEditingStoryId(null)}
@@ -371,15 +391,38 @@ export default function ChildrensStories() {
               </div>
             )}
               {/* DELETE */}
-              <button
-              onClick={() => handleDelete(story.id)}
-              className="bg-red-600 text-white px-4 py-2 rounded-xl"
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="bg-red-600 text-white px-4 py-2 rounded-xl">
+                    Delete
+                  </button>
+                </AlertDialogTrigger>
 
-              >
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Delete Story
+                    </AlertDialogTitle>
 
-              Delete
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this story?
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
 
-                </button>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      Cancel
+                    </AlertDialogCancel>
+
+                    <AlertDialogAction
+                      onClick={() => handleDelete(story.id)}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
               {/* MANUAL EDIT */}
               <button
@@ -393,7 +436,7 @@ export default function ChildrensStories() {
 
               Edit Story
 
-                </button>
+              </button>
 
               {/* AI EDIT */}
               <button
