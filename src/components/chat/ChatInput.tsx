@@ -11,9 +11,11 @@ interface ChatInputProps {
   isStreaming?: boolean;
   onStop?: () => void;
   tokenBalance?: number;
+  mode?: "normal" | "journey";
+onModeChange?: (mode: "normal" | "journey") => void;
 }
 
-const ChatInput = ({ onSend, disabled, isStreaming, onStop, tokenBalance }: ChatInputProps) => {
+const ChatInput = ({ onSend, disabled, isStreaming, onStop, tokenBalance,mode, onModeChange }: ChatInputProps) => {
   const [text, setText] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
 const [files, setFiles] = useState<File[]>([]);
@@ -93,6 +95,23 @@ const audioInputRef = useRef<HTMLInputElement>(null);
             <Camera className="w-5 h-5" />
           </button>
 
+<div className="flex gap-2 mb-2">
+  <button
+    type="button"
+    onClick={() => onModeChange?.("normal")}
+    className={mode === "normal" ? "bg-black text-white px-3 py-1 rounded" : "px-3 py-1"}
+  >
+    💬 Normal
+  </button>
+
+  <button
+    type="button"
+    onClick={() => onModeChange?.("journey")}
+    className={mode === "journey" ? "bg-black text-white px-3 py-1 rounded" : "px-3 py-1"}
+  >
+    🌍 Journey
+  </button>
+</div>
 
           <textarea
             ref={taRef}

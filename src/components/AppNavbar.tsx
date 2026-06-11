@@ -78,10 +78,16 @@ const AppNavbar = () => {
   const navigate = useNavigate();
   const { username, userType, logout } = useAuth();
   const { i18n } = useTranslation();
+  // const toggleLang = () => {
+  //   const newLang = i18n.language === "ar" ? "en" : "ar";
+  //   i18n.changeLanguage(newLang);
+  //   localStorage.setItem("lang", newLang);
+  // };
   const toggleLang = () => {
-    const newLang = i18n.language === "ar" ? "en" : "ar";
+    const newLang = i18n.language === "en" ? "ar" : "en";
     i18n.changeLanguage(newLang);
-    localStorage.setItem("lang", newLang);
+    document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+    localStorage.setItem("language", newLang);
   };
   const isParent = userType === "parent";
   const isChild = userType === "child";
@@ -210,6 +216,13 @@ const AppNavbar = () => {
 
               <div className="flex items-center gap-2 shrink-0">
                 <ThemeToggle className="hidden sm:flex" />
+                <button
+                  onClick={toggleLang}
+                  className="hidden sm:flex p-2 rounded-xl hover:bg-muted/60 transition"
+                  title="Change Language"
+                >
+                  <Globe className="w-4 h-4" />
+                </button>
                 <span className="hidden lg:inline text-sm text-muted-foreground">
                   Hi{" "}
                   <span className="font-semibold text-foreground">

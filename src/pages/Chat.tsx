@@ -20,6 +20,7 @@ import {
   streamChat,
 } from "@/lib/chat";
 import { getTokenStats } from "@/lib/profile";
+import JourneyMessage from "@/components/chat/JourneyMessage";
 
 type UiMessage = {
   id: number | string;
@@ -28,6 +29,9 @@ type UiMessage = {
   streaming?: boolean;
   audioUrl?: string;
   imageUrl?: string;
+
+  responseMode?: string;
+  journeyData?: any;
 };
 
 
@@ -54,36 +58,13 @@ const Chat = () => {
   const { user } = useAuth();
   const [tokenBalance, setTokenBalance] = useState<number>(0);
 
+  const [mode, setMode] = useState<"normal" | "journey">("normal");
   useEffect(() => {
     getTokenStats().then((res) => {
       setTokenBalance(res.data.tokenBalance);
     });
   }, []);
 
-  //get all conversations on load + when route param changes
-  // useEffect(() => {
-  //   if (!user) return;
-  //   (async () => {
-  //     try {
-  //       const list = await listConversations(user!.id);
-  //       setConversations(list);
-  //       // Prefer conversation from URL param, else first in list
-  //       if (routeConvoId && list.find((c) => c.id === Number(routeConvoId))) {
-  //         setActiveId(Number(routeConvoId));
-  //         console.log("activatedd id :" , activeId , "routtteid:" , routeConvoId)
-  //       } else if (list.length > 0) {
-  //         setActiveId(list[0].id);
-  //       }
-  //     } catch {
-  //       toast.error("Couldn't load chats", {
-  //         description: "Please refresh and try again 💫",
-  //       });
-  //     } finally {
-  //       setLoadingConvos(false);
-  //     }
-  //   })();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [routeConvoId, user]);
   useEffect(() => {
     if (!user) return;
 
@@ -131,6 +112,9 @@ const Chat = () => {
               content: m.answer,
               audioUrl: m.audioUrl,
               imageUrl: m.imageUrl,
+
+              responseMode: m.responseMode,
+              journeyData: m.journeyData,
             },
           ]),
         );
@@ -210,6 +194,7 @@ const Chat = () => {
       question: text,
       conversationId: convoId!,
       files,
+      mode,
       onDelta: (chunk) => {
         if (abortRef.current.aborted) return;
         acc += chunk;
@@ -295,7 +280,7 @@ const Chat = () => {
             </div>
             <span className="font-bold">{t("sparkyName")}</span>
           </div>
-          <ChatTopControls className="ml-auto" />
+          <ChatTopControls />
         </header>
 
         {/* Desktop floating controls (theme + logout) */}
@@ -346,7 +331,7 @@ const Chat = () => {
               </div>
             ) : (
               <>
-                {messages.map((m) => (
+                {/* {messages.map((m) => (
                   <MessageBubble
                     key={m.id}
                     role={m.role}
@@ -355,7 +340,29 @@ const Chat = () => {
                     audioUrl={m.audioUrl}
                     imageUrl={m.imageUrl}
                   />
-                ))}
+                ))} */}
+                {messages.map((m) => {
+                if (m.role === "assistant" && m.responseMode === "journey") {
+                  return (
+                    <JourneyMessage
+                      key={m.id}
+                      content={m.content}
+                      audioUrl={m.audioUrl}
+                      imageUrl={m.imageUrl}
+                    />
+                  );
+                }
+
+                return (
+                  <MessageBubble
+                    key={m.id}
+                    role={m.role}
+                    content={m.content}
+                    imageUrl={m.imageUrl}
+                    audioUrl={m.audioUrl}
+                  />
+                );
+              })}
                 {streaming && messages[messages.length - 1]?.content === "" && (
                   <TypingIndicator />
                 )}
@@ -370,6 +377,8 @@ const Chat = () => {
           isStreaming={streaming}
           onStop={handleStop}
           tokenBalance={tokenBalance}
+          mode={mode}
+          onModeChange={setMode}
         />
       </div>
     </div>

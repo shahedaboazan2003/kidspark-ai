@@ -200,7 +200,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getChildStories, getMyStories } from "@/lib/story";
-
+import { submitAnswers } from "@/lib/questions";
+import { toast } from "sonner";
 export default function MyStories() {
   const { childId } = useParams();
   const navigate = useNavigate();
@@ -211,6 +212,11 @@ export default function MyStories() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
 
+    const [showQuestions, setShowQuestions] =
+    useState(false);
+  
+     const [answers, setAnswers] =
+    useState<Record<number, string>>({});
   // ---------------- LOAD ----------------
   useEffect(() => {
   console.log("STORIES", stories);
@@ -317,6 +323,28 @@ console.log(selectedStory?.scenes);
   const story = selectedStory;
   const scene = story.scenes[currentSceneIndex];
 
+  const handleSubmitAnswers =
+  async () => {
+    try {
+      await submitAnswers(
+        story.id,
+        {
+          answers: story.questions.map(
+              (q: any) => ({
+                questionId: q.id,
+                answer:
+                  answers[q.id] || "",
+              })
+            ),
+        }
+      );
+
+    toast.success("Answers submitted successfully");
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <button
@@ -332,6 +360,9 @@ console.log(selectedStory?.scenes);
         ref={audioRef}
         controls
         className="w-full mb-6"
+        onEnded={() => {
+        setShowQuestions(true);
+      }}
       >
         <source
           src={`http://localhost:3000${story.audioUrl}`}
@@ -356,6 +387,42 @@ console.log(selectedStory?.scenes);
         <div className="text-sm text-gray-400 mt-3">
           Scene {currentSceneIndex + 1} / {story.scenes.length}
         </div>
+        {showQuestions && (
+  <div className="mt-8 bg-white p-4 rounded-xl shadow">
+    <h2 className="text-2xl font-bold mb-4">
+      Questions
+    </h2>
+
+    {story.questions?.map((q: any) => (
+      <div
+        key={q.id}
+        className="mb-4"
+      >
+        <p className="font-medium mb-2">
+          {q.question}
+        </p>
+
+        <textarea
+              className="w-full border rounded-lg p-2"
+              value={answers[q.id] || ""}
+              onChange={(e) =>
+                setAnswers((prev) => ({
+                  ...prev,
+                  [q.id]: e.target.value,
+                }))
+              }
+            />
+          </div>
+        ))}
+
+        <button
+          onClick={handleSubmitAnswers}
+          className="bg-green-600 text-white px-4 py-2 rounded-xl"
+        >
+          Submit Answers
+        </button>
+      </div>
+    )}
       </div>
     </div>
   );

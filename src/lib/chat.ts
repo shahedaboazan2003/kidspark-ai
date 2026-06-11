@@ -28,6 +28,8 @@ export type AskMessage = {
   createdAt:string
   audioUrl?: string;
   imageUrl?: string;
+  responseMode?: string
+  journeyData?: any
 }
 
 export type Conversation = {
@@ -140,10 +142,12 @@ export async function streamChat({
   onError,
   onAudio,
   onImage,
+  mode = "normal",
 }: {
   question: string;
   conversationId?: number;
   files?: File[];
+  mode?: "normal" | "journey";
   onDelta: (chunk: string) => void;
   onDone: (data?: {
   audioUrl?: string;
@@ -159,7 +163,7 @@ export async function streamChat({
 
   formData.append("question", question);
 
-  
+  formData.append("mode", mode);
   if (conversationId) {
     formData.append(
       "conversationId",
@@ -266,110 +270,6 @@ for (const line of lines) {
 
   onDone();
 }
-
-
-// export async function streamChat({
-//   question,
-//   childId,
-//   conversationId,
-//   age,
-//   files,
-//   onDelta,
-//   onDone,
-//   onError,
-// }: {
-//   question: string;
-//   childId: number;
-//   conversationId?: number;
-//   age: number;
-//   files?: File[];
-//   onDelta: (chunk: string) => void;
-//   onDone: (payload: any) => void;
-//   onError: (msg: string) => void;
-// }) {
-//   const url = `${import.meta.env.VITE_API_URL}/ai/stream`;
-
-//   const formData = new FormData();
-
-//   formData.append("question", question);
-//   formData.append("childId", String(childId));
-//   formData.append("age", String(age));
-
-//   if (conversationId) {
-//     formData.append("conversationId", String(conversationId));
-//   }
-
-//   if (files?.length) {
-//     for (const file of files) {
-//       formData.append("files", file);
-//     }
-//   }
-
-//   let resp: Response;
-
-//   try {
-//     resp = await fetch(url, {
-//       method: "POST",
-//       body: formData,
-//     });
-//   } catch {
-//     onError("Network error 💫");
-//     return;
-//   }
-
-//   if (!resp.ok || !resp.body) {
-//     onError("Stream failed 💫");
-//     return;
-//   }
-
-//   const reader = resp.body.getReader();
-//   const decoder = new TextDecoder();
-
-//   let buffer = "";
-//   let currentEvent = "";
-
-//   while (true) {
-//     const { done, value } = await reader.read();
-//     if (done) break;
-
-//     buffer += decoder.decode(value, { stream: true });
-
-//     const lines = buffer.split("\n");
-//     buffer = lines.pop() || "";
-
-//     for (const line of lines) {
-//       const trimmed = line.trim();
-//       if (!trimmed) continue;
-
-//       if (trimmed.startsWith("event:")) {
-//         currentEvent = trimmed.replace("event: ", "").trim();
-//         continue;
-//       }
-
-//       if (trimmed.startsWith("data:")) {
-//         const raw = trimmed.replace("data: ", "");
-
-//         try {
-//           const parsed = JSON.parse(raw);
-
-//           if (currentEvent === "delta") {
-//             onDelta(parsed);
-//           }
-
-//           if (currentEvent === "done") {
-//             onDone(parsed);
-//             return;
-//           }
-//         } catch {
-//           // fallback for plain text chunks
-//           onDelta(raw);
-//         }
-//       }
-//     }
-//   }
-
-//   onDone(null);
-// }
 
 export const histoyPage = async (childId:number) =>{
   const r = await fetch(`${import.meta.env.VITE_API_URL}/history/${childId}`,{

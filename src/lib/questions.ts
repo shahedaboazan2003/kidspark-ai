@@ -86,3 +86,22 @@ export const regenerateQuestions = async(storyId:number) => {
     })
     return await res.json()
 } 
+
+export const submitAnswers = async (storyId:number,data: {
+    answers: {
+      questionId: number;
+      answer: string;
+    }[];
+  }) =>{
+    const token = localStorage.getItem("accessToken")
+    const url = `${import.meta.env.VITE_API_URL}/questions/${storyId}/answers`;
+     const res = await fetch(url , {
+        method:"POST",
+        headers:{
+            "Content-Type": "application/json",
+            Authorization:token?`Bearer ${token}`:''
+        },
+        body:JSON.stringify(data)
+    })
+    return await res.json()
+}

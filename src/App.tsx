@@ -28,6 +28,9 @@ import { useFirebaseNotifications } from "./hooks/useFirebaseNotifications.ts";
 import { getToken } from "firebase/messaging";
 import { messaging } from "./lib/firebase.ts";
 import { useEffect } from "react";
+import i18n from "./i18n/i18n.ts";
+import Reports from './pages/Reports.tsx';
+import StoryReport from './pages/StoryReport.tsx'
 const queryClient = new QueryClient();
 
 const NavbarController = () => {
@@ -68,6 +71,14 @@ const App = () => {
   //  useEffect(() => {
   //   requestNotificationPermission();
   // }, []);
+  useEffect(() => {
+    const savedLang = localStorage.getItem("language") || "en";
+
+    i18n.changeLanguage(savedLang);
+
+    document.documentElement.dir =
+      savedLang === "ar" ? "rtl" : "ltr";
+  }, []);
 
   return(
   <QueryClientProvider client={queryClient}>
@@ -193,6 +204,23 @@ const App = () => {
                 }
               />
 
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/reports/story/:storyId"
+                element={
+                  <ProtectedRoute allow={["parent"]}>
+                    <StoryReport />
+                  </ProtectedRoute>
+                }
+              />
               {/* <Route
                 path="/conversation/:id?"
                 element={

@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Star,
   Sparkles,
+  BarChart3,
 } from "lucide-react";
 
 import AppNavbar from "@/components/AppNavbar";
@@ -231,6 +232,14 @@ const Dashboard = () => {
                 description={t("readStories")}
                 icon={BookOpen}
                 gradient="from-blue-500 to-indigo-500"
+              />
+
+              <QuickActionCard
+                to="/reports"
+                label={t("reports")}
+                description={t("viewChildProgress")}
+                icon={BarChart3}
+                gradient="from-emerald-500 to-green-500"
               />
             </div>
           </section>

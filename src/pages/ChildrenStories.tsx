@@ -13,6 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { addQuestions, approveQuestions, deleteQuestion, generateQuestions, regenerateQuestions, updateQuestion } from "@/lib/questions";
+import { Edit2, Trash2 } from "lucide-react";
 
 type Scene = {
   id: number;
@@ -29,8 +31,14 @@ type Story = {
   status: string;
   audioUrl?: string | null;
   scenes: Scene[];
+  questions:Question[]
 };
 
+type Question = {
+  id:number,
+  storyId:number,
+  question:string
+}
 export default function ChildrenStories() {
   const { t } = useTranslation();
   const [stories, setStories] = useState<Story[]>([]);
@@ -42,6 +50,19 @@ export default function ChildrenStories() {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+
+  const [editingQuestionId, setEditingQuestionId] =useState<number | null>(null);
+
+  const [editedQuestion, setEditedQuestion] = useState("");
+
+  const [showAddQuestionForStory, setShowAddQuestionForStory] = useState<number | null>(null);
+
+  const [newQuestion, setNewQuestion] = useState("");
+
+  const [questionLoading, setQuestionLoading] = useState(false);
+
+  const [loadingStoryId, setLoadingStoryId] =
+  useState<number | null>(null);
   const navigate = useNavigate()
   useEffect(() => {
       const fetchStories = async () => {
@@ -57,6 +78,7 @@ export default function ChildrenStories() {
               // image: s.scenes?.[0]?.imageUrl || undefined,
               audioUrl: s.audioUrl,
               scenes: s.scenes || [],
+              questions:s.questions || []
             }))
           );     
           }catch(err){
@@ -79,16 +101,41 @@ export default function ChildrenStories() {
 
   }, [search, stories]);
 
-  const handleSaveEdit = async (story:Story) => {
-    try{
-      const res = await updateStory(story.id, {
-        scenes: story.scenes.map((scene) => ({ id: scene.id, title: scene.title, content: scene.content, })),
-      })
-      setEditingStoryId(null)
-    }catch(err){
-      console.log(err)
+ const handleSaveEdit = async (story: Story) => {
+  try {
+    const res = await updateStory(story.id, {
+      scenes: story.scenes.map((scene) => ({
+        id: scene.id,
+        title: scene.title,
+        content: scene.content,
+      })),
+    });
+
+    setStories((prev) =>
+      prev.map((s) =>
+        s.id === story.id
+          ? {
+              ...s,
+              ...res.data.story,
+              status: "DRAFT",
+            }
+          : s
+      )
+    );
+
+    if (selectedStory?.id === story.id) {
+      setSelectedStory({
+        ...selectedStory,
+        ...res.data.story,
+        status: "DRAFT",
+      });
     }
-  };
+
+    setEditingStoryId(null);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   const handleApprove = async (storyId:number) => {
     try{
@@ -226,7 +273,164 @@ export default function ChildrenStories() {
       }
   };
 
-    
+  const handleGenerateQuestions = async (
+  storyId: number
+  ) => {
+    try {
+      setQuestionLoading(true);
+      const res = await generateQuestions(storyId);
+
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId
+            ? {
+                ...story,
+                questions: res.data,
+              }
+            : story
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }finally{
+      setQuestionLoading(false);
+    }
+  };
+      
+  const handleRegenerateQuestions = async (storyId: number) => {
+    try {
+      setLoadingStoryId(storyId);
+
+      const res = await regenerateQuestions(storyId);
+  
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId
+            ? {
+                ...story,
+                questions: res.data,
+              }
+            : story
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }finally{
+        setLoadingStoryId(null);
+
+    }
+  };
+
+  const handleApproveQuestions = async (storyId: number) => {
+    try {
+      await approveQuestions(storyId);
+
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId
+            ? {
+                ...story,
+                status: "PUBLISHED",
+              }
+            : story
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleAddQuestion = async (
+  storyId: number
+  ) => {
+    try {
+      const res = await addQuestions(storyId, {
+          question: newQuestion,
+        });
+
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId
+            ? {
+                ...story,
+                questions: [
+                  ...story.questions,
+                  res.data,
+                ],
+              }
+            : story
+        )
+      );
+
+      setNewQuestion("");
+      setShowAddQuestionForStory(null);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleDeleteQuestion = async (
+    storyId: number,
+    questionId: number
+  ) => {
+    try {
+      await deleteQuestion(questionId);
+
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId
+            ? {
+                ...story,
+                questions:
+                  story.questions.filter(
+                    (q) =>
+                      q.id !== questionId
+                  ),
+              }
+            : story
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUpdateQuestion = async (
+    storyId: number,
+    questionId: number
+  ) => {
+    try {
+      const res =
+        await updateQuestion(
+          questionId,
+          {
+            question: editedQuestion,
+          }
+        );
+
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId
+            ? {
+                ...story,
+                questions:
+                  story.questions.map(
+                    (q) =>
+                      q.id === questionId
+                        ? res.data
+                        : q
+                  ),
+              }
+            : story
+        )
+      );
+
+      setEditingQuestionId(null);
+      setEditedQuestion("");
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
 
     <div className="min-h-screen bg-background p-6">
@@ -311,39 +515,159 @@ export default function ChildrenStories() {
                       )}
 
                       <textarea
-  value={scene.content}
-  readOnly={editingStoryId !== story.id}
-  onChange={(e) => {
+                        value={scene.content}
+                        readOnly={editingStoryId !== story.id}
+                        onChange={(e) => {
 
-    const updatedStories = stories.map((s) => {
+                          const updatedStories = stories.map((s) => {
 
-      if (s.id !== story.id) return s;
+                            if (s.id !== story.id) return s;
 
-      return {
-        ...s,
-        scenes: s.scenes.map((sc) =>
-          sc.id === scene.id
-            ? {
-                ...sc,
-                content: e.target.value,
-              }
-            : sc
-        ),
-      };
-    });
+                            return {
+                              ...s,
+                              scenes: s.scenes.map((sc) =>
+                                sc.id === scene.id
+                                  ? {
+                                      ...sc,
+                                      content: e.target.value,
+                                    }
+                                  : sc
+                              ),
+                            };
+                          });
 
-    setStories(updatedStories);
-  }}
-  className={`w-full border rounded-xl p-3 ${
-    editingStoryId === story.id
-      ? "bg-white"
-      : "bg-background"
-  }`}
-/>
+                          setStories(updatedStories);
+                        }}
+                        className={`w-full border rounded-xl p-3 ${
+                          editingStoryId === story.id
+                            ? "bg-white"
+                            : "bg-background"
+                        }`}
+                      />
 
 
                     </div>
                   ))}
+
+                  {story.questions.length > 0 && (
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="font-bold text-xl mb-4">
+                      Questions
+                    </h3>
+
+                  {story.questions.map((q) => (
+                    <div
+                      key={q.id}
+                      className="border rounded-xl p-3 mb-3"
+                    >
+                      {editingQuestionId === q.id ? (
+                        <>
+                          <input
+                            value={editedQuestion}
+                            onChange={(e) =>
+                              setEditedQuestion(
+                                e.target.value
+                              )
+                            }
+                            className="w-full border rounded p-2"
+                          />
+
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() =>
+                                handleUpdateQuestion(
+                                  story.id,
+                                  q.id
+                                )
+                              }
+                            >
+                              Save
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                setEditingQuestionId(
+                                  null
+                                )
+                              }
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p>{q.question}</p>
+
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => {
+                                setEditingQuestionId(
+                                  q.id
+                                );
+
+                                setEditedQuestion(
+                                  q.question
+                                );
+                              }}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                handleDeleteQuestion(
+                                  story.id,
+                                  q.id
+                                )
+                              }
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                  )}
+
+                  {showAddQuestionForStory ===
+                  story.id && (
+                  <div className="mt-4">
+                    <input
+                      value={newQuestion}
+                      onChange={(e) =>
+                        setNewQuestion(
+                          e.target.value
+                        )
+                      }
+                      className="w-full border rounded-xl p-2"
+                    />
+
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() =>
+                          handleAddQuestion(
+                            story.id
+                          )
+                        }
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          setShowAddQuestionForStory(
+                            null
+                          )
+                        }
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
             <div className="flex flex-wrap gap-3 mt-6">
@@ -461,6 +785,53 @@ export default function ChildrenStories() {
               Approve </button>
               )}
 
+              {story.status === "DRAFT" && story.questions.length > 0 && (
+                <>
+                  <button
+                    onClick={() =>
+                      handleApproveQuestions(
+                        story.id
+                      )
+                    }
+                    className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    Approve questions
+                  </button>
+
+                   <button
+                    onClick={() =>
+                      setShowAddQuestionForStory(
+                        story.id
+                      )
+                    }
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    Add Question
+                  </button>
+                </>
+              )}
+
+              {story.status === "PUBLISHED" && story.questions.length > 0 && (
+               <button
+  disabled={loadingStoryId === story.id}
+  onClick={() =>
+    handleRegenerateQuestions(story.id)
+  }
+  className="
+    bg-orange-600
+    text-white
+    px-6
+    py-3
+    rounded-xl
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+  "
+>
+  {loadingStoryId === story.id
+    ? "Regenerating Questions..."
+    : "Regenerate Questions"}
+</button>
+              )}
               </div>
 
                 </div>
