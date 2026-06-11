@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { register } from "@/lib/auth";
 import { ApiError } from "@/lib/http";
 import { useTranslation } from "react-i18next";
+import { useNotificationHandler } from "@/hooks/useFirebaseNotifications";
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -42,6 +43,13 @@ const Register = () => {
   const [showRepeat, setShowRepeat] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
+
+  useNotificationHandler({
+    type: "register",
+    handler: (p) => {
+      console.log(p);
+    },
+  });
 
   const validate = (data: FormState): Errors => {
     const result = registerSchema.safeParse(data);

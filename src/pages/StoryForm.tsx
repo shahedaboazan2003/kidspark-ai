@@ -256,7 +256,7 @@ export default function StoryForm() {
   const handleAddQuestion = async ()=> {
     if(!newQuestion.trim()) return
     try{
-      const res = await addQuestions(generatedStory.story.id, {question:newQuestion})
+      const res = await addQuestions(generatedStory.story.id, {question:newQuestion, expectedAnswer: expectedAnswer})
       setQuestions((prev) => [...prev , res.data])
       setNewQuestion("")
       setShowAddQuestion(false)
@@ -276,7 +276,7 @@ export default function StoryForm() {
 
   const handleUpdateQuestion = async (questionId:number) =>{
     try{
-      const res = await updateQuestion(questionId, {question: editedQuestion})
+      const res = await updateQuestion(questionId, {question: editedQuestion, expectedAnswer: expectedAnswer})
       setQuestions((prev) => prev.map((q) => q.id === questionId? res.data : q))
       setEditingQuestionId(null)
       setEditedQuestion("")
