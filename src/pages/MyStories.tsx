@@ -1,207 +1,9 @@
-// import { useEffect, useState } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-// import { useTranslation } from "react-i18next";
-// import { getChildStories, getMyStories } from "@/lib/story";
-
-// export default function MyStories() {
-//   const { t } = useTranslation();
-//   const [stories, setStories] = useState<any[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const navigate = useNavigate();
-
-//   const { childId } = useParams();
-
-//   const role = localStorage.getItem("role");
-
-//   useEffect(() => {
-
-//     const loadStories = async () => {
-
-//       try {
-
-//         let response;
-
-//         console.log("role", role)
-//         console.log("childId", childId)
-//         console.log("response", response)
-//         // parent
-//         if (childId) {
-
-//           response = await getChildStories(Number(childId));
-//           console.log(response)
-//         }
-
-//         // child
-//         else {
-
-//           response = await getMyStories();
-
-//         }
-
-//         setStories(response.data);
-
-//       } catch (err) {
-
-//         console.log(err);
-
-//       } finally {
-
-//         setLoading(false);
-
-//       }
-//     };
-
-//     loadStories();
-
-//   }, [childId, role]);
-
-//   if (loading) {
-//     return (
-//       <div className="p-10 text-center">
-//         Loading stories...
-//       </div>
-//     );
-//   }
-
-//   return (
-
-//     <div className="min-h-screen bg-gray-100 p-6">
-
-//       <div className="max-w-5xl mx-auto">
-
-//         {/* BACK BUTTON */}
-//         <button
-//           onClick={() => navigate("/dashboard")}
-//           className="mb-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl"
-//         >
-//           ← Back
-//         </button>
-        
-
-//         {/* PAGE TITLE */}
-//         <h1 className="text-4xl font-bold mb-8">
-//           t(myStories)
-//         </h1>
-
-//         {/* EMPTY */}
-//         {stories.length === 0 ? (
-//           <div className="bg-white p-6 rounded-2xl shadow">{t("noStoriesYet")}</div>
-//         ) : (
-
-//           <div className="grid md:grid-cols-2 gap-6">
-
-//             {stories.map((story: any) => (
-
-//               <div
-//                 key={story.id}
-//                 className="bg-white rounded-2xl shadow-md overflow-hidden"
-//               >
-
-
-//                 <div className="p-5">
-
-//                   {/* TITLE */}
-//                   <h2 className="text-2xl font-bold mb-3">
-
-//                   {story.title}
-//                   {/* CHILD */}
-//                   <p className="text-sm text-gray-500 mb-2">
-//                     {t("child")}: {story.child}
-//                   </p>
-
-//                   {/* STATUS */}
-//                   <p className="text-sm text-purple-600 mb-4">
-//                     {t("status")}: {story.status}
-//                   </p>
-
-//                   </h2>
-//                   {/* CONTENT */}
-//                   <p className="text-gray-700 mb-6 whitespace-pre-line">
-
-//                     {story.content}
-
-//                   </p>
-
-//                   {/* SCENES */}
-//                   <div className="space-y-6">
-
-//                     {story.scenes?.map((scene: any) => (
-
-//                       <div
-//                         key={scene.id}
-//                         className="border rounded-xl p-4"
-//                       >
-
-//                         {/* SCENE TITLE */}
-//                         <h3 className="font-bold text-lg mb-3">
-
-//                           {scene.title}
-
-//                         </h3>
-
-//                         {/* IMAGE */}
-//                         {scene.imageUrl && (
-
-//                           <img
-//                             src={`http://localhost:3000${scene.imageUrl}`}
-//                             alt={scene.title}
-//                             className="w-full rounded-xl mb-4"
-//                           />
-
-//                         )}
-
-//                         {/* SCENE CONTENT */}
-//                         <p className="text-gray-700 whitespace-pre-line">
-
-//                           {scene.content}
-
-//                         </p>
-
-//                       </div>
-
-//                     ))}
-
-//                     {/* AUDIO */}
-
-//                     {story.audioUrl && (
-
-//                   <audio
-//                     controls
-//                     className="w-full"
-//                   >
-
-//                     <source
-//                       src={`http://localhost:3000${story.audioUrl}`}
-//                       type="audio/mpeg"
-//                     />
-
-//                   </audio>
-
-//                 )}
-
-//                   </div>
-
-//                 </div>
-
-//               </div>
-
-//             ))}
-
-//           </div>
-
-//         )}
-
-//       </div>
-
-//     </div>
-//   );
-// }
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getChildStories, getMyStories } from "@/lib/story";
 import { submitAnswers } from "@/lib/questions";
-import { toast } from "sonner";
+import Confetti from "react-confetti";
+
 export default function MyStories() {
   const { childId } = useParams();
   const navigate = useNavigate();
@@ -212,15 +14,19 @@ export default function MyStories() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
 
-    const [showQuestions, setShowQuestions] =
-    useState(false);
+  const [showQuestions, setShowQuestions] = useState(false);
   
-     const [answers, setAnswers] =
-    useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+
+  const [answersSubmitted, setAnswersSubmitted] = useState(false);
+
+  const [showConfetti, setShowConfetti] = useState(false);
+
   // ---------------- LOAD ----------------
   useEffect(() => {
   console.log("STORIES", stories);
 }, [stories]);
+
   useEffect(() => {
     const load = async () => {
       const res = childId
@@ -245,8 +51,8 @@ export default function MyStories() {
 
     const index = selectedStory.scenes.findIndex(
       (s: any) =>
-        s.startTime !== null &&
-        s.endTime !== null &&
+        s.startTime != null &&
+        s.endTime != null &&
         time >= s.startTime &&
         time < s.endTime
     );
@@ -262,35 +68,25 @@ console.log("FIRST SCENE:", selectedStory.scenes?.[0]);
 
   audio.addEventListener("timeupdate", onTimeUpdate);
 
+
   return () => audio.removeEventListener("timeupdate", onTimeUpdate);
 }, [selectedStory]);
-  // ---------------- RESET ----------------
+
   useEffect(() => {
     setCurrentSceneIndex(0);
   }, [selectedStory]);
 
-  // ---------------- SYNC ----------------
-  // useEffect(() => {
-  //   const audio = audioRef.current;
-  //   if (!audio || !selectedStory) return;
+  useEffect(() => {
+  if (!selectedStory) return;
 
-  //   const onTimeUpdate = () => {
-  //     const time = audio.currentTime;
+  if (
+    !selectedStory.audioUrl &&
+    currentSceneIndex === selectedStory.scenes.length - 1
+  ) {
+    setShowQuestions(true);
+  }
+}, [currentSceneIndex, selectedStory]);
 
-  //     const index = selectedStory.scenes.findIndex(
-  //       (s: any) => time >= s.startTime && time < s.endTime
-  //     );
-
-  //     if (index !== -1) {
-  //       setCurrentSceneIndex(index);
-  //     }
-  //   };
-
-  //   audio.addEventListener("timeupdate", onTimeUpdate);
-
-  //   return () => audio.removeEventListener("timeupdate", onTimeUpdate);
-  // }, [selectedStory]);
-console.log(selectedStory?.scenes);
   // ---------------- GRID VIEW ----------------
   if (!selectedStory) {
     return (
@@ -304,10 +100,12 @@ console.log(selectedStory?.scenes);
             </p>
 
             <button
-            
               onClick={() => {
-                console.log("SELECTED", story);
                 setSelectedStory(story);
+                setShowQuestions(false);
+                setAnswers({});
+                setCurrentSceneIndex(0);
+              setAnswersSubmitted(false);
               }}
               className="bg-blue-500 text-white px-4 py-2 rounded"
             >
@@ -321,10 +119,10 @@ console.log(selectedStory?.scenes);
 
   // ---------------- PLAYER VIEW ----------------
   const story = selectedStory;
-  const scene = story.scenes[currentSceneIndex];
+  const scene = story.scenes?.[currentSceneIndex];
 
-  const handleSubmitAnswers =
-  async () => {
+  const handleSubmitAnswers = async () => {
+    if(answersSubmitted) return
     try {
       await submitAnswers(
         story.id,
@@ -338,8 +136,11 @@ console.log(selectedStory?.scenes);
             ),
         }
       );
-
-    toast.success("Answers submitted successfully");
+    setAnswersSubmitted(true)
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 5000);
 
     } catch (err) {
       console.log(err);
@@ -356,6 +157,7 @@ console.log(selectedStory?.scenes);
 
       <h1 className="text-2xl font-bold mb-4">{story.title}</h1>
 
+      {story.audioUrl && (
       <audio
         ref={audioRef}
         controls
@@ -369,14 +171,33 @@ console.log(selectedStory?.scenes);
           type="audio/mpeg"
         />
       </audio>
-
+      )}
       <div className="bg-white p-4 rounded-xl shadow">
         <h2 className="text-xl font-bold mb-3">{scene?.title}</h2>
 
+        {showConfetti && (
+          <>
+            <Confetti />
+
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+              <div className="bg-white p-8 rounded-3xl shadow-xl text-center">
+                <div className="text-6xl mb-4">🏆</div>
+
+                <h2 className="text-3xl font-bold">
+                  أحسنت يا بطل!
+                </h2>
+
+                <p className="mt-3">
+                  لقد أكملت أسئلة القصة بنجاح
+                </p>
+              </div>
+            </div>
+          </>
+        )}
         {scene?.imageUrl && (
           <img
             src={`http://localhost:3000${scene.imageUrl}`}
-            className="w-full rounded mb-3"
+            className="w-full max-h-[300px] object-contain rounded mb-3"
           />
         )}
 
@@ -386,40 +207,67 @@ console.log(selectedStory?.scenes);
 
         <div className="text-sm text-gray-400 mt-3">
           Scene {currentSceneIndex + 1} / {story.scenes.length}
-        </div>
-        {showQuestions && (
-  <div className="mt-8 bg-white p-4 rounded-xl shadow">
-    <h2 className="text-2xl font-bold mb-4">
-      Questions
-    </h2>
-
-    {story.questions?.map((q: any) => (
-      <div
-        key={q.id}
-        className="mb-4"
-      >
-        <p className="font-medium mb-2">
-          {q.question}
-        </p>
-
-        <textarea
-              className="w-full border rounded-lg p-2"
-              value={answers[q.id] || ""}
-              onChange={(e) =>
-                setAnswers((prev) => ({
-                  ...prev,
-                  [q.id]: e.target.value,
-                }))
+          {!story.audioUrl && (
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() =>
+                setCurrentSceneIndex((prev) => prev - 1)
               }
-            />
+              disabled={currentSceneIndex === 0}
+              className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <button
+              onClick={() =>
+                setCurrentSceneIndex((prev) => prev + 1)
+              }
+              disabled={
+                currentSceneIndex === story.scenes.length - 1
+              }
+              className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
+        )}
+        </div>
+
+        {showQuestions && (
+        <div className="mt-8 bg-white p-4 rounded-xl shadow">
+          <h2 className="text-2xl font-bold mb-4">
+            Questions
+          </h2>
+
+      {story.questions?.map((q: any) => (
+        <div
+          key={q.id}
+          className="mb-4"
+        >
+          <p className="font-medium mb-2">
+            {q.question}
+          </p>
+
+          <textarea
+                className="w-full border rounded-lg p-2"
+                value={answers[q.id] || ""}
+                onChange={(e) =>
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [q.id]: e.target.value,
+                  }))
+                }
+              />
+            </div>
         ))}
 
         <button
+          disabled={answersSubmitted}
           onClick={handleSubmitAnswers}
           className="bg-green-600 text-white px-4 py-2 rounded-xl"
         >
-          Submit Answers
+          {answersSubmitted ? "Answers Submitted" : "Submit Answers "}
         </button>
       </div>
     )}

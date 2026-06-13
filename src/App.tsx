@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicOnlyRoute from "@/components/PublicOnlyRoute";
-import Index from "./pages/Index.tsx";
+import Index, { HomeRedirect } from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Register from "./pages/Register.tsx";
 import Login from "@/pages/Login";
@@ -91,7 +91,23 @@ const App = () => {
             <NavbarController />
             <Routes>
               {/* Public */}
-              <Route path="/" element={<Index />} />
+              <Route
+                path="/"
+                element={
+                  localStorage.getItem("accessToken")
+                    ? (
+                      <Navigate
+                        to={
+                          localStorage.getItem("userType") === "parent"
+                            ? "/dashboard"
+                            : "/chat"
+                        }
+                        replace
+                      />
+                    )
+                    : <Navigate to="/login" replace />
+                }
+              />
               <Route
                 path="/register"
                 element={

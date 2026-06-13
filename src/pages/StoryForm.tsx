@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { addQuestions, approveQuestions, deleteQuestion, generateQuestions, updateQuestion } from "@/lib/questions";
 import { Edit2, Trash2 } from "lucide-react";
+import { useNotificationHandler } from "@/hooks/useFirebaseNotifications";
 
 export default function StoryForm() {
   const { t } = useTranslation();
@@ -62,7 +63,15 @@ export default function StoryForm() {
   const [editedQuestion, setEditedQuestion] = useState("");
 
   const [questionLoading, setQuestionLoading] = useState(false);
-  // const [generationStep , setGenerationStep] = useState("")
+  const [generationStep , setGenerationStep] = useState("")
+
+  useNotificationHandler({
+    type: "AI_PROGRESS",
+    handler: (payload) => {
+      setGenerationStep(payload.data?.step || "");
+    },
+  });
+
 
   //useeffect to get children's names
   useEffect(() => {
@@ -124,8 +133,9 @@ export default function StoryForm() {
   };
 
   const handleGenerate = async () => {
-    if(loading) return
+    if(loading || generatedStory) return
     try {
+      setGenerationStep("Starting...");
       setLoading(true);
       const response = await generateStory({
         educationalGoal: form.behavior,
@@ -138,9 +148,11 @@ export default function StoryForm() {
       console.log(response);
       setGeneratedStory(response.data);
       setIsEditing(false);
+      
     } catch (err) {
       console.log(err);
     } finally {
+      setGenerationStep("");
       setLoading(false);
       setQuestionLoading(false);
     }
@@ -242,6 +254,7 @@ export default function StoryForm() {
   };
 
   const handleGenerateQuestions = async () =>{
+    if(questions.length > 0) return
     try{
       setQuestionLoading(true);
       const res = await generateQuestions(generatedStory.story.id)
@@ -256,7 +269,7 @@ export default function StoryForm() {
   const handleAddQuestion = async ()=> {
     if(!newQuestion.trim()) return
     try{
-      const res = await addQuestions(generatedStory.story.id, {question:newQuestion, expectedAnswer: expectedAnswer})
+      const res = await addQuestions(generatedStory.story.id, {question:newQuestion})
       setQuestions((prev) => [...prev , res.data])
       setNewQuestion("")
       setShowAddQuestion(false)
@@ -276,7 +289,7 @@ export default function StoryForm() {
 
   const handleUpdateQuestion = async (questionId:number) =>{
     try{
-      const res = await updateQuestion(questionId, {question: editedQuestion, expectedAnswer: expectedAnswer})
+      const res = await updateQuestion(questionId, {question: editedQuestion})
       setQuestions((prev) => prev.map((q) => q.id === questionId? res.data : q))
       setEditingQuestionId(null)
       setEditedQuestion("")
@@ -423,7 +436,7 @@ export default function StoryForm() {
           {/* BUTTON */}
           <button
             onClick={handleGenerate}
-            disabled={loading}
+            disabled={loading || generatedStory !== null}
             className="
             bg-purple-600
             text-white
@@ -434,13 +447,13 @@ export default function StoryForm() {
             disabled:cursor-not-allowed
           "
           >
-            {loading ? t("generating...") : t("generateStory")}
+            {loading ? t("generating...") : generatedStory ? "Story Already Generated" : t("generateStory")}
           </button>
-          {/* {loading && (
+          {loading && (
             <div className="mt-4 text-purple-600 font-medium">
               {generationStep}
             </div>
-          )} */}
+          )}
         </div>
       </div>
         {/* GENERATED STORY */}
@@ -544,20 +557,19 @@ export default function StoryForm() {
                   </button> 
                 ):(
                   <button
-                    disabled={questionLoading}
+                    disabled={questionLoading || questions.length > 0}
                     onClick={handleGenerateQuestions}
-            className="
-            bg-purple-600
-            text-white
-            px-6
-            py-3
-            rounded-xl
-            disabled:opacity-50
-            disabled:cursor-not-allowed"
+                    className="
+                    bg-purple-600
+                    text-white
+                    px-6
+                    py-3
+                    rounded-xl
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed"
                   >
                     {questionLoading
-                  ? "Generating..."
-                  : "Generate Questions"}
+                  ? "Generating..." : questions.length > 0 ? "Questions Already Generated" : "Generate Questions"}
                   </button>
                 
                 )}
