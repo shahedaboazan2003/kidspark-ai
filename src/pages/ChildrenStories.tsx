@@ -31,7 +31,9 @@ type Story = {
   status: string;
   audioUrl?: string | null;
   scenes: Scene[];
-  questions:Question[]
+  questions:Question[];
+  isApproved: boolean;
+  questionsApproved: boolean;
 };
 
 type Question = {
@@ -64,6 +66,8 @@ export default function ChildrenStories() {
   const [loadingStoryId, setLoadingStoryId] =
   useState<number | null>(null);
   const navigate = useNavigate()
+
+
   useEffect(() => {
       const fetchStories = async () => {
         try{
@@ -75,10 +79,11 @@ export default function ChildrenStories() {
               content: s.content,
               childName: s.child?.firstName || "Unknown",
               status: s.status,
-              // image: s.scenes?.[0]?.imageUrl || undefined,
               audioUrl: s.audioUrl,
               scenes: s.scenes || [],
-              questions:s.questions || []
+              questions:s.questions || [],
+              isApproved: s.isApproved,
+              questionsApproved: s.questionsApproved,
             }))
           );     
           }catch(err){
@@ -101,6 +106,7 @@ export default function ChildrenStories() {
 
   }, [search, stories]);
 
+
  const handleSaveEdit = async (story: Story) => {
   try {
     const res = await updateStory(story.id, {
@@ -111,13 +117,17 @@ export default function ChildrenStories() {
       })),
     });
 
+    console.log("NEW AUDIO", res.data.story.audioUrl);
     setStories((prev) =>
       prev.map((s) =>
         s.id === story.id
           ? {
               ...s,
               ...res.data.story,
+              scenes: res.data.scenes,
               status: "DRAFT",
+              isApproved: false,
+              questionsApproved: false,
             }
           : s
       )
@@ -127,6 +137,7 @@ export default function ChildrenStories() {
       setSelectedStory({
         ...selectedStory,
         ...res.data.story,
+        scenes: res.data.scenes,
         status: "DRAFT",
       });
     }
@@ -140,26 +151,17 @@ export default function ChildrenStories() {
   const handleApprove = async (storyId:number) => {
     try{
       await approveStory(storyId)
-      setStories((prev) => prev.map((story) => story.id === storyId ? { ...story, status: "PUBLISHED" } : story ) );
-      // navigate(`/my-stories/${story.id}`)
+      setStories((prev) => prev.map((story) => story.id === storyId ? { ...story, isApproved: true, } : story ) );
     }catch(err){
       console.log(err)
     }
-
-    // const approvedStories = JSON.parse(localStorage.getItem("stories")) || [];
-
-    // approvedStories.push({
-    //   ...stories,
-    //   status: "approved",
-    // });
-
-    // localStorage.setItem("stories", JSON.stringify(approvedStories));
   }
 
   const handleEditWithAi = async () => {
   
     if (!aiMessage.trim() || !selectedStory) return;
-  
+    const message = aiMessage;
+    setAiMessage("")
     try {
   
       setAiLoading(true);
@@ -168,17 +170,16 @@ export default function ChildrenStories() {
         ...prev,
         {
           role: "user",
-          text: aiMessage,
+          text: message,
         },
       ]);
   console.log("SENDING:", {
     editRequest: aiMessage,
   });
-      const res =
-        await updateStoryWithAi(
+      const res = await updateStoryWithAi(
           selectedStory.id,
           {
-            editRequest: aiMessage,
+            editRequest: message,
           },
         );
         console.log(res)
@@ -252,7 +253,7 @@ export default function ChildrenStories() {
     } catch (err) {
   
       console.log(err);
-  
+  setAiMessage(message)
     } finally {
   
       setAiLoading(false);
@@ -491,7 +492,17 @@ export default function ChildrenStories() {
 
                   {/* AUDIO */}
                   {story.audioUrl && (
-                  <audio controls className="w-full mb-4">
+                  // <audio controls className="w-full mb-4">
+                  //   <source
+                  //     src={`${import.meta.env.VITE_API_URL}${story.audioUrl}`}
+                  //     type="audio/mpeg"
+                  //   />
+                  // </audio>
+                  <audio
+                    key={story.audioUrl}
+                    controls
+                    className="w-full mb-4"
+                  >
                     <source
                       src={`${import.meta.env.VITE_API_URL}${story.audioUrl}`}
                       type="audio/mpeg"
@@ -774,18 +785,18 @@ export default function ChildrenStories() {
 
               Edit using AI
 
-                </button>
+              </button>
 
               {/* APPROVE */}
-              {story.status === "DRAFT" && (
+              {/* {story.status === "DRAFT" && (
               <button
               onClick={() => handleApprove(story.id)}
               className="bg-green-600 text-white px-4 py-2 rounded-xl"
               >
               Approve </button>
-              )}
-
-              {story.status === "DRAFT" && story.questions.length > 0 && (
+              )} */}
+              
+              {/* {story.status === "DRAFT" && story.questions.length > 0 && (
                 <>
                   <button
                     onClick={() =>
@@ -809,28 +820,71 @@ export default function ChildrenStories() {
                     Add Question
                   </button>
                 </>
+              )} */}
+
+{/* 1-القصة غير معتمدة وغير منشورة */}
+              {!story.isApproved && story.status !== "PUBLISHED" && (
+                <button
+                  onClick={() => handleApprove(story.id)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-xl"
+                >
+                  Approve Story
+                </button>
               )}
 
-              {story.status === "PUBLISHED" && story.questions.length > 0 && (
+{/* 2-القصة معتمدة لكن غير منشورة  */}
+              {story.isApproved && story.status !== "PUBLISHED" && story.questions.length === 0 && (
+              <button
+                onClick={() => handleGenerateQuestions(story.id)}
+                disabled={questionLoading}
+                className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+              >
+                {questionLoading
+                  ? "Generating..."
+                  : "Generate Questions"}
+              </button>
+            )}
+
+{/* القصة معتمدة لكن غير منشورة وفي اسئلة */}
+              {story.isApproved && story.status !== "PUBLISHED" && story.questions.length > 0 && (
+                <>
+                  <button
+                    onClick={() => handleApproveQuestions(story.id)}
+                    className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    Approve Questions
+                  </button>
+
+                  <button
+                    onClick={() => setShowAddQuestionForStory(story.id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    Add Question
+                  </button>
+                </>
+              )}
+
+{/* القصة منشورة */}
+              { story.questions.length > 0 && (
                <button
-  disabled={loadingStoryId === story.id}
-  onClick={() =>
-    handleRegenerateQuestions(story.id)
-  }
-  className="
-    bg-orange-600
-    text-white
-    px-6
-    py-3
-    rounded-xl
-    disabled:opacity-50
-    disabled:cursor-not-allowed
-  "
->
-  {loadingStoryId === story.id
-    ? "Regenerating Questions..."
-    : "Regenerate Questions"}
-</button>
+                  disabled={loadingStoryId === story.id}
+                  onClick={() =>
+                    handleRegenerateQuestions(story.id)
+                  }
+                  className="
+                    bg-orange-600
+                    text-white
+                    px-6
+                    py-3
+                    rounded-xl
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                  "
+                >
+                  {loadingStoryId === story.id
+                    ? "Regenerating Questions..."
+                    : "Regenerate Questions"}
+                </button>
               )}
               </div>
 
@@ -904,7 +958,7 @@ export default function ChildrenStories() {
             {/* INPUT */}
             <div className="p-4 border-t flex gap-2">
 
-              <input
+              {/* <input
                 value={aiMessage}
                 onChange={(e) =>
                   setAiMessage(e.target.value)
@@ -913,8 +967,34 @@ export default function ChildrenStories() {
                 placeholder="Ask AI to modify the story..."
 
                 className="flex-1 border rounded-xl px-3 py-2"
-              />
-
+              /> */}
+              <textarea
+              value={aiMessage}
+              onChange={(e) => {
+                setAiMessage(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleEditWithAi();
+                  }
+                }}
+                  rows={1}
+              placeholder="Ask AI to modify the story..."
+              className="
+                flex-1
+                border
+                rounded-xl
+                px-3
+                py-2
+                resize-none
+                overflow-hidden
+                min-h-[44px]
+                max-h-[250px]
+              "
+            />
               <button
                 onClick={handleEditWithAi}
                 disabled={aiLoading}

@@ -37,13 +37,14 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
-    setError("");
-
     if (!userType) {
       setError(t("selectRole"));
       return;
     }
+
+    setLoading(true);
+    setError("");
+
 
     try {
       const res = await apiLogin({
@@ -178,7 +179,7 @@ const Login = () => {
               <p className="text-red-500 text-center text-sm">{error}</p>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button type="submit" disabled={loading || !isValid} className="w-full">
               {loading ? <Loader2 className="animate-spin" /> : t("login")}
             </Button>
           </form>

@@ -23,6 +23,12 @@ import { useTranslation } from "react-i18next";
 import { addQuestions, approveQuestions, deleteQuestion, generateQuestions, updateQuestion } from "@/lib/questions";
 import { Edit2, Trash2 } from "lucide-react";
 import { useNotificationHandler } from "@/hooks/useFirebaseNotifications";
+import { CheckCircle2Icon } from "lucide-react"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 export default function StoryForm() {
   const { t } = useTranslation();
@@ -52,8 +58,6 @@ export default function StoryForm() {
 
   const [questions, setQuestions] = useState<any[]>([]);
 
-  const [questionsLoading, setQuestionsLoading] = useState(false);
-
   const [showAddQuestion, setShowAddQuestion] = useState(false);
 
   const [newQuestion, setNewQuestion] = useState("");
@@ -65,6 +69,7 @@ export default function StoryForm() {
   const [questionLoading, setQuestionLoading] = useState(false);
   const [generationStep , setGenerationStep] = useState("")
 
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   useNotificationHandler({
     type: "AI_PROGRESS",
     handler: (payload) => {
@@ -184,7 +189,8 @@ export default function StoryForm() {
       const res = await updateStoryWithAi(generatedStory.story.id, {
         editRequest: aiMessage,
       });
-      console.log(res);
+      console.log("OLD STORY", generatedStory);
+      console.log("NEW RESPONSE", res.data);
 
       // update story on screen
       setGeneratedStory(res.data);
@@ -227,11 +233,15 @@ export default function StoryForm() {
       setStoryApproved( res.data.story.isApproved);
       setQuestions([]);
       setIsEditing(false);
+
+      setShowSuccessAlert(true);
+
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 3000);
     } catch (err) {
       console.log(err);
     }
-
-    alert("Story edited successfully!");
   };
 
   const handleApprove = async () => {
@@ -532,12 +542,23 @@ export default function StoryForm() {
                 </button>
               </div>
             )}
+
+            {showSuccessAlert && (
+              <Alert className="max-w-md mb-4">
+                <CheckCircle2Icon className="h-4 w-4" />
+
+                <AlertTitle>Success</AlertTitle>
+
+                <AlertDescription>
+                  Story updated successfully.
+                </AlertDescription>
+              </Alert>
+            )}
             {!isEditing && (
               <div className="flex gap-4 mt-6">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="bg-blue-500 text-white px-5 py-2 rounded-xl"
-                >
+                  className="bg-blue-500 text-white px-5 py-2 rounded-xl">
                   {t("editStory")}
                 </button>
 
