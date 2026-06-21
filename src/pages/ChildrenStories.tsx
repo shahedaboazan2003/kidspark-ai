@@ -44,13 +44,10 @@ type Story = {
   status: string;
   audioUrl?: string | null;
   scenes: Scene[];
-<<<<<<< Updated upstream
   questions:Question[];
   isApproved: boolean;
   questionsApproved: boolean;
-=======
   questions: Question[];
->>>>>>> Stashed changes
 };
 
 type Question = {
@@ -84,7 +81,6 @@ export default function ChildrenStories() {
 
   const [questionLoading, setQuestionLoading] = useState(false);
 
-<<<<<<< Updated upstream
   const [loadingStoryId, setLoadingStoryId] =
   useState<number | null>(null);
   const navigate = useNavigate()
@@ -111,7 +107,6 @@ export default function ChildrenStories() {
           }catch(err){
           console.log(err)
         }
-=======
   const [loadingStoryId, setLoadingStoryId] = useState<number | null>(null);
   const navigate = useNavigate();
   useEffect(() => {
@@ -133,7 +128,6 @@ export default function ChildrenStories() {
         );
       } catch (err) {
         console.log(err);
->>>>>>> Stashed changes
       }
     };
     fetchStories();
@@ -147,7 +141,6 @@ export default function ChildrenStories() {
     setFilteredStories(filtered);
   }, [search, stories]);
 
-<<<<<<< Updated upstream
 
  const handleSaveEdit = async (story: Story) => {
   try {
@@ -181,7 +174,6 @@ export default function ChildrenStories() {
         ...res.data.story,
         scenes: res.data.scenes,
         status: "DRAFT",
-=======
   const handleSaveEdit = async (story: Story) => {
     try {
       const res = await updateStory(story.id, {
@@ -190,7 +182,6 @@ export default function ChildrenStories() {
           title: scene.title,
           content: scene.content,
         })),
->>>>>>> Stashed changes
       });
 
       setStories((prev) =>
@@ -219,7 +210,6 @@ export default function ChildrenStories() {
     }
   };
 
-<<<<<<< Updated upstream
     setEditingStoryId(null);
   } catch (err) {
     console.log(err);
@@ -234,7 +224,6 @@ export default function ChildrenStories() {
       console.log(err)
     }
   }
-=======
   const handleApprove = async (storyId: number) => {
     try {
       await approveStory(storyId);
@@ -247,16 +236,12 @@ export default function ChildrenStories() {
       console.log(err);
     }
   };
->>>>>>> Stashed changes
 
   const handleEditWithAi = async () => {
     if (!aiMessage.trim() || !selectedStory) return;
-<<<<<<< Updated upstream
     const message = aiMessage;
     setAiMessage("")
-=======
 
->>>>>>> Stashed changes
     try {
       setAiLoading(true);
 
@@ -267,7 +252,6 @@ export default function ChildrenStories() {
           text: message,
         },
       ]);
-<<<<<<< Updated upstream
   console.log("SENDING:", {
     editRequest: aiMessage,
   });
@@ -279,7 +263,6 @@ export default function ChildrenStories() {
         );
         console.log(res)
   
-=======
       console.log("SENDING:", {
         editRequest: aiMessage,
       });
@@ -288,7 +271,6 @@ export default function ChildrenStories() {
       });
       console.log(res);
 
->>>>>>> Stashed changes
       // update story on screen
       setStories((prev) =>
         prev.map((story) => {
@@ -334,10 +316,7 @@ export default function ChildrenStories() {
       setAiMessage("");
     } catch (err) {
       console.log(err);
-<<<<<<< Updated upstream
   setAiMessage(message)
-=======
->>>>>>> Stashed changes
     } finally {
       setAiLoading(false);
     }
@@ -534,7 +513,6 @@ export default function ChildrenStories() {
                       {story.content}
                     </p>
 
-<<<<<<< Updated upstream
               <div
                 key={story.id}
                 className="bg-card rounded-2xl shadow-md overflow-hidden"
@@ -588,14 +566,12 @@ export default function ChildrenStories() {
                         <img
                             src={`${import.meta.env.VITE_API_URL}${scene.imageUrl}`}
                           className="w-full h-48 object-cover rounded-lg mb-2"
-=======
                     {/* AUDIO */}
                     {story.audioUrl && (
                       <audio controls className="w-full mb-4">
                         <source
                           src={`${import.meta.env.VITE_API_URL}${story.audioUrl}`}
                           type="audio/mpeg"
->>>>>>> Stashed changes
                         />
                       </audio>
                     )}
@@ -868,7 +844,6 @@ export default function ChildrenStories() {
                         )}
                     </div>
                   </div>
-<<<<<<< Updated upstream
                 )}
               </div>
 
@@ -1079,8 +1054,6 @@ export default function ChildrenStories() {
               )}
               </div>
 
-=======
->>>>>>> Stashed changes
                 </div>
               ))}
             </div>
@@ -1126,12 +1099,9 @@ export default function ChildrenStories() {
 
             {/* INPUT */}
             <div className="p-4 border-t flex gap-2">
-<<<<<<< Updated upstream
 
               {/* <input
-=======
               <input
->>>>>>> Stashed changes
                 value={aiMessage}
                 onChange={(e) => setAiMessage(e.target.value)}
                 placeholder={t("askAiToModifyStory")}

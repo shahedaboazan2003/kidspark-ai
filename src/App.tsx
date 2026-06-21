@@ -25,8 +25,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import MyFiles from "./pages/MyFiles";
 import ChildrenStories from "./pages/ChildrenStories";
 import { useFirebaseNotifications } from "./hooks/useFirebaseNotifications.ts";
-import { getToken } from "firebase/messaging";
-import { messaging } from "./lib/firebase.ts";
 import { useEffect } from "react";
 import i18n from "./i18n/i18n.ts";
 import Reports from "./pages/Reports.tsx";
@@ -78,7 +76,6 @@ const App = () => {
                 />
                 <Route path="/verify-email" element={<VerifyEmail />} />
 
-<<<<<<< Updated upstream
   return(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -124,7 +121,6 @@ const App = () => {
                 }
               />
               <Route path="/verify-email" element={<VerifyEmail />} />
-=======
                 {/* Parent-only */}
                 <Route
                   path="/dashboard"
@@ -166,7 +162,6 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
->>>>>>> Stashed changes
 
                 {/* Chat — accessible to BOTH parent and child */}
                 <Route

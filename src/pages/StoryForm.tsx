@@ -26,7 +26,6 @@ import {
   updateQuestion,
 } from "@/lib/questions";
 import { Edit2, Trash2 } from "lucide-react";
-<<<<<<< Updated upstream
 import { useNotificationHandler } from "@/hooks/useFirebaseNotifications";
 import { CheckCircle2Icon } from "lucide-react"
 import {
@@ -35,9 +34,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 
-=======
 import PlayfulBackground from "@/components/PlayfulBackground";
->>>>>>> Stashed changes
 export default function StoryForm() {
   const { t } = useTranslation();
   const [form, setForm] = useState({
@@ -77,7 +74,6 @@ export default function StoryForm() {
   const [editedQuestion, setEditedQuestion] = useState("");
 
   const [questionLoading, setQuestionLoading] = useState(false);
-<<<<<<< Updated upstream
   const [generationStep , setGenerationStep] = useState("")
 
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -90,8 +86,6 @@ export default function StoryForm() {
 
 
   //useeffect to get children's names
-=======
->>>>>>> Stashed changes
   useEffect(() => {
     if (!user?.id) return;
 
@@ -151,11 +145,8 @@ export default function StoryForm() {
   };
 
   const handleGenerate = async () => {
-<<<<<<< Updated upstream
     if(loading || generatedStory) return
-=======
     if (loading) return;
->>>>>>> Stashed changes
     try {
       setGenerationStep("Starting...");
       setLoading(true);
@@ -280,14 +271,11 @@ export default function StoryForm() {
     setStoryApproved(true);
   };
 
-<<<<<<< Updated upstream
   const handleGenerateQuestions = async () =>{
     if(questions.length > 0) return
     try{
-=======
   const handleGenerateQuestions = async () => {
     try {
->>>>>>> Stashed changes
       setQuestionLoading(true);
       const res = await generateQuestions(generatedStory.story.id);
       setQuestions(res.data);
@@ -397,7 +385,6 @@ export default function StoryForm() {
                     {t("educationalGoal")}
                   </label>
 
-<<<<<<< Updated upstream
           {/* LENGTH */}
           <div>
             <label className="block mb-2 font-semibold">
@@ -474,7 +461,6 @@ export default function StoryForm() {
             onClick={handleGenerate}
             disabled={loading || generatedStory !== null}
             className="
-=======
                   <textarea
                     disabled={loading}
                     name="behavior"
@@ -549,7 +535,6 @@ export default function StoryForm() {
                   onClick={handleGenerate}
                   disabled={loading}
                   className="
->>>>>>> Stashed changes
             bg-purple-600
             text-white
             px-6
@@ -558,7 +543,6 @@ export default function StoryForm() {
             disabled:opacity-50
             disabled:cursor-not-allowed
           "
-<<<<<<< Updated upstream
           >
             {loading ? t("generating...") : generatedStory ? "Story Already Generated" : t("generateStory")}
           </button>
@@ -633,13 +617,10 @@ export default function StoryForm() {
                 <button
                   onClick={handleSaveEdit}
                   className="bg-yellow-500 text-white px-5 py-2 rounded-xl"
-=======
->>>>>>> Stashed changes
                 >
                   {loading ? t("generating...") : t("generateStory")}
                 </button>
               </div>
-<<<<<<< Updated upstream
             )}
 
             {showSuccessAlert && (
@@ -660,7 +641,6 @@ export default function StoryForm() {
                   className="bg-blue-500 text-white px-5 py-2 rounded-xl">
                   {t("editStory")}
                 </button>
-=======
             </div>
             {/* GENERATED STORY */}
             {generatedStory && (
@@ -682,14 +662,12 @@ export default function StoryForm() {
                     />
                   </audio>
                 )}
->>>>>>> Stashed changes
 
                 {/* SCENES */}
                 {generatedStory.scenes.map((scene: any) => (
                   <div key={scene.id} className="mb-10">
                     <h3 className="text-xl font-bold mb-3">{scene.title}</h3>
 
-<<<<<<< Updated upstream
                 {!storyApproved ? (
                   <button
                   onClick={handleApprove}
@@ -714,7 +692,6 @@ export default function StoryForm() {
                   ? "Generating..." : questions.length > 0 ? "Questions Already Generated" : "Generate Questions"}
                   </button>
                 
-=======
                     {/* IMAGE */}
                     {scene.imageUrl && (
                       <img
@@ -807,7 +784,6 @@ export default function StoryForm() {
                       </button>
                     )}
                   </div>
->>>>>>> Stashed changes
                 )}
               </div>
             )}

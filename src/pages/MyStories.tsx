@@ -2,16 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getChildStories, getMyStories } from "@/lib/story";
 import { submitAnswers } from "@/lib/questions";
-<<<<<<< Updated upstream
 import Confetti from "react-confetti";
 
-=======
 import { toast } from "sonner";
 import AppNavbar from "@/components/AppNavbar";
 import PlayfulBackground from "@/components/PlayfulBackground";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
->>>>>>> Stashed changes
 export default function MyStories() {
   const { childId } = useParams();
   const navigate = useNavigate();
@@ -23,7 +20,6 @@ export default function MyStories() {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
 
   const [showQuestions, setShowQuestions] = useState(false);
-<<<<<<< Updated upstream
   
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
@@ -36,14 +32,12 @@ export default function MyStories() {
   console.log("STORIES", stories);
 }, [stories]);
 
-=======
 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   // ---------------- LOAD ----------------
   useEffect(() => {
     console.log("STORIES", stories);
   }, [stories]);
->>>>>>> Stashed changes
   useEffect(() => {
     const load = async () => {
       const res = childId
@@ -66,7 +60,6 @@ export default function MyStories() {
 
       console.log("time:", time);
 
-<<<<<<< Updated upstream
     const index = selectedStory.scenes.findIndex(
       (s: any) =>
         s.startTime != null &&
@@ -74,7 +67,6 @@ export default function MyStories() {
         time >= s.startTime &&
         time < s.endTime
     );
-=======
       const index = selectedStory.scenes.findIndex(
         (s: any) =>
           s.startTime !== null &&
@@ -82,7 +74,6 @@ export default function MyStories() {
           time >= s.startTime &&
           time < s.endTime,
       );
->>>>>>> Stashed changes
 
       console.log("index:", index);
       console.log("SCENES:", selectedStory.scenes);
@@ -95,16 +86,13 @@ export default function MyStories() {
 
     audio.addEventListener("timeupdate", onTimeUpdate);
 
-<<<<<<< Updated upstream
 
   return () => audio.removeEventListener("timeupdate", onTimeUpdate);
 }, [selectedStory]);
 
-=======
     return () => audio.removeEventListener("timeupdate", onTimeUpdate);
   }, [selectedStory]);
   // ---------------- RESET ----------------
->>>>>>> Stashed changes
   useEffect(() => {
     setCurrentSceneIndex(0);
   }, [selectedStory]);
@@ -120,8 +108,6 @@ export default function MyStories() {
   }
 }, [currentSceneIndex, selectedStory]);
 
-<<<<<<< Updated upstream
-=======
   //     const index = selectedStory.scenes.findIndex(
   //       (s: any) => time >= s.startTime && time < s.endTime
   //     );
@@ -136,7 +122,6 @@ export default function MyStories() {
   //   return () => audio.removeEventListener("timeupdate", onTimeUpdate);
   // }, [selectedStory]);
   console.log(selectedStory?.scenes);
->>>>>>> Stashed changes
   // ---------------- GRID VIEW ----------------
   if (!selectedStory) {
     return (
@@ -151,7 +136,6 @@ export default function MyStories() {
                 <div key={story.id} className="bg-white p-4 rounded-xl shadow">
                   <h2 className="font-bold text-xl">{story.title}</h2>
 
-<<<<<<< Updated upstream
             <button
               onClick={() => {
                 setSelectedStory(story);
@@ -166,7 +150,6 @@ export default function MyStories() {
             </button>
           </div>
         ))}
-=======
                   <p className="text-gray-600 mb-3">
                     {story.content.slice(0, 120)}...
                   </p>
@@ -185,7 +168,6 @@ export default function MyStories() {
             </div>
           </main>
         </div>
->>>>>>> Stashed changes
       </div>
     );
   }
@@ -196,7 +178,6 @@ export default function MyStories() {
   const scene = story.scenes?.[currentSceneIndex];
 
   const handleSubmitAnswers = async () => {
-<<<<<<< Updated upstream
     if(answersSubmitted) return
     try {
       await submitAnswers(
@@ -216,7 +197,6 @@ export default function MyStories() {
     setTimeout(() => {
       setShowConfetti(false);
     }, 5000);
-=======
     try {
       await submitAnswers(story.id, {
         answers: story.questions.map((q: any) => ({
@@ -224,7 +204,6 @@ export default function MyStories() {
           answer: answers[q.id] || "",
         })),
       });
->>>>>>> Stashed changes
 
       toast.success(t("answersSubmittedSuccessfully"));
     } catch (err) {
@@ -246,7 +225,6 @@ export default function MyStories() {
             ← {t("back")}
           </button>
 
-<<<<<<< Updated upstream
       {story.audioUrl && (
       <audio
         ref={audioRef}
@@ -361,7 +339,6 @@ export default function MyStories() {
         </button>
       </div>
     )}
-=======
           <h1 className="text-2xl font-bold mb-4">{story.title}</h1>
 
           <audio
@@ -427,7 +404,6 @@ export default function MyStories() {
             )}
           </div>
         </main>
->>>>>>> Stashed changes
       </div>
     </div>
   );
