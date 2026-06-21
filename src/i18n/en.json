@@ -304,7 +304,6 @@
   "selectChildren": "Select Children",
   "uploadFile": "Upload File",
   "uploadedFiles": "Uploaded Files",
-
   "chooseChild": "Choose a child",
   "selectAtLeastOneChild": "Please select at least one child",
   "editChildren": "Edit Children",
@@ -360,5 +359,7 @@
   "approveQuestions": "Approve Questions",
   "save": "Save",
   "cancel": "Cancel",
-  "generating": "Generating..."
+  "generating": "Generating...",
+  "approveStoryButton": "Approve Story",
+"storyUpdatedSuccessfully": "Story updated successfully"
 }

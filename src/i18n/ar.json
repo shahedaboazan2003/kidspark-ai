@@ -353,5 +353,7 @@
   "approveQuestions": "اعتماد الأسئلة",
   "save": "حفظ",
   "cancel": "إلغاء",
-  "generating": "جاري الإنشاء..."
+  "generating": "جاري الإنشاء...",
+  "approveStoryButton": "الموافقة على القصة",
+"storyUpdatedSuccessfully": "تم تحديث القصة بنجاح"
 }

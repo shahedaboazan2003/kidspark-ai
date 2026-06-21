@@ -57,7 +57,23 @@ const App = () => {
               <NavbarController />
               <Routes>
                 {/* Public */}
-                <Route path="/" element={<Index />} />
+                <Route
+                  path="/"
+                  element={
+                    localStorage.getItem("accessToken") ? (
+                      <Navigate
+                        to={
+                          localStorage.getItem("userType") === "parent"
+                            ? "/dashboard"
+                            : "/chat"
+                        }
+                        replace
+                      />
+                    ) : (
+                      <Navigate to="/login" replace />
+                    )
+                  }
+                />
                 <Route
                   path="/register"
                   element={
@@ -75,52 +91,6 @@ const App = () => {
                   }
                 />
                 <Route path="/verify-email" element={<VerifyEmail />} />
-
-  return(
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <NavbarController />
-            <Routes>
-              {/* Public */}
-              <Route
-                path="/"
-                element={
-                  localStorage.getItem("accessToken")
-                    ? (
-                      <Navigate
-                        to={
-                          localStorage.getItem("userType") === "parent"
-                            ? "/dashboard"
-                            : "/chat"
-                        }
-                        replace
-                      />
-                    )
-                    : <Navigate to="/login" replace />
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <PublicOnlyRoute>
-                    <Register />
-                  </PublicOnlyRoute>
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  <PublicOnlyRoute>
-                    <Login />
-                  </PublicOnlyRoute>
-                }
-              />
-              <Route path="/verify-email" element={<VerifyEmail />} />
                 {/* Parent-only */}
                 <Route
                   path="/dashboard"
