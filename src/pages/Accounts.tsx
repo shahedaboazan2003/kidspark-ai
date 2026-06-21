@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import React from "react";
-// import { useTranslation } from "react-i18next";
 import {
   Search,
   Users,
@@ -230,7 +228,9 @@ const Accounts = () => {
                               : "bg-secondary/30 text-secondary-foreground",
                           )}
                         >
-                         {a.type === "parent" ? `👤 ${t("parents")}` : `🧒 ${t("children")}`}
+                          {a.type === "parent"
+                            ? `👤 ${t("parents")}`
+                            : `🧒 ${t("children")}`}
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm hidden md:table-cell">

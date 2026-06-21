@@ -1,7 +1,7 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { Child, calcAge } from "@/lib/children";
 import { cn } from "@/lib/utils";
-
+import { useTranslation } from "react-i18next";
 interface Props {
   child: Child;
   onEdit: () => void;
@@ -10,7 +10,8 @@ interface Props {
 }
 
 const ChildCard = ({ child, onEdit, onDelete, delay = 0 }: Props) => {
-  const age = calcAge(child.birthdate);
+  const age = calcAge(child.birthDate);
+  const { t } = useTranslation();
 
   return (
     <div
@@ -43,7 +44,7 @@ const ChildCard = ({ child, onEdit, onDelete, delay = 0 }: Props) => {
             aria-label={`Edit ${child.firstName} {child.lastName}`}
           >
             <Pencil className="w-4 h-4" />
-            Edit
+            {t("edit")}
           </button>
           <button
             onClick={onDelete}
@@ -51,7 +52,7 @@ const ChildCard = ({ child, onEdit, onDelete, delay = 0 }: Props) => {
             aria-label={`Delete ${child.firstName} {child.lastName}`}
           >
             <Trash2 className="w-4 h-4" />
-            Delete
+           {t("delete")}
           </button>
         </div>
       </div>

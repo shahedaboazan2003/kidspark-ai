@@ -38,9 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
-import { BookPlus } from "lucide-react";
 import { Globe } from "lucide-react";
-// import { Link } from "react-router-dom";
 interface NavItem {
   to: string;
   label: string;
@@ -48,41 +46,36 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const PARENT_LINKS: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", emoji: "📊", icon: LayoutDashboard },
-  { to: "/add-child", label: "Add Child", emoji: "➕", icon: UserPlus },
-  { to: "/history", label: "History", emoji: "📚", icon: BookOpen },
-  { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
-  { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
-  { to: "/profile", label: "Profile", emoji: "👤", icon: User },
-  // {
-  //   to: "/my-files",
-  //   label: "My Files",
-  //   emoji: "📁",
-  //   icon: FolderOpen,
-  // },
-  // {
-  //   to: "/children-stories",
-  //   label: "Children Stories",
-  //   emoji: "👧",
-  //   icon: BookOpen,
-  // },
+// const PARENT_LINKS: NavItem[] = [
+//   { to: "/dashboard", label: "Dashboard", emoji: "📊", icon: LayoutDashboard },
+//   { to: "/add-child", label: "Add Child", emoji: "➕", icon: UserPlus },
+//   { to: "/history", label: "History", emoji: "📚", icon: BookOpen },
+//   { to: "/accounts", label: "Accounts", emoji: "👥", icon: Users },
+//   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
+//   { to: "/profile", label: "Profile", emoji: "👤", icon: User },
+
+// ];
+const PARENT_LINKS = [
+  { to: "/dashboard", label: "dashboard", emoji: "📊", icon: LayoutDashboard },
+  { to: "/add-child", label: "addChild", emoji: "➕", icon: UserPlus },
+  { to: "/history", label: "history", emoji: "📚", icon: BookOpen },
+  { to: "/accounts", label: "accounts", emoji: "👥", icon: Users },
+  { to: "/chat", label: "chat", emoji: "💬", icon: MessageCircle },
+  { to: "/profile", label: "profile", emoji: "👤", icon: User },
 ];
 
-const CHILD_LINKS: NavItem[] = [
-  { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
-  { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
+// const CHILD_LINKS: NavItem[] = [
+//   { to: "/chat", label: "Chat", emoji: "💬", icon: MessageCircle },
+//   { to: "/my-stories", label: "My Stories", emoji: "📖", icon: BookOpen },
+// ];
+const CHILD_LINKS = [
+  { to: "/chat", label: "chat", emoji: "💬", icon: MessageCircle },
+  { to: "/my-stories", label: "myStories", emoji: "📖", icon: BookOpen },
 ];
-
 const AppNavbar = () => {
   const navigate = useNavigate();
   const { username, userType, logout } = useAuth();
-  const { i18n } = useTranslation();
-  // const toggleLang = () => {
-  //   const newLang = i18n.language === "ar" ? "en" : "ar";
-  //   i18n.changeLanguage(newLang);
-  //   localStorage.setItem("lang", newLang);
-  // };
+  const { t, i18n } = useTranslation();
   const toggleLang = () => {
     const newLang = i18n.language === "en" ? "ar" : "en";
     i18n.changeLanguage(newLang);
@@ -105,14 +98,15 @@ const AppNavbar = () => {
   const displayName = username
     ? username.charAt(0).toUpperCase() + username.slice(1)
     : userType === "child"
-      ? "Friend"
-      : "Parent";
+      ? t("friend")
+      : t("parent");
   const initial = displayName.charAt(0).toUpperCase();
-  const roleLabel = userType === "parent" ? "Parent account" : "Kid explorer";
+  const roleLabel =
+    userType === "parent" ? t("parentAccount") : t("kidExplorer");
 
   const handleLogout = () => {
     logout();
-    toast.success("See you soon! 👋");
+    toast.success(t("seeYouSoon"));
     navigate("/login");
   };
 
@@ -156,7 +150,7 @@ const AppNavbar = () => {
                   />
                 </div>
                 <span className="font-bold text-base text-foreground hidden sm:inline">
-                  Little Minds
+                  {t("appName")}
                 </span>
               </Link>
 
@@ -170,15 +164,16 @@ const AppNavbar = () => {
                     activeClassName="!text-primary !bg-primary/10 shadow-soft scale-105"
                   >
                     <span className="text-base leading-none">{item.emoji}</span>
-                    <span>{item.label}</span>
+                    <span>{t(item.label)}</span>
                   </NavLink>
                 ))}
+                {isParent && (
                 <div className="relative ml-1">
                   <button
                     onClick={() => setOpenMore(!openMore)}
                     className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
                   >
-                    More
+                    {t("more")}
                     <ChevronDown className="w-4 h-4" />
                   </button>
 
@@ -190,7 +185,7 @@ const AppNavbar = () => {
                         onClick={() => setOpenMore(false)}
                         className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
                       >
-                        ✨ Story Generator
+                        ✨ {t("storyGenerator")}
                       </Link>
 
                       {/* My Files */}
@@ -199,7 +194,7 @@ const AppNavbar = () => {
                         onClick={() => setOpenMore(false)}
                         className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
                       >
-                        📁 My Files
+                        📁 {t("myFiles")}
                       </Link>
                       {/* Children's Stories */}
                       <Link
@@ -207,11 +202,12 @@ const AppNavbar = () => {
                         onClick={() => setOpenMore(false)}
                         className="flex items-center gap-2 px-4 py-3 hover:bg-muted/60 transition"
                       >
-                        👧 Children's Stories
+                        👧 {t("childrenStories")}
                       </Link>
                     </div>
                   )}
                 </div>
+                )}
               </nav>
 
               <div className="flex items-center gap-2 shrink-0">
@@ -219,12 +215,12 @@ const AppNavbar = () => {
                 <button
                   onClick={toggleLang}
                   className="hidden sm:flex p-2 rounded-xl hover:bg-muted/60 transition"
-                  title="Change Language"
+                  title={t("changeLanguage")}
                 >
                   <Globe className="w-4 h-4" />
                 </button>
                 <span className="hidden lg:inline text-sm text-muted-foreground">
-                  Hi{" "}
+                  {t("hi")}{" "}
                   <span className="font-semibold text-foreground">
                     {displayName}
                   </span>{" "}
@@ -256,7 +252,7 @@ const AppNavbar = () => {
                       className="rounded-lg cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
-                      Logout
+                      {t("logout")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -265,7 +261,7 @@ const AppNavbar = () => {
                   type="button"
                   className="md:hidden ml-1 w-10 h-10 rounded-xl flex items-center justify-center text-foreground hover:bg-muted/60 transition-colors"
                   onClick={() => setMobileOpen(true)}
-                  aria-label="Open menu"
+                  aria-label={t("openMenu")}
                 >
                   <Menu className="w-5 h-5" />
                 </button>
@@ -288,12 +284,12 @@ const AppNavbar = () => {
                   strokeWidth={2.5}
                 />
               </div>
-              Little Minds
+              {t("appName")}
             </SheetTitle>
             <button
               onClick={() => setMobileOpen(false)}
               className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-muted/60 transition-colors"
-              aria-label="Close menu"
+              aria-label={t("closeMenu")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -306,7 +302,7 @@ const AppNavbar = () => {
               </div>
               <div className="min-w-0">
                 <div className="font-semibold text-sm truncate">
-                  Hi {displayName} 👋
+                  {t("hi")} {displayName} 👋
                 </div>
                 <div className="text-xs text-muted-foreground">{roleLabel}</div>
               </div>
@@ -328,42 +324,11 @@ const AppNavbar = () => {
                 <span className="text-lg leading-none w-6 text-center">
                   {item.emoji}
                 </span>
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
               </NavLink>
             ))}
           </nav>
 
-          {/* <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
-            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
-              <span className="text-sm font-semibold text-foreground">
-                Theme
-              </span>
-              <ThemeToggle />
-              <button
-                onClick={() => changeLang("ar")}
-                className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
-              >
-                AR
-              </button>
-
-              <button
-                onClick={() => changeLang("en")}
-                className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
-              >
-                EN
-              </button>
-            </div>
-            <button
-              onClick={() => {
-                setMobileOpen(false);
-                setLogoutOpen(true);
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </div> */}
           <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-3 bg-background">
             {/* CONTROLS ROW */}
             <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
@@ -371,7 +336,7 @@ const AppNavbar = () => {
               <div className="flex items-center gap-2">
                 <ThemeToggle />
                 <span className="text-xs font-semibold text-foreground">
-                  Theme
+                  {t("theme")}
                 </span>
               </div>
 
@@ -379,12 +344,11 @@ const AppNavbar = () => {
               <button
                 onClick={toggleLang}
                 className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition"
-                title="Change Language"
+                title={t("changeLanguage")}
               >
                 <Globe className="w-4 h-4" />
               </button>
             </div>
-
             {/* LOGOUT */}
             <button
               onClick={() => {
@@ -394,12 +358,11 @@ const AppNavbar = () => {
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              {t("logout")}
             </button>
           </div>
         </SheetContent>
       </Sheet>
-
       <LogoutConfirmModal
         open={logoutOpen}
         onOpenChange={setLogoutOpen}
@@ -408,49 +371,4 @@ const AppNavbar = () => {
     </>
   );
 };
-
 export default AppNavbar;
-// <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border/50 space-y-2">
-//   {/* THEME */}
-//   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
-//     <span className="text-sm font-semibold text-foreground">
-//       Theme
-//     </span>
-//     <ThemeToggle />
-//   </div>
-
-//   {/* LANGUAGE */}
-//   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/40">
-//     <span className="text-sm font-semibold text-foreground">
-//       Language
-//     </span>
-
-//     <div className="flex gap-2">
-//       <button
-//         onClick={() => changeLang("ar")}
-//         className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
-//       >
-//         AR
-//       </button>
-
-//       <button
-//         onClick={() => changeLang("en")}
-//         className="px-2 py-1 text-xs rounded-lg bg-muted hover:bg-muted/80"
-//       >
-//         EN
-//       </button>
-//     </div>
-//   </div>
-
-//   {/* LOGOUT */}
-//   <button
-//     onClick={() => {
-//       setMobileOpen(false);
-//       setLogoutOpen(true);
-//     }}
-//     className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors"
-//   >
-//     <LogOut className="w-4 h-4" />
-//     Logout
-//   </button>
-// </div>

@@ -1,4 +1,10 @@
-import { approveStory, deleteStory, getChildrenStories, updateStory, updateStoryWithAi } from "@/lib/story";
+import {
+  approveStory,
+  deleteStory,
+  getChildrenStories,
+  updateStory,
+  updateStoryWithAi,
+} from "@/lib/story";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -12,10 +18,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { addQuestions, approveQuestions, deleteQuestion, generateQuestions, regenerateQuestions, updateQuestion } from "@/lib/questions";
+} from "@/components/ui/alert-dialog";
+import {
+  addQuestions,
+  approveQuestions,
+  deleteQuestion,
+  generateQuestions,
+  regenerateQuestions,
+  updateQuestion,
+} from "@/lib/questions";
 import { Edit2, Trash2 } from "lucide-react";
-
+import PlayfulBackground from "@/components/PlayfulBackground";
 type Scene = {
   id: number;
   title: string;
@@ -31,16 +44,20 @@ type Story = {
   status: string;
   audioUrl?: string | null;
   scenes: Scene[];
+<<<<<<< Updated upstream
   questions:Question[];
   isApproved: boolean;
   questionsApproved: boolean;
+=======
+  questions: Question[];
+>>>>>>> Stashed changes
 };
 
 type Question = {
-  id:number,
-  storyId:number,
-  question:string
-}
+  id: number;
+  storyId: number;
+  question: string;
+};
 export default function ChildrenStories() {
   const { t } = useTranslation();
   const [stories, setStories] = useState<Story[]>([]);
@@ -53,16 +70,21 @@ export default function ChildrenStories() {
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 
-  const [editingQuestionId, setEditingQuestionId] =useState<number | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
+    null,
+  );
 
   const [editedQuestion, setEditedQuestion] = useState("");
 
-  const [showAddQuestionForStory, setShowAddQuestionForStory] = useState<number | null>(null);
+  const [showAddQuestionForStory, setShowAddQuestionForStory] = useState<
+    number | null
+  >(null);
 
   const [newQuestion, setNewQuestion] = useState("");
 
   const [questionLoading, setQuestionLoading] = useState(false);
 
+<<<<<<< Updated upstream
   const [loadingStoryId, setLoadingStoryId] =
   useState<number | null>(null);
   const navigate = useNavigate()
@@ -89,23 +111,43 @@ export default function ChildrenStories() {
           }catch(err){
           console.log(err)
         }
+=======
+  const [loadingStoryId, setLoadingStoryId] = useState<number | null>(null);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const data = await getChildrenStories();
+        setStories(
+          data.data.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            content: s.content,
+            childName: s.child?.firstName || "Unknown",
+            status: s.status,
+            // image: s.scenes?.[0]?.imageUrl || undefined,
+            audioUrl: s.audioUrl,
+            scenes: s.scenes || [],
+            questions: s.questions || [],
+          })),
+        );
+      } catch (err) {
+        console.log(err);
+>>>>>>> Stashed changes
       }
-        fetchStories()
+    };
+    fetchStories();
   }, []);
 
   useEffect(() => {
-
     const filtered = stories.filter((story) =>
-      (story.childName || "")
-      .toLowerCase()
-      .includes(search.toLowerCase())
-
+      (story.childName || "").toLowerCase().includes(search.toLowerCase()),
     );
 
     setFilteredStories(filtered);
-
   }, [search, stories]);
 
+<<<<<<< Updated upstream
 
  const handleSaveEdit = async (story: Story) => {
   try {
@@ -139,9 +181,45 @@ export default function ChildrenStories() {
         ...res.data.story,
         scenes: res.data.scenes,
         status: "DRAFT",
+=======
+  const handleSaveEdit = async (story: Story) => {
+    try {
+      const res = await updateStory(story.id, {
+        scenes: story.scenes.map((scene) => ({
+          id: scene.id,
+          title: scene.title,
+          content: scene.content,
+        })),
+>>>>>>> Stashed changes
       });
-    }
 
+      setStories((prev) =>
+        prev.map((s) =>
+          s.id === story.id
+            ? {
+                ...s,
+                ...res.data.story,
+                status: "DRAFT",
+              }
+            : s,
+        ),
+      );
+
+      if (selectedStory?.id === story.id) {
+        setSelectedStory({
+          ...selectedStory,
+          ...res.data.story,
+          status: "DRAFT",
+        });
+      }
+
+      setEditingStoryId(null);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+<<<<<<< Updated upstream
     setEditingStoryId(null);
   } catch (err) {
     console.log(err);
@@ -156,16 +234,32 @@ export default function ChildrenStories() {
       console.log(err)
     }
   }
+=======
+  const handleApprove = async (storyId: number) => {
+    try {
+      await approveStory(storyId);
+      setStories((prev) =>
+        prev.map((story) =>
+          story.id === storyId ? { ...story, status: "PUBLISHED" } : story,
+        ),
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+>>>>>>> Stashed changes
 
   const handleEditWithAi = async () => {
-  
     if (!aiMessage.trim() || !selectedStory) return;
+<<<<<<< Updated upstream
     const message = aiMessage;
     setAiMessage("")
+=======
+
+>>>>>>> Stashed changes
     try {
-  
       setAiLoading(true);
-  
+
       setChatMessages((prev) => [
         ...prev,
         {
@@ -173,6 +267,7 @@ export default function ChildrenStories() {
           text: message,
         },
       ]);
+<<<<<<< Updated upstream
   console.log("SENDING:", {
     editRequest: aiMessage,
   });
@@ -184,99 +279,81 @@ export default function ChildrenStories() {
         );
         console.log(res)
   
+=======
+      console.log("SENDING:", {
+        editRequest: aiMessage,
+      });
+      const res = await updateStoryWithAi(selectedStory.id, {
+        editRequest: aiMessage,
+      });
+      console.log(res);
+
+>>>>>>> Stashed changes
       // update story on screen
       setStories((prev) =>
         prev.map((story) => {
+          if (story.id !== selectedStory.id) return story;
 
-        if (story.id !== selectedStory.id)
-          return story;
+          return {
+            ...story,
+            title: res.data.story?.title || story.title,
 
-        return {
-          ...story,
-          title:
-            res.data.story?.title ||
-            story.title,
+            content: res.data.story?.content || story.content,
 
-          content:
-            res.data.story?.content ||
-            story.content,
+            scenes: res.data.scenes || story.scenes,
 
-          scenes:
-            res.data.scenes ||
-            story.scenes,
+            audioUrl: res.data.story?.audioUrl || story.audioUrl,
 
-          audioUrl:
-            res.data.story?.audioUrl ||
-            story.audioUrl,
-
-          status:
-            res.data.story?.status ||
-            story.status,
-        };
-
-        })
-        );
+            status: res.data.story?.status || story.status,
+          };
+        }),
+      );
 
       setSelectedStory((prev) =>
-          prev
+        prev
           ? {
-          ...prev,
-          title:
-          res.data.story?.title ||
-          prev.title,
+              ...prev,
+              title: res.data.story?.title || prev.title,
 
-              content:
-                res.data.story?.content ||
-                prev.content,
+              content: res.data.story?.content || prev.content,
 
-              scenes:
-                res.data.scenes ||
-                prev.scenes,
+              scenes: res.data.scenes || prev.scenes,
             }
-          : null
-
-          );
+          : null,
+      );
 
       // add assistant message
       setChatMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text:
-            res.data.summaryOfChanges ||
-            "Story updated successfully",
+          text: res.data.summaryOfChanges || "Story updated successfully",
         },
       ]);
-  
+
       setAiMessage("");
-  
     } catch (err) {
-  
       console.log(err);
+<<<<<<< Updated upstream
   setAiMessage(message)
+=======
+>>>>>>> Stashed changes
     } finally {
-  
       setAiLoading(false);
-  
     }
   };
 
   const handleDelete = async (storyId: number) => {
-      try {
+    try {
       await deleteStory(storyId);
 
-      setStories((prev) =>
-        prev.filter((story) => story.id !== storyId)
-      );
-      } catch (err) {
+      setStories((prev) => prev.filter((story) => story.id !== storyId));
+    } catch (err) {
       console.log(err);
-
-      }
+    }
   };
 
-  const handleGenerateQuestions = async (
-  storyId: number
-  ) => {
+  const handleGenerateQuestions = async (storyId: number) => {
     try {
       setQuestionLoading(true);
       const res = await generateQuestions(storyId);
@@ -288,22 +365,22 @@ export default function ChildrenStories() {
                 ...story,
                 questions: res.data,
               }
-            : story
-        )
+            : story,
+        ),
       );
     } catch (err) {
       console.log(err);
-    }finally{
+    } finally {
       setQuestionLoading(false);
     }
   };
-      
+
   const handleRegenerateQuestions = async (storyId: number) => {
     try {
       setLoadingStoryId(storyId);
 
       const res = await regenerateQuestions(storyId);
-  
+
       setStories((prev) =>
         prev.map((story) =>
           story.id === storyId
@@ -311,14 +388,13 @@ export default function ChildrenStories() {
                 ...story,
                 questions: res.data,
               }
-            : story
-        )
+            : story,
+        ),
       );
     } catch (err) {
       console.log(err);
-    }finally{
-        setLoadingStoryId(null);
-
+    } finally {
+      setLoadingStoryId(null);
     }
   };
 
@@ -333,34 +409,29 @@ export default function ChildrenStories() {
                 ...story,
                 status: "PUBLISHED",
               }
-            : story
-        )
+            : story,
+        ),
       );
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleAddQuestion = async (
-  storyId: number
-  ) => {
+  const handleAddQuestion = async (storyId: number) => {
     try {
       const res = await addQuestions(storyId, {
-          question: newQuestion,
-        });
+        question: newQuestion,
+      });
 
       setStories((prev) =>
         prev.map((story) =>
           story.id === storyId
             ? {
                 ...story,
-                questions: [
-                  ...story.questions,
-                  res.data,
-                ],
+                questions: [...story.questions, res.data],
               }
-            : story
-        )
+            : story,
+        ),
       );
 
       setNewQuestion("");
@@ -370,10 +441,7 @@ export default function ChildrenStories() {
     }
   };
 
-  const handleDeleteQuestion = async (
-    storyId: number,
-    questionId: number
-  ) => {
+  const handleDeleteQuestion = async (storyId: number, questionId: number) => {
     try {
       await deleteQuestion(questionId);
 
@@ -382,48 +450,33 @@ export default function ChildrenStories() {
           story.id === storyId
             ? {
                 ...story,
-                questions:
-                  story.questions.filter(
-                    (q) =>
-                      q.id !== questionId
-                  ),
+                questions: story.questions.filter((q) => q.id !== questionId),
               }
-            : story
-        )
+            : story,
+        ),
       );
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleUpdateQuestion = async (
-    storyId: number,
-    questionId: number
-  ) => {
+  const handleUpdateQuestion = async (storyId: number, questionId: number) => {
     try {
-      const res =
-        await updateQuestion(
-          questionId,
-          {
-            question: editedQuestion,
-          }
-        );
+      const res = await updateQuestion(questionId, {
+        question: editedQuestion,
+      });
 
       setStories((prev) =>
         prev.map((story) =>
           story.id === storyId
             ? {
                 ...story,
-                questions:
-                  story.questions.map(
-                    (q) =>
-                      q.id === questionId
-                        ? res.data
-                        : q
-                  ),
+                questions: story.questions.map((q) =>
+                  q.id === questionId ? res.data : q,
+                ),
               }
-            : story
-        )
+            : story,
+        ),
       );
 
       setEditingQuestionId(null);
@@ -432,43 +485,56 @@ export default function ChildrenStories() {
       console.log(err);
     }
   };
+  // return (
+  //   <div className="min-h-screen bg-background p-6">
   return (
+    <div className="min-h-screen bg-background relative">
+      <div className="absolute inset-0 playful-bg opacity-60" aria-hidden />
+      <PlayfulBackground />
 
-    <div className="min-h-screen bg-background p-6">
+      <div className="relative z-10 p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* TITLE */}
+          <h1 className="text-4xl font-bold mb-8">{t("childrenStories")}</h1>
 
-      <div className="max-w-6xl mx-auto">
-
-        {/* TITLE */}
-        <h1 className="text-4xl font-bold mb-8">
-          {t("childrenStories")}
-        </h1>
-
-        {/* SEARCH */}
-        <div className="mb-8">
-
-          <input
-            type="text"
-            placeholder={t("searchByChildName")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-4 rounded-2xl border border-border bg-card"
-          />
-
-        </div>
-
-        {/* STORIES */}
-        {filteredStories.length === 0 ? (
-
-          <div className="bg-card rounded-2xl p-8 text-center shadow">
-            {t("noStoriesFound")}   
+          {/* SEARCH */}
+          <div className="mb-8">
+            <input
+              type="text"
+              placeholder={t("searchByChildName")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full p-4 rounded-2xl border border-border bg-card"
+            />
           </div>
 
-        ) : (
+          {/* STORIES */}
+          {filteredStories.length === 0 ? (
+            <div className="bg-card rounded-2xl p-8 text-center shadow">
+              {t("noStoriesFound")}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {filteredStories.map((story) => (
+                <div
+                  key={story.id}
+                  className="bg-card rounded-2xl shadow-md overflow-hidden"
+                >
+                  <div className="p-5">
+                    <h2 className="text-2xl font-bold mb-2">{story.title}</h2>
 
-          <div className="grid md:grid-cols-2 gap-6">
+                    <p className="text-sm text-purple-500 mb-4">
+                      {t("child")}: {story.childName}
+                    </p>
 
-            {filteredStories.map((story) => (
+                    <p className="text-sm text-purple-500 mb-4">
+                      Status: {story.status}
+                    </p>
+                    <p className="text-muted-foreground whitespace-pre-line">
+                      {story.content}
+                    </p>
 
+<<<<<<< Updated upstream
               <div
                 key={story.id}
                 className="bg-card rounded-2xl shadow-md overflow-hidden"
@@ -522,162 +588,287 @@ export default function ChildrenStories() {
                         <img
                             src={`${import.meta.env.VITE_API_URL}${scene.imageUrl}`}
                           className="w-full h-48 object-cover rounded-lg mb-2"
+=======
+                    {/* AUDIO */}
+                    {story.audioUrl && (
+                      <audio controls className="w-full mb-4">
+                        <source
+                          src={`${import.meta.env.VITE_API_URL}${story.audioUrl}`}
+                          type="audio/mpeg"
+>>>>>>> Stashed changes
                         />
-                      )}
+                      </audio>
+                    )}
 
-                      <textarea
-                        value={scene.content}
-                        readOnly={editingStoryId !== story.id}
-                        onChange={(e) => {
+                    <div className="space-y-6">
+                      {story.scenes.map((scene, index) => (
+                        <div key={scene.id} className="border-t pt-4">
+                          <h3 className="text-lg font-semibold mb-1">
+                            {index + 1}. {scene.title}
+                          </h3>
 
-                          const updatedStories = stories.map((s) => {
+                          {scene.imageUrl && (
+                            <img
+                              src={`${import.meta.env.VITE_API_URL}${scene.imageUrl}`}
+                              className="w-full h-48 object-cover rounded-lg mb-2"
+                            />
+                          )}
 
-                            if (s.id !== story.id) return s;
+                          <textarea
+                            value={scene.content}
+                            readOnly={editingStoryId !== story.id}
+                            onChange={(e) => {
+                              const updatedStories = stories.map((s) => {
+                                if (s.id !== story.id) return s;
 
-                            return {
-                              ...s,
-                              scenes: s.scenes.map((sc) =>
-                                sc.id === scene.id
-                                  ? {
-                                      ...sc,
-                                      content: e.target.value,
-                                    }
-                                  : sc
-                              ),
-                            };
-                          });
+                                return {
+                                  ...s,
+                                  scenes: s.scenes.map((sc) =>
+                                    sc.id === scene.id
+                                      ? {
+                                          ...sc,
+                                          content: e.target.value,
+                                        }
+                                      : sc,
+                                  ),
+                                };
+                              });
 
-                          setStories(updatedStories);
-                        }}
-                        className={`w-full border rounded-xl p-3 ${
-                          editingStoryId === story.id
-                            ? "bg-white"
-                            : "bg-background"
-                        }`}
-                      />
-
-
-                    </div>
-                  ))}
-
-                  {story.questions.length > 0 && (
-                  <div className="mt-6 border-t pt-4">
-                    <h3 className="font-bold text-xl mb-4">
-                      Questions
-                    </h3>
-
-                  {story.questions.map((q) => (
-                    <div
-                      key={q.id}
-                      className="border rounded-xl p-3 mb-3"
-                    >
-                      {editingQuestionId === q.id ? (
-                        <>
-                          <input
-                            value={editedQuestion}
-                            onChange={(e) =>
-                              setEditedQuestion(
-                                e.target.value
-                              )
-                            }
-                            className="w-full border rounded p-2"
+                              setStories(updatedStories);
+                            }}
+                            className={`w-full border rounded-xl p-3 ${
+                              editingStoryId === story.id
+                                ? "bg-white"
+                                : "bg-background"
+                            }`}
                           />
+                        </div>
+                      ))}
 
+                      {story.questions.length > 0 && (
+                        <div className="mt-6 border-t pt-4">
+                          <h3 className="font-bold text-xl mb-4">{t("questions")}</h3>
+
+                          {story.questions.map((q) => (
+                            <div
+                              key={q.id}
+                              className="border rounded-xl p-3 mb-3"
+                            >
+                              {editingQuestionId === q.id ? (
+                                <>
+                                  <input
+                                    value={editedQuestion}
+                                    onChange={(e) =>
+                                      setEditedQuestion(e.target.value)
+                                    }
+                                    className="w-full border rounded p-2"
+                                  />
+                                  <div className="flex gap-2 mt-2">
+                                    <button
+                                      onClick={() =>
+                                        handleUpdateQuestion(story.id, q.id)
+                                      }
+                                    >
+                                      {t("save")}
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingQuestionId(null)}
+                                    >
+                                      {t("cancel")}
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <p>{q.question}</p>
+                                  <div className="flex gap-2 mt-2">
+                                    <button
+                                      onClick={() => {
+                                        setEditingQuestionId(q.id);
+                                        setEditedQuestion(q.question);
+                                      }}
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteQuestion(story.id, q.id)
+                                      }
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {showAddQuestionForStory === story.id && (
+                        <div className="mt-4">
+                          <input
+                            value={newQuestion}
+                            onChange={(e) => setNewQuestion(e.target.value)}
+                            className="w-full border rounded-xl p-2"
+                          />
                           <div className="flex gap-2 mt-2">
-                            <button
-                              onClick={() =>
-                                handleUpdateQuestion(
-                                  story.id,
-                                  q.id
-                                )
-                              }
-                            >
-                              Save
+                            <button onClick={() => handleAddQuestion(story.id)}>
+                              {t("save")}
                             </button>
-
                             <button
-                              onClick={() =>
-                                setEditingQuestionId(
-                                  null
-                                )
-                              }
+                              onClick={() => setShowAddQuestionForStory(null)}
                             >
-                              Cancel
+                              {t("cancel")}
                             </button>
                           </div>
-                        </>
-                      ) : (
-                        <>
-                          <p>{q.question}</p>
-
-                          <div className="flex gap-2 mt-2">
-                            <button
-                              onClick={() => {
-                                setEditingQuestionId(
-                                  q.id
-                                );
-
-                                setEditedQuestion(
-                                  q.question
-                                );
-                              }}
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                handleDeleteQuestion(
-                                  story.id,
-                                  q.id
-                                )
-                              }
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </>
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-                  )}
+                    <div className="flex flex-wrap gap-3 mt-6">
+                      {editingStoryId === story.id && (
+                        <div className="flex gap-4">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button className="bg-yellow-600 text-white px-4 py-2 rounded-xl">
+                                {t("saveEdit")}
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  {t("saveEdit")}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t("confirmSaveEdit")}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                  {t("cancel")}
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleSaveEdit(story)}
+                                >
+                                  {t("save")}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          <button
+                            onClick={() => setEditingStoryId(null)}
+                            className="bg-gray-500 text-white px-5 py-2 rounded-xl"
+                          >
+                            {t("cancel")}
+                          </button>
+                        </div>
+                      )}
+                      {/* DELETE */}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button className="bg-red-600 text-white px-4 py-2 rounded-xl">
+                              {t("delete")}
+                          </button>
+                        </AlertDialogTrigger>
 
-                  {showAddQuestionForStory ===
-                  story.id && (
-                  <div className="mt-4">
-                    <input
-                      value={newQuestion}
-                      onChange={(e) =>
-                        setNewQuestion(
-                          e.target.value
-                        )
-                      }
-                      className="w-full border rounded-xl p-2"
-                    />
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("deleteStory")}
+                            </AlertDialogTitle>
 
-                    <div className="flex gap-2 mt-2">
+                            <AlertDialogDescription>
+                              {t("deleteStoryConfirmation")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+
+                            <AlertDialogAction
+                              onClick={() => handleDelete(story.id)}
+                            >
+                                {t("delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      {/* MANUAL EDIT */}
                       <button
-                        onClick={() =>
-                          handleAddQuestion(
-                            story.id
-                          )
-                        }
+                        onClick={() => {
+                          setSelectedStory(story);
+                          setEditingStoryId(story.id);
+                        }}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-xl"
                       >
-                        Save
+                        {t("editStory")}
                       </button>
 
+                      {/* AI EDIT */}
                       <button
-                        onClick={() =>
-                          setShowAddQuestionForStory(
-                            null
-                          )
-                        }
+                        onClick={() => {
+                          setSelectedStory(story);
+                          setShowAiEditor(true);
+                        }}
+                        className="bg-purple-600 text-white px-4 py-2 rounded-xl"
                       >
-                        Cancel
+                        {t("editUsingAi")}
                       </button>
+
+                      {/* APPROVE */}
+                      {story.status === "DRAFT" && (
+                        <button
+                          onClick={() => handleApprove(story.id)}
+                          className="bg-green-600 text-white px-4 py-2 rounded-xl"
+                        >
+                          {t("approve")}{" "}
+                        </button>
+                      )}
+
+                      {story.status === "DRAFT" &&
+                        story.questions.length > 0 && (
+                          <>
+                            <button
+                              onClick={() => handleApproveQuestions(story.id)}
+                              className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+                            >
+                              {t("approveQuestions")}
+                            </button>
+
+                            <button
+                              onClick={() =>
+                                setShowAddQuestionForStory(story.id)
+                              }
+                              className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+                            >
+                              {t("addQuestion")}
+                            </button>
+                          </>
+                        )}
+
+                      {story.status === "PUBLISHED" &&
+                        story.questions.length > 0 && (
+                          <button
+                            disabled={loadingStoryId === story.id}
+                            onClick={() => handleRegenerateQuestions(story.id)}
+                            className="
+                          bg-orange-600
+                          text-white
+                          px-6
+                          py-3
+                          rounded-xl
+                          disabled:opacity-50
+                          disabled:cursor-not-allowed
+                        "
+                          >
+                            {loadingStoryId === story.id
+                              ? t("regeneratingQuestions")
+                              : t("regenerateQuestions")}
+                          </button>
+                        )}
                     </div>
                   </div>
+<<<<<<< Updated upstream
                 )}
               </div>
 
@@ -888,29 +1079,20 @@ export default function ChildrenStories() {
               )}
               </div>
 
+=======
+>>>>>>> Stashed changes
                 </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/*chat */}
         {showAiEditor && (
-
           <div className="fixed top-0 right-0 w-[400px] h-screen bg-white shadow-2xl border-l z-50 flex flex-col">
-
             {/* HEADER */}
             <div className="p-4 border-b flex justify-between items-center">
-
-              <h2 className="text-xl font-bold">
-                AI Story Editor
-              </h2>
+              <h2 className="text-xl font-bold">{t("aiStoryEditor")}</h2>
 
               <button
                 onClick={() => setShowAiEditor(false)}
@@ -918,54 +1100,41 @@ export default function ChildrenStories() {
               >
                 ✕
               </button>
-
             </div>
 
             {/* CHAT */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
-              {chatMessages.map(
-                (msg, index) => (
-
-                  <div
-                    key={index}
-                    className={`p-3 rounded-xl max-w-[85%] ${
-                      msg.role === "user"
-                        ? "bg-purple-600 text-white ml-auto"
-                        : "bg-gray-200 text-black"
-                    }`}
-                  >
-
-                    {msg.text}
-
-                  </div>
-
-                ),
-              )}
+              {chatMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-xl max-w-[85%] ${
+                    msg.role === "user"
+                      ? "bg-purple-600 text-white ml-auto"
+                      : "bg-gray-200 text-black"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              ))}
 
               {aiLoading && (
-
                 <div className="bg-gray-200 p-3 rounded-xl w-fit">
-
-                  Updating story...
-
+                  {t("updatingStory")}
                 </div>
-
               )}
-
             </div>
 
             {/* INPUT */}
             <div className="p-4 border-t flex gap-2">
+<<<<<<< Updated upstream
 
               {/* <input
+=======
+              <input
+>>>>>>> Stashed changes
                 value={aiMessage}
-                onChange={(e) =>
-                  setAiMessage(e.target.value)
-                }
-
-                placeholder="Ask AI to modify the story..."
-
+                onChange={(e) => setAiMessage(e.target.value)}
+                placeholder={t("askAiToModifyStory")}
                 className="flex-1 border rounded-xl px-3 py-2"
               /> */}
               <textarea
@@ -1000,16 +1169,12 @@ export default function ChildrenStories() {
                 disabled={aiLoading}
                 className="bg-purple-600 text-white px-4 py-2 rounded-xl"
               >
-
-                Send
-
+                {t("send")}
               </button>
-
             </div>
-
           </div>
-
         )}
+      </div>
     </div>
   );
 }

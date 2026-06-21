@@ -134,7 +134,6 @@ const Dashboard = () => {
               delay={200}
             />
           </section>
-
           <section>
             <div className="flex justify-between items-center mb-5">
               <div>
@@ -143,7 +142,6 @@ const Dashboard = () => {
                   {t("manageProfiles")}
                 </p>
               </div>
-
               <Link to="/add-child">
                 <Button variant="hero">
                   <PlusCircle className="w-4 h-4" />
@@ -151,7 +149,6 @@ const Dashboard = () => {
                 </Button>
               </Link>
             </div>
-
             {state === "loading" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3].map((i) => (
@@ -159,14 +156,12 @@ const Dashboard = () => {
                 ))}
               </div>
             )}
-
             {state === "error" && (
               <div className="text-center p-10 border border-red-200 rounded-2xl">
                 <AlertCircle className="mx-auto text-red-500" />
                 <p className="mt-2">{t("failedLoadChildren")}</p>
               </div>
             )}
-
             {state === "ready" && children.length === 0 && (
               <div className="text-center p-10">
                 <p>{t("noChildrenYet")}</p>
@@ -192,7 +187,6 @@ const Dashboard = () => {
               </div>
             )}
           </section>
-
           <section className="mt-10">
             <h2 className="text-2xl font-bold mb-5">{t("quickActions")}</h2>
 

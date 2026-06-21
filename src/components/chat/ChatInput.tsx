@@ -3,7 +3,7 @@ import { Camera, Mic, SendHorizonal, Loader2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
+import { useTranslation } from "react-i18next";
 interface ChatInputProps {
   // onSend: (text: string) => void;
   onSend: (text: string, files: File[]) => void;
@@ -12,15 +12,24 @@ interface ChatInputProps {
   onStop?: () => void;
   tokenBalance?: number;
   mode?: "normal" | "journey";
-onModeChange?: (mode: "normal" | "journey") => void;
+  onModeChange?: (mode: "normal" | "journey") => void;
 }
 
-const ChatInput = ({ onSend, disabled, isStreaming, onStop, tokenBalance,mode, onModeChange }: ChatInputProps) => {
+const ChatInput = ({
+  onSend,
+  disabled,
+  isStreaming,
+  onStop,
+  tokenBalance,
+  mode,
+  onModeChange,
+}: ChatInputProps) => {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
-const [files, setFiles] = useState<File[]>([]);
-const imageInputRef = useRef<HTMLInputElement>(null);
-const audioInputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -32,8 +41,8 @@ const audioInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
     if (tokenBalance <= 0) {
-    toast.error("Your balance has expired 🚫");
-    return;
+      toast.error("Your balance has expired 🚫");
+      return;
     }
     const t = text.trim();
     if ((!t && files.length === 0) || disabled) return;
@@ -63,29 +72,29 @@ const audioInputRef = useRef<HTMLInputElement>(null);
             "focus-within:border-primary focus-within:shadow-glow",
           )}
         >
-            {/* IMAGE INPUT */}
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={(e) => {
-            const selected = Array.from(e.target.files || []);
-            setFiles((prev) => [...prev, ...selected]);
-          }}
-        />
+          {/* IMAGE INPUT */}
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const selected = Array.from(e.target.files || []);
+              setFiles((prev) => [...prev, ...selected]);
+            }}
+          />
 
-        {/* AUDIO INPUT */}
-        <input
-          ref={audioInputRef}
-          type="file"
-          accept="audio/*"
-          hidden
-          onChange={(e) => {
-            const selected = Array.from(e.target.files || []);
-            setFiles((prev) => [...prev, ...selected]);
-          }}
-        />
+          {/* AUDIO INPUT */}
+          <input
+            ref={audioInputRef}
+            type="file"
+            accept="audio/*"
+            hidden
+            onChange={(e) => {
+              const selected = Array.from(e.target.files || []);
+              setFiles((prev) => [...prev, ...selected]);
+            }}
+          />
           <button
             type="button"
             onClick={() => imageInputRef.current?.click()}
@@ -95,30 +104,39 @@ const audioInputRef = useRef<HTMLInputElement>(null);
             <Camera className="w-5 h-5" />
           </button>
 
-<div className="flex gap-2 mb-2">
-  <button
-    type="button"
-    onClick={() => onModeChange?.("normal")}
-    className={mode === "normal" ? "bg-black text-white px-3 py-1 rounded" : "px-3 py-1"}
-  >
-    💬 Normal
-  </button>
+          <div className="flex gap-2 mb-2">
+            <button
+              type="button"
+              onClick={() => onModeChange?.("normal")}
+              className={
+                mode === "normal"
+                  ? "bg-teal-500 text-white px-3 py-1 rounded"
+                  : "px-3 py-1"
+              
+              }
+            >
+              💬  {t("normal")}
+            </button>
 
-  <button
-    type="button"
-    onClick={() => onModeChange?.("journey")}
-    className={mode === "journey" ? "bg-black text-white px-3 py-1 rounded" : "px-3 py-1"}
-  >
-    🌍 Journey
-  </button>
-</div>
+            <button
+              type="button"
+              onClick={() => onModeChange?.("journey")}
+              className={
+                mode === "journey"
+                  ? "bg-sky-500 text-white px-3 py-1 rounded"
+                  : "px-3 py-1"
+              }
+            >
+              🌍 {t("journey")}
+            </button>
+          </div>
 
           <textarea
             ref={taRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Ask Sparky anything... 🌟"
+            placeholder={t("askSparky")}
             rows={1}
             disabled={disabled}
             className="flex-1 resize-none bg-transparent border-0 outline-none text-base placeholder:text-muted-foreground/70 py-2.5 max-h-40 leading-relaxed disabled:opacity-60"
@@ -150,11 +168,19 @@ const audioInputRef = useRef<HTMLInputElement>(null);
               size="icon"
               variant="hero"
               onClick={handleSend}
-              disabled={(!text.trim() && files.length === 0) || disabled || tokenBalance <= 0}
+              disabled={
+                (!text.trim() && files.length === 0) ||
+                disabled ||
+                tokenBalance <= 0
+              }
               className="rounded-2xl h-11 w-11 shrink-0"
               aria-label="Send"
             >
-              {disabled ? <Loader2 className="w-5 h-5 animate-spin" /> : <SendHorizonal className="w-5 h-5" />}
+              {disabled ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <SendHorizonal className="w-5 h-5" />
+              )}
             </Button>
           )}
         </div>

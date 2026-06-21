@@ -36,16 +36,16 @@ const Profile = () => {
   useEffect(() => {
     getTokenStats().then(setData);
   }, []);
-  /*  if (!data) return <div>Loading....</div>; */
-  if (!data || !data.data) {
-    return <div>{t("loadingOrError")}</div>;
-  }
-  return (
-    <div className="min-h-screen bg-background relative">
-      <PlayfulBackground />
 
-      <div className="relative z-10">
-        {/* <AppNavbar /> */}
+return (
+  <div className="min-h-screen bg-background relative">
+    <div
+      className="absolute inset-0 playful-bg opacity-60"
+      aria-hidden="true"
+    />
+    <PlayfulBackground />
+    <div className="relative z-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <main className="max-w-2xl mx-auto px-4 py-10">
           <h1 className="text-3xl font-bold mb-6">{t("myProfile")} 👤</h1>
 
@@ -95,6 +95,8 @@ const Profile = () => {
         </main>
       </div>
     </div>
+          </div>
+
   );
 };
 

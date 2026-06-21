@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { BookOpen } from "lucide-react";
-
+import { useTranslation } from "react-i18next";
 interface ChatSidebarProps {
   conversations: Conversation[];
   activeId: number | null;
@@ -27,8 +27,8 @@ const ChatSidebar = ({
   open,
   onClose,
 }: ChatSidebarProps) => {
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   return (
     <>
       {/* Mobile overlay */}
@@ -39,17 +39,24 @@ const ChatSidebar = ({
         />
       )}
 
+      {/* <aside
+        className={cn(
+          "fixed lg:sticky top-16 left-0 z-40 lg:z-auto",
+          "w-72 h-screen bg-card border-r border-border/60 flex flex-col",
+          "transition-transform duration-300 ease-out",
+          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        )}
+      > */}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 z-40 lg:z-auto",
-          "w-72 h-screen bg-card border-r border-border/60 flex flex-col",
+          "fixed lg:sticky top-16 left-0 z-40 lg:z-auto",
+          "w-72 h-[calc(100vh-4rem)] bg-card border-r border-border/60 flex flex-col",
           "transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Header */}
         <div className="p-4 border-b border-border/50 space-y-3">
-
           <div className="flex items-center gap-2 mb-4">
             <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-button">
               <Sparkles
@@ -58,9 +65,12 @@ const ChatSidebar = ({
               />
             </div>
             <div>
-              <h2 className="font-bold text-base leading-tight">Sparky</h2>
+              <h2 className="font-bold text-base leading-tight">
+                {t("sparkyName")}
+              </h2>
+
               <p className="text-[11px] text-muted-foreground">
-                Your learning buddy
+                {t("learningBuddy")}
               </p>
             </div>
           </div>
@@ -74,7 +84,7 @@ const ChatSidebar = ({
             }}
           >
             <Plus className="w-4 h-4" />
-            New Chat
+            {t("newChat")}
           </Button>
 
           <Button
@@ -87,7 +97,7 @@ const ChatSidebar = ({
             }}
           >
             <BookOpen className="w-4 h-4" />
-            My Stories
+            {t("myStories")}
           </Button>
         </div>
 
@@ -104,7 +114,7 @@ const ChatSidebar = ({
             </div>
           ) : conversations.length === 0 ? (
             <div className="text-center text-xs text-muted-foreground p-6">
-              No chats yet. Start your first one! 🌟
+              {t("noChats")}
             </div>
           ) : (
             conversations.map((c) => {
@@ -142,7 +152,7 @@ const ChatSidebar = ({
                       {c.lastActivity &&
                       !isNaN(new Date(c.lastActivity).getTime())
                         ? format(new Date(c.lastActivity), "PPP · p")
-                        : "No activity"}
+                        : t("noActivity")}
                     </p>
                   </div>
                   <div
@@ -151,7 +161,7 @@ const ChatSidebar = ({
                       onDelete(c.id);
                     }}
                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1 rounded-md hover:bg-destructive/10"
-                    aria-label="Delete chat"
+                    aria-label={t("deleteChat")}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </div>
@@ -163,7 +173,7 @@ const ChatSidebar = ({
 
         <div className="p-3 border-t border-border/50 text-center">
           <p className="text-[10px] text-muted-foreground">
-            Made with 💜 for curious kids
+            {t("madeForKids")}
           </p>
         </div>
       </aside>

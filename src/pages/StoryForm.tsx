@@ -1,6 +1,4 @@
-
 import { useEffect, useState } from "react";
-// import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -20,8 +18,15 @@ import {
 } from "@/lib/story";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { addQuestions, approveQuestions, deleteQuestion, generateQuestions, updateQuestion } from "@/lib/questions";
+import {
+  addQuestions,
+  approveQuestions,
+  deleteQuestion,
+  generateQuestions,
+  updateQuestion,
+} from "@/lib/questions";
 import { Edit2, Trash2 } from "lucide-react";
+<<<<<<< Updated upstream
 import { useNotificationHandler } from "@/hooks/useFirebaseNotifications";
 import { CheckCircle2Icon } from "lucide-react"
 import {
@@ -30,6 +35,9 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 
+=======
+import PlayfulBackground from "@/components/PlayfulBackground";
+>>>>>>> Stashed changes
 export default function StoryForm() {
   const { t } = useTranslation();
   const [form, setForm] = useState({
@@ -62,11 +70,14 @@ export default function StoryForm() {
 
   const [newQuestion, setNewQuestion] = useState("");
 
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
+    null,
+  );
 
   const [editedQuestion, setEditedQuestion] = useState("");
 
   const [questionLoading, setQuestionLoading] = useState(false);
+<<<<<<< Updated upstream
   const [generationStep , setGenerationStep] = useState("")
 
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -79,6 +90,8 @@ export default function StoryForm() {
 
 
   //useeffect to get children's names
+=======
+>>>>>>> Stashed changes
   useEffect(() => {
     if (!user?.id) return;
 
@@ -120,13 +133,13 @@ export default function StoryForm() {
   }, [showAiEditor, generatedStory]);
 
   useEffect(() => {
-  if (
-    generatedStory?.story?.isApproved ||
-    generatedStory?.story?.status === "PUBLISHED"
-  ) {
-    setStoryApproved(true);
-  }
-}, [generatedStory]);
+    if (
+      generatedStory?.story?.isApproved ||
+      generatedStory?.story?.status === "PUBLISHED"
+    ) {
+      setStoryApproved(true);
+    }
+  }, [generatedStory]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -138,7 +151,11 @@ export default function StoryForm() {
   };
 
   const handleGenerate = async () => {
+<<<<<<< Updated upstream
     if(loading || generatedStory) return
+=======
+    if (loading) return;
+>>>>>>> Stashed changes
     try {
       setGenerationStep("Starting...");
       setLoading(true);
@@ -194,7 +211,7 @@ export default function StoryForm() {
 
       // update story on screen
       setGeneratedStory(res.data);
-      setStoryApproved( res.data.story.isApproved);
+      setStoryApproved(res.data.story.isApproved);
       setQuestions([]);
 
       // add assistant message
@@ -230,7 +247,7 @@ export default function StoryForm() {
       });
 
       setGeneratedStory(res.data);
-      setStoryApproved( res.data.story.isApproved);
+      setStoryApproved(res.data.story.isApproved);
       setQuestions([]);
       setIsEditing(false);
 
@@ -263,115 +280,124 @@ export default function StoryForm() {
     setStoryApproved(true);
   };
 
+<<<<<<< Updated upstream
   const handleGenerateQuestions = async () =>{
     if(questions.length > 0) return
     try{
+=======
+  const handleGenerateQuestions = async () => {
+    try {
+>>>>>>> Stashed changes
       setQuestionLoading(true);
-      const res = await generateQuestions(generatedStory.story.id)
-      setQuestions(res.data)
-    }catch(err){
-      console.log(err)
-    }finally {
-    setQuestionLoading(false);
-  }
-  }
-
-  const handleAddQuestion = async ()=> {
-    if(!newQuestion.trim()) return
-    try{
-      const res = await addQuestions(generatedStory.story.id, {question:newQuestion})
-      setQuestions((prev) => [...prev , res.data])
-      setNewQuestion("")
-      setShowAddQuestion(false)
-    }catch(err){
-      console.log(err)
+      const res = await generateQuestions(generatedStory.story.id);
+      setQuestions(res.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setQuestionLoading(false);
     }
-  }
+  };
 
-  const handleDeleteQuestion = async (questionId:number) => {
-    try{
-      const res = await deleteQuestion(questionId)
-      setQuestions((prev) => prev.filter((q) => q.id !== questionId))
-    }catch(err){
-      console.log(err)
+  const handleAddQuestion = async () => {
+    if (!newQuestion.trim()) return;
+    try {
+      const res = await addQuestions(generatedStory.story.id, {
+        question: newQuestion,
+      });
+      setQuestions((prev) => [...prev, res.data]);
+      setNewQuestion("");
+      setShowAddQuestion(false);
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
-  const handleUpdateQuestion = async (questionId:number) =>{
-    try{
-      const res = await updateQuestion(questionId, {question: editedQuestion})
-      setQuestions((prev) => prev.map((q) => q.id === questionId? res.data : q))
-      setEditingQuestionId(null)
-      setEditedQuestion("")
-    }catch(err){
-      console.log(err)
+  const handleDeleteQuestion = async (questionId: number) => {
+    try {
+      const res = await deleteQuestion(questionId);
+      setQuestions((prev) => prev.filter((q) => q.id !== questionId));
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
+
+  const handleUpdateQuestion = async (questionId: number) => {
+    try {
+      const res = await updateQuestion(questionId, {
+        question: editedQuestion,
+      });
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? res.data : q)),
+      );
+      setEditingQuestionId(null);
+      setEditedQuestion("");
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleApproveQuestions = async () => {
-    try{
-      const res = await approveQuestions(generatedStory.story.id)
-      navigate(
-      `/my-stories/${generatedStory.story.childId}`
-      );
-    }catch(err){
-      console.log(err)
+    try {
+      const res = await approveQuestions(generatedStory.story.id);
+      navigate(`/my-stories/${generatedStory.story.childId}`);
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
   return (
-    <div className="min-h-screen p-6 bg-background">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-6">
-        <h1 className="text-3xl font-bold mb-6">{t("storyGeneratorTitle")}</h1>
-        <div
-          className={`space-y-4 ${
-            loading ? "opacity-60 pointer-events-none" : ""
-          }`}
-        >
-        {/* FORM */}
-        <div className="space-y-4">
-          {/* CHILD SELECT */}
-          <div>
-            <label className="block mb-2 font-semibold">
-              {t("chooseChild")}
-            </label>
-
-            <Select
-              disabled={loading}
-              value={selectedChild ? String(selectedChild) : ""}
-              onValueChange={(value) => setSelectedChild(Number(value))}
+    <div className="min-h-screen bg-background relative">
+      <div
+        className="absolute inset-0 playful-bg opacity-60"
+        aria-hidden="true"
+      />
+      <PlayfulBackground />
+      <div className="relative z-10">
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+          <div className="bg-card rounded-2xl shadow-soft border border-border/50 p-6">
+            <h1 className="text-3xl font-bold mb-6">
+              {t("storyGeneratorTitle")}
+            </h1>
+            <div
+              className={`space-y-4 ${
+                loading ? "opacity-60 pointer-events-none" : ""
+              }`}
             >
-              <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder={t("selectChild")} />
-              </SelectTrigger>
+              {/* FORM */}
+              <div className="space-y-4">
+                {/* CHILD SELECT */}
+                <div>
+                  <label className="block mb-2 font-semibold">
+                    {t("chooseChild")}
+                  </label>
 
-              <SelectContent>
-                <SelectGroup>
-                  {children.map((c: any) => (
-                    <SelectItem key={c.id} value={String(c.id)}>
-                      {c.firstName}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+                  <Select
+                    disabled={loading}
+                    value={selectedChild ? String(selectedChild) : ""}
+                    onValueChange={(value) => setSelectedChild(Number(value))}
+                  >
+                    <SelectTrigger className="w-[220px]">
+                      <SelectValue placeholder={t("selectChild")} />
+                    </SelectTrigger>
 
-          {/* EDUCATIONAL GOAL */}
-          <div>
-            <label className="block mb-2 font-semibold">
-              {t("educationalGoal")}
-            </label>
+                    <SelectContent>
+                      <SelectGroup>
+                        {children.map((c: any) => (
+                          <SelectItem key={c.id} value={String(c.id)}>
+                            {c.firstName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <textarea
-              disabled={loading}
-              name="behavior"
-              value={form.behavior}
-              onChange={handleChange}
-              placeholder={t("behaviorPlaceholder")}
-              className="w-full min-h-[120px] border rounded-xl p-3"
-            />
-          </div>
+                {/* EDUCATIONAL GOAL */}
+                <div>
+                  <label className="block mb-2 font-semibold">
+                    {t("educationalGoal")}
+                  </label>
 
+<<<<<<< Updated upstream
           {/* LENGTH */}
           <div>
             <label className="block mb-2 font-semibold">
@@ -448,6 +474,82 @@ export default function StoryForm() {
             onClick={handleGenerate}
             disabled={loading || generatedStory !== null}
             className="
+=======
+                  <textarea
+                    disabled={loading}
+                    name="behavior"
+                    value={form.behavior}
+                    onChange={handleChange}
+                    placeholder={t("behaviorPlaceholder")}
+                    className="w-full min-h-[120px] border rounded-xl p-3"
+                  />
+                </div>
+                {/* LENGTH */}
+                <div>
+                  <label className="block mb-2 font-semibold">
+                    {t("storyLength")}
+                  </label>
+                  <select
+                    disabled={loading}
+                    name="length"
+                    value={form.length}
+                    onChange={handleChange}
+                    className="w-full border rounded-xl p-3"
+                  >
+                    <option value="">{t("selectLength")}</option>
+                    <option value="short">{t("short")}</option>
+                    <option value="medium">{t("medium")}</option>
+                    <option value="long">{t("long")}</option>
+                  </select>
+                </div>
+                {/* TYPE */}
+                <div>
+                  <label className="block mb-2 font-semibold">
+                    {t("storyType")}
+                  </label>
+                  <select
+                    disabled={loading}
+                    name="type"
+                    value={form.type}
+                    onChange={handleChange}
+                    className="w-full border rounded-xl p-3"
+                  >
+                    <option value="">{t("selectType")}</option>
+                    <option value="adventure">{t("adventure")}</option>
+                    <option value="fantasy">{t("fantasy")}</option>
+                    <option value="educational">{t("educational")}</option>
+                    <option value="funny">{t("funny")}</option>
+                  </select>
+                </div>
+                {/* CHECKBOXES */}
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2">
+                    <input
+                      disabled={loading}
+                      type="checkbox"
+                      name="withImage"
+                      checked={form.withImage}
+                      onChange={handleChange}
+                    />
+                    {t("withImages")}
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      disabled={loading}
+                      type="checkbox"
+                      name="withAudio"
+                      checked={form.withAudio}
+                      onChange={handleChange}
+                    />
+                    {t("withAudio")}
+                  </label>
+                </div>
+                {/* BUTTON */}
+                <button
+                  onClick={handleGenerate}
+                  disabled={loading}
+                  className="
+>>>>>>> Stashed changes
             bg-purple-600
             text-white
             px-6
@@ -456,6 +558,7 @@ export default function StoryForm() {
             disabled:opacity-50
             disabled:cursor-not-allowed
           "
+<<<<<<< Updated upstream
           >
             {loading ? t("generating...") : generatedStory ? "Story Already Generated" : t("generateStory")}
           </button>
@@ -530,17 +633,13 @@ export default function StoryForm() {
                 <button
                   onClick={handleSaveEdit}
                   className="bg-yellow-500 text-white px-5 py-2 rounded-xl"
+=======
+>>>>>>> Stashed changes
                 >
-                  {t("saveEdit")}
-                </button>
-
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="bg-gray-500 text-white px-5 py-2 rounded-xl"
-                >
-                  {t("cancel")}
+                  {loading ? t("generating...") : t("generateStory")}
                 </button>
               </div>
+<<<<<<< Updated upstream
             )}
 
             {showSuccessAlert && (
@@ -561,14 +660,36 @@ export default function StoryForm() {
                   className="bg-blue-500 text-white px-5 py-2 rounded-xl">
                   {t("editStory")}
                 </button>
+=======
+            </div>
+            {/* GENERATED STORY */}
+            {generatedStory && (
+              <div className="mt-10 border rounded-2xl p-6 bg-gray-50">
+                {/* TITLE */}
+                <h2 className="text-3xl font-bold mb-4">
+                  {generatedStory.story.title}
+                </h2>
+                {/* SUMMARY */}
+                <p className="mb-6 text-gray-700">
+                  {generatedStory.story.content}
+                </p>
+                {/* AUDIO */}
+                {generatedStory.story.audioUrl && (
+                  <audio controls className="w-full mb-6">
+                    <source
+                      src={`http://localhost:3000${generatedStory.story.audioUrl}`}
+                      type="audio/mpeg"
+                    />
+                  </audio>
+                )}
+>>>>>>> Stashed changes
 
-                <button
-                  onClick={() => setShowAiEditor(true)}
-                  className="bg-blue-500 text-white px-5 py-2 rounded-xl"
-                >
-                  {t("editUsingAI")}
-                </button>
+                {/* SCENES */}
+                {generatedStory.scenes.map((scene: any) => (
+                  <div key={scene.id} className="mb-10">
+                    <h3 className="text-xl font-bold mb-3">{scene.title}</h3>
 
+<<<<<<< Updated upstream
                 {!storyApproved ? (
                   <button
                   onClick={handleApprove}
@@ -593,186 +714,246 @@ export default function StoryForm() {
                   ? "Generating..." : questions.length > 0 ? "Questions Already Generated" : "Generate Questions"}
                   </button>
                 
+=======
+                    {/* IMAGE */}
+                    {scene.imageUrl && (
+                      <img
+                        src={`http://localhost:3000${scene.imageUrl}`}
+                        alt={scene.title}
+                        className="w-full rounded-xl mb-4"
+                      />
+                    )}
+
+                    {/* CONTENT */}
+                    <textarea
+                      value={scene.content}
+                      readOnly={!isEditing}
+                      onChange={(e) => {
+                        const updatedScenes = generatedStory.scenes.map(
+                          (s: any) =>
+                            s.id === scene.id
+                              ? { ...s, content: e.target.value }
+                              : s,
+                        );
+
+                        setGeneratedStory({
+                          ...generatedStory,
+                          scenes: updatedScenes,
+                        });
+                      }}
+                      className={`w-full min-h-[120px] border rounded-xl p-3 ${
+                        isEditing ? "bg-white" : "bg-background"
+                      }`}
+                    />
+                  </div>
+                ))}
+
+                {isEditing && (
+                  <div className="flex gap-4">
+                    <button
+                      onClick={handleSaveEdit}
+                      className="bg-yellow-500 text-white px-5 py-2 rounded-xl"
+                    >
+                      {t("saveEdit")}
+                    </button>
+
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="bg-gray-500 text-white px-5 py-2 rounded-xl"
+                    >
+                      {t("cancel")}
+                    </button>
+                  </div>
+                )}
+                {!isEditing && (
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="bg-blue-500 text-white px-5 py-2 rounded-xl"
+                    >
+                      {t("editStory")}
+                    </button>
+
+                    <button
+                      onClick={() => setShowAiEditor(true)}
+                      className="bg-blue-500 text-white px-5 py-2 rounded-xl"
+                    >
+                      {t("editUsingAI")}
+                    </button>
+
+                    {!storyApproved ? (
+                      <button
+                        onClick={handleApprove}
+                        className="bg-green-600 text-white px-5 py-2 rounded-xl"
+                      >
+                        {t("approveStory")}
+                      </button>
+                    ) : (
+                      <button
+                        disabled={questionLoading}
+                        onClick={handleGenerateQuestions}
+                        className="
+            bg-purple-600
+            text-white
+            px-6
+            py-3
+            rounded-xl
+            disabled:opacity-50
+            disabled:cursor-not-allowed"
+                      >
+                        {questionLoading
+                          ? "Generating..."
+                          : "Generate Questions"}
+                      </button>
+                    )}
+                  </div>
+>>>>>>> Stashed changes
                 )}
               </div>
             )}
-          </div>
-        )}
 
-        {questions.length > 0 && (
-        <div className="mt-10 border rounded-2xl p-6">
-          <h2 className="text-2xl font-bold mb-6">
-            Story Questions
-          </h2>
+            {questions.length > 0 && (
+              <div className="mt-10 border rounded-2xl p-6">
+                <h2 className="text-2xl font-bold mb-6">Story Questions</h2>
 
-          {questions.map((question) => (
-            <div
-              key={question.id}
-              className="border rounded-xl p-4 mb-4"
-            >
-              {editingQuestionId === question.id ? (
-                <>
-                  <input
-                    value={editedQuestion}
-                    onChange={(e) =>
-                      setEditedQuestion(e.target.value)
-                    }
-                    className="w-full border rounded-lg p-2"
-                  />
+                {questions.map((question) => (
+                  <div key={question.id} className="border rounded-xl p-4 mb-4">
+                    {editingQuestionId === question.id ? (
+                      <>
+                        <input
+                          value={editedQuestion}
+                          onChange={(e) => setEditedQuestion(e.target.value)}
+                          className="w-full border rounded-lg p-2"
+                        />
 
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() =>
-                        handleUpdateQuestion(
-                          question.id
-                        )
-                      }
-                    >
-                      Save
-                    </button>
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => handleUpdateQuestion(question.id)}
+                          >
+                            Save
+                          </button>
 
-                    <button
-                      onClick={() =>
-                        setEditingQuestionId(null)
-                      }
-                    >
-                      Cancel
-                    </button>
+                          <button onClick={() => setEditingQuestionId(null)}>
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p>{question.question}</p>
+
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => {
+                              setEditingQuestionId(question.id);
+                              setEditedQuestion(question.question);
+                            }}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteQuestion(question.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </>
-              ) : (
-                <>
-                  <p>{question.question}</p>
+                ))}
 
-                  <div className="flex gap-2 mt-3">
-                    <button
-                      onClick={() => {
-                        setEditingQuestionId(
-                          question.id
-                        );
-                        setEditedQuestion(
-                          question.question
-                        );
-                      }}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
+                {showAddQuestion ? (
+                  <div className="mt-4">
+                    <input
+                      value={newQuestion}
+                      onChange={(e) => setNewQuestion(e.target.value)}
+                      className="w-full border rounded-lg p-2"
+                    />
 
-                    <button
-                      onClick={() =>
-                        handleDeleteQuestion(
-                          question.id
-                        )
-                      }
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex gap-2 mt-2">
+                      <button onClick={handleAddQuestion}>Save</button>
+
+                      <button onClick={() => setShowAddQuestion(false)}>
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                </>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <button
+                    onClick={() => setShowAddQuestion(true)}
+                    className="bg-green-600 text-white px-5 py-2 rounded-xl mt-6"
+                  >
+                    Add Question
+                  </button>
+                )}
 
-    {showAddQuestion ? (
-      <div className="mt-4">
-        <input
-          value={newQuestion}
-          onChange={(e) =>
-            setNewQuestion(e.target.value)
-          }
-          className="w-full border rounded-lg p-2"
-        />
-
-        <div className="flex gap-2 mt-2">
-          <button onClick={handleAddQuestion}>
-            Save
-          </button>
-
-          <button
-            onClick={() =>
-              setShowAddQuestion(false)
-            }
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    ) : (
-      
-      <button
-        onClick={() =>
-          setShowAddQuestion(true)
-        }
-        className="bg-green-600 text-white px-5 py-2 rounded-xl mt-6"
-      >
-        Add Question
-      </button>
-    )}
-
-    <button
-      onClick={handleApproveQuestions}
-      className="bg-green-600 text-white px-5 py-2 rounded-xl mt-6"
-    >
-      Approve Questions
-    </button>
-  </div>
-        )}
-      </div>
-      {showAiEditor && (
-        <div className="fixed top-0 right-0 w-[400px] h-screen bg-white shadow-2xl border-l z-50 flex flex-col">
-          {/* HEADER */}
-          <div className="p-4 border-b flex justify-between items-center">
-            <h2 className="text-xl font-bold">{t("aiStoryEditor")}</h2>
-
-            <button
-              onClick={() => setShowAiEditor(false)}
-              className="text-gray-500"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* CHAT */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {chatMessages.map((msg, index) => (
-              <div
-                key={index}
-                className={`p-3 rounded-xl max-w-[85%] ${
-                  msg.role === "user"
-                    ? "bg-purple-600 text-white ml-auto"
-                    : "bg-gray-200 text-black"
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))}
-
-            {aiLoading && (
-              <div className="bg-gray-200 p-3 rounded-xl w-fit">
-                {t("updatingStory")}
+                <button
+                  onClick={handleApproveQuestions}
+                  className="bg-green-600 text-white px-5 py-2 rounded-xl mt-6"
+                >
+                  Approve Questions
+                </button>
               </div>
             )}
           </div>
+          {showAiEditor && (
+            <div className="fixed top-0 right-0 w-[400px] h-screen bg-white shadow-2xl border-l z-50 flex flex-col">
+              {/* HEADER */}
+              <div className="p-4 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold">{t("aiStoryEditor")}</h2>
 
-          {/* INPUT */}
-          <div className="p-4 border-t flex gap-2">
-            <input
-              value={aiMessage}
-              onChange={(e) => setAiMessage(e.target.value)}
-              placeholder={t("askAiToModifyStory")}
-              className="flex-1 border rounded-xl px-3 py-2"
-            />
+                <button
+                  onClick={() => setShowAiEditor(false)}
+                  className="text-gray-500"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <button
-              onClick={handleEditWithAi}
-              disabled={aiLoading}
-              className="bg-purple-600 text-white px-4 py-2 rounded-xl"
-            >
-              {t("send")}
-            </button>
-          </div>
-        </div>
-      )}
+              {/* CHAT */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {chatMessages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-xl max-w-[85%] ${
+                      msg.role === "user"
+                        ? "bg-purple-600 text-white ml-auto"
+                        : "bg-gray-200 text-black"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
+
+                {aiLoading && (
+                  <div className="bg-gray-200 p-3 rounded-xl w-fit">
+                    {t("updatingStory")}
+                  </div>
+                )}
+              </div>
+
+              {/* INPUT */}
+              <div className="p-4 border-t flex gap-2">
+                <input
+                  value={aiMessage}
+                  onChange={(e) => setAiMessage(e.target.value)}
+                  placeholder={t("askAiToModifyStory")}
+                  className="flex-1 border rounded-xl px-3 py-2"
+                />
+
+                <button
+                  onClick={handleEditWithAi}
+                  disabled={aiLoading}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-xl"
+                >
+                  {t("send")}
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
